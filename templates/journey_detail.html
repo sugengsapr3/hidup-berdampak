@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ journey.title }} | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Pilihan Perjalanan</p>
+    <h1>{{ journey.emoji }} {{ journey.title }}</h1>
+    <p>{{ journey.desc }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container prose">
+    <p>{{ journey.body }}</p>
+    <p style="text-align:center; margin-top:36px;">
+      <a href="{{ url_for('journeys') }}" class="btn btn-ghost">&larr; Semua Perjalanan</a>
+      <a href="{{ url_for('join') }}" class="btn btn-gold" style="margin-left:10px;">Bergabung</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

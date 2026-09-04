@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ site.brand }} | Hidup yang meninggalkan makna{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-content">
+    <h1>HIDUP<span class="dot">.</span> BERDAMPAK</h1>
+    <p class="lead">{{ site.hero_sub }}</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('journeys') }}" class="btn btn-gold">Mulai Perjalanan</a>
+      <a href="{{ site.youtube_url }}" class="btn btn-ghost">Tonton di YouTube</a>
+    </div>
+    <div class="scroll-hint">&#8595;</div>
+  </div>
+</section>
+
+<section class="section section-2">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Pilihan Perjalanan</p>
+      <h2>Mau mulai dari mana?</h2>
+      <p>Enam jalur untuk merenung, tumbuh, dan meninggalkan jejak yang berarti.</p>
+    </div>
+    <div class="journey-grid">
+      {% for j in journeys %}
+      <a href="{{ url_for('journey_detail', slug=j.slug) }}" class="journey-card">
+        <div class="emoji">{{ j.emoji }}</div>
+        <h3>{{ j.title }}</h3>
+        <p>{{ j.desc }}</p>
+        <span class="arrow">Telusuri &rarr;</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Bukan sekadar website</p>
+      <h2>Sebuah gerakan jangka panjang</h2>
+      <p>Tumbuh dari YouTube menjadi ekosistem yang lebih luas.</p>
+    </div>
+    <div class="pillar-grid">
+      {% for p in pillars %}
+      <div class="pillar">
+        <div class="emoji">{{ p.emoji }}</div>
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="container">
+    {% for line in site.closing %}
+    <p class="{{ 'accent' if loop.last else '' }}">{{ line }}</p>
+    {% endfor %}
+    <a href="{{ url_for('join') }}" class="btn btn-gold">Bergabung dengan HIDUP. BERDAMPAK</a>
+  </div>
+</section>
+{% endblock %}

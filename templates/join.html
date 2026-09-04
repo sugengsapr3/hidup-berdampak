@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Bergabung | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Bergabung</p>
+    <h1>Mari tinggalkan sesuatu yang berarti</h1>
+    <p>
+      Suatu hari kita semua akan pergi. Pertanyaannya: apa yang kita tinggalkan?
+      Bergabunglah dengan gerakan ini dan mulai perjalananmu.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="join-card">
+      <form method="post" action="{{ url_for('join') }}">
+        <div class="form-group">
+          <label for="name">Nama</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;">Bergabung dengan HIDUP. BERDAMPAK</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

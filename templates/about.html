@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Tentang | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Tentang Gerakan Ini</p>
+    <h1>HIDUP. BERDAMPAK</h1>
+    <p>{{ site.hero_sub }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container prose">
+    <p>
+      HIDUP. BERDAMPAK adalah sebuah gerakan tentang cara kita menjalani hidup:
+      bukan mengejar seberapa lama, tapi seberapa berarti. Ini bukan sekadar
+      website pendamping YouTube, melainkan sebuah rumah bagi ide, nilai, dan
+      komunitas yang tumbuh bersama.
+    </p>
+    <p>
+      Visinya jangka panjang, 10 hingga 20 tahun ke depan. Dari konten, ia bisa
+      berkembang menjadi media, penerbitan buku, komunitas, kelas online,
+      merchandise, program sosial, dan produk digital.
+    </p>
+  </div>
+
+  <div class="container" style="margin-top:56px;">
+    <div class="section-head">
+      <p class="kicker">Arah Pengembangan</p>
+      <h2>Satu visi, banyak wujud</h2>
+    </div>
+    <div class="pillar-grid">
+      {% for p in pillars %}
+      <div class="pillar">
+        <div class="emoji">{{ p.emoji }}</div>
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="closing">
+  <div class="container">
+    {% for line in site.closing %}
+    <p class="{{ 'accent' if loop.last else '' }}">{{ line }}</p>
+    {% endfor %}
+    <a href="{{ url_for('join') }}" class="btn btn-gold">Bergabung dengan HIDUP. BERDAMPAK</a>
+  </div>
+</section>
+{% endblock %}

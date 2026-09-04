@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site.brand }}{% endblock %}</title>
+  <meta name="description" content="{{ site.hero_sub }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{{ url_for('home') }}" class="brand">
+        HIDUP<span class="brand-mark">.</span> BERDAMPAK
+      </a>
+      <input type="checkbox" id="nav-toggle" class="nav-toggle">
+      <label for="nav-toggle" class="nav-burger" aria-label="Menu">&#9776;</label>
+      <nav class="main-nav">
+        <ul>
+          {% for item in nav %}
+          <li>
+            <a href="{{ url_for(item.endpoint) }}"
+               class="{{ 'active' if active == item.endpoint else '' }}">
+              {{ item.label }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-wrap">
+          {% for category, msg in messages %}
+            <div class="flash flash-{{ category }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">HIDUP<span>.</span> BERDAMPAK</div>
+        <ul class="footer-socials">
+          {% for s in site.socials %}
+          <li><a href="{{ s.url }}">{{ s.label }}</a></li>
+          {% endfor %}
+          <li><a href="mailto:{{ site.email }}">Email</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        &copy; {{ current_year }} {{ site.name }} &middot; Meninggalkan sesuatu yang berarti.
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
