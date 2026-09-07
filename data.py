@@ -22,6 +22,22 @@ SITE = {
     ],
     "email": "hidup.berdampak.media@gmail.com",
     "youtube_url": "#",
+    # Konten halaman berlangganan (newsletter)
+    "newsletter": {
+        "name": "Catatan Berdampak",
+        "desc": (
+            "Setiap pekan, aku berbagi tips produktivitas yang bisa langsung "
+            "dipraktikkan, refleksi hidup, dan sorotan dari buku-buku favoritku, "
+            "langsung ke inbox-mu. Gratis, dan akan selalu gratis."
+        ),
+        "readers": "12.000+",
+        "reviews": "200+ ulasan",
+        "disclaimer": (
+            "Dengan mengirim formulir ini, kamu akan berlangganan newsletter "
+            "gratisku, yang sesekali memuat info soal buku, aplikasi, dan kelasku. "
+            "Kamu bisa berhenti berlangganan kapan saja tanpa masalah."
+        ),
+    },
     "socials": [
         {"label": "YouTube", "url": "#"},
         {"label": "Instagram", "url": "#"},

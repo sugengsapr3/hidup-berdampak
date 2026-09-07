@@ -2,31 +2,41 @@
 {% block title %}Bergabung | {{ site.brand }}{% endblock %}
 
 {% block content %}
-<section class="page-hero">
-  <div class="container">
-    <p class="kicker">Bergabung</p>
-    <h1>Mari tinggalkan sesuatu yang berarti</h1>
-    <p>
-      Suatu hari kita semua akan pergi. Pertanyaannya: apa yang kita tinggalkan?
-      Bergabunglah dengan gerakan ini dan mulai perjalananmu.
-    </p>
-  </div>
-</section>
-
 <section class="section">
   <div class="container">
-    <div class="join-card">
-      <form method="post" action="{{ url_for('join') }}">
-        <div class="form-group">
-          <label for="name">Nama</label>
-          <input type="text" id="name" name="name" required>
+    <div class="subscribe-card">
+      <div class="subscribe-left">
+        <h1 class="subscribe-title">
+          Berlangganan <span class="brand-accent">{{ site.newsletter.name }}</span> ✈️
+        </h1>
+        <p class="subscribe-readers">
+          Bergabunglah dengan komunitas yang terus tumbuh, lebih dari
+          <strong>{{ site.newsletter.readers }} pembaca setia.</strong>
+        </p>
+        <div class="subscribe-social-proof">
+          <div class="avatars">
+            <span class="avatar">🙂</span>
+            <span class="avatar">😊</span>
+            <span class="avatar">🙌</span>
+          </div>
+          <div class="reviews">
+            <span class="stars">★★★★★</span>
+            <span class="review-count">{{ site.newsletter.reviews }}</span>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required>
-        </div>
-        <button type="submit" class="btn btn-gold" style="width:100%;">Bergabung dengan HIDUP. BERDAMPAK</button>
-      </form>
+      </div>
+
+      <div class="subscribe-right">
+        <p class="subscribe-desc">{{ site.newsletter.desc }}</p>
+        <form method="post" action="{{ url_for('join') }}" class="subscribe-form">
+          <input type="text" name="name" placeholder="Namamu" aria-label="Nama" required>
+          <div class="subscribe-input-row">
+            <input type="email" name="email" placeholder="Alamat email kamu" aria-label="Email" required>
+            <button type="submit" class="btn btn-gold">Langganan</button>
+          </div>
+        </form>
+        <p class="subscribe-disclaimer">{{ site.newsletter.disclaimer }} 😊</p>
+      </div>
     </div>
   </div>
 </section>
