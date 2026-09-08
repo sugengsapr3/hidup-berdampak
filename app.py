@@ -8,14 +8,39 @@ Menjalankan:
     python app.py
 Lalu buka http://127.0.0.1:5000
 """
+import os
 from datetime import datetime
 
-from flask import Flask, render_template, request, abort, flash, redirect, url_for
+from flask import (
+    Flask, render_template, request, abort, flash, redirect, url_for, session
+)
+from authlib.integrations.flask_client import OAuth
 
 import data
 
 app = Flask(__name__)
-app.secret_key = "ganti-dengan-secret-key-anda"
+# Secret key dari environment (fallback untuk dev lokal saja).
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
+
+# --- Konfigurasi OAuth Google -----------------------------------------
+# Client ID & Secret diambil dari environment variable (tidak di-hardcode),
+# sehingga aman di repo publik. Set di Vercel: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+
+oauth = OAuth(app)
+if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
+    oauth.register(
+        name="google",
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+
+
+def google_enabled():
+    return bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
 
 
 @app.context_processor
@@ -29,6 +54,7 @@ def inject_globals():
         "nav_resources_items": data.NAV_RESOURCES_ITEMS,
         "footer_columns": data.FOOTER_COLUMNS,
         "current_year": datetime.now().year,
+        "current_user": session.get("user"),
     }
 
 
@@ -99,7 +125,60 @@ def about():
 # ---------------------------------------------------------------- Login
 @app.route("/login")
 def login():
-    return render_template("login.html", providers=data.AUTH_PROVIDERS, active="login")
+    return render_template(
+        "login.html",
+        providers=data.AUTH_PROVIDERS,
+        google_enabled=google_enabled(),
+        active="login",
+    )
+
+
+# ---------------------------------------------------------------- OAuth Google
+@app.route("/auth/google")
+def auth_google():
+    if not google_enabled():
+        flash("Login Google belum dikonfigurasi. Coba lagi nanti.", "error")
+        return redirect(url_for("login"))
+    redirect_uri = url_for("auth_google_callback", _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@app.route("/auth/google/callback")
+def auth_google_callback():
+    if not google_enabled():
+        abort(404)
+    try:
+        token = oauth.google.authorize_access_token()
+        info = token.get("userinfo") or {}
+    except Exception:
+        flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
+        return redirect(url_for("login"))
+
+    if not info.get("email"):
+        flash("Tidak bisa membaca data akun Google.", "error")
+        return redirect(url_for("login"))
+
+    session["user"] = {
+        "name": info.get("name", info["email"].split("@")[0]),
+        "email": info["email"],
+        "picture": info.get("picture", ""),
+    }
+    flash(f"Selamat datang, {session['user']['name']} 👋", "success")
+    return redirect(url_for("account"))
+
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    flash("Kamu sudah keluar.", "success")
+    return redirect(url_for("home"))
+
+
+@app.route("/akun")
+def account():
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    return render_template("account.html", active="")
 
 
 # ---------------------------------------------------------------- Pencarian

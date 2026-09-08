@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Akun | HIDUP. BERDAMPAK{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="auth-card">
+      {% if current_user and current_user.picture %}
+      <img class="account-avatar" src="{{ current_user.picture }}" alt="Foto profil" referrerpolicy="no-referrer">
+      {% else %}
+      <div class="auth-logo">{{ (current_user.name[:1] if current_user else 'H')|upper }}</div>
+      {% endif %}
+      <h1 class="auth-title">Halo, {{ current_user.name if current_user else 'Teman' }}</h1>
+      <p class="auth-sub">{{ current_user.email if current_user else '' }}</p>
+      <div class="auth-providers" style="margin-top:20px;">
+        <a href="{{ url_for('learn') }}" class="btn btn-gold" style="width:100%;">Mulai Belajar</a>
+        <a href="{{ url_for('logout') }}" class="auth-btn">Keluar</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

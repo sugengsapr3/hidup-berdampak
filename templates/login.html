@@ -14,7 +14,11 @@
 
       <div class="auth-providers">
         {% for p in providers %}
-        <a href="{{ url_for('login') }}?provider={{ p.key }}" class="auth-btn auth-{{ p.key }}">
+        {% if p.key == 'google' and google_enabled %}
+        <a href="{{ url_for('auth_google') }}" class="auth-btn auth-{{ p.key }}">
+        {% else %}
+        <a href="{{ url_for('login') }}?provider={{ p.key }}" class="auth-btn auth-{{ p.key }}"{% if p.key != 'google' %} title="Segera hadir"{% endif %}>
+        {% endif %}
           <span class="auth-icon">
             {% if p.key == 'google' %}
               <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">

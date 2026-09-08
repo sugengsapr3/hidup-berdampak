@@ -63,14 +63,23 @@
             {% endif %}
           {% endfor %}
           <li class="nav-mobile-actions">
+            {% if current_user %}
+            <a href="{{ url_for('account') }}">Akun</a>
+            <a href="{{ url_for('logout') }}">Keluar</a>
+            {% else %}
             <a href="{{ url_for('login') }}">Login</a>
+            {% endif %}
             <a href="{{ url_for('search') }}">Cari</a>
           </li>
         </ul>
       </nav>
 
       <div class="nav-actions">
+        {% if current_user %}
+        <a href="{{ url_for('account') }}" class="btn-login"><span aria-hidden="true">&#128100;</span> Akun</a>
+        {% else %}
         <a href="{{ url_for('login') }}" class="btn-login"><span aria-hidden="true">&#128100;</span> Login</a>
+        {% endif %}
         <a href="{{ url_for('search') }}" class="btn-search" aria-label="Cari">&#128269;</a>
       </div>
     </div>
