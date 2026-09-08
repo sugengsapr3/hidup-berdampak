@@ -81,6 +81,50 @@ def login():
     return render_template("login.html", active="login")
 
 
+def _build_search_index():
+    """Kumpulkan semua konten yang bisa dicari menjadi satu daftar seragam."""
+    index = []
+    for j in data.JOURNEYS:
+        index.append({
+            "title": j["title"], "desc": j.get("desc", ""), "body": j.get("body", ""),
+            "kind": "Perjalanan", "url": url_for("journey_detail", slug=j["slug"]),
+        })
+    for c in data.COURSES:
+        index.append({
+            "title": c["title"], "desc": c.get("desc", ""), "body": "",
+            "kind": "Kelas", "url": url_for("courses"),
+        })
+    for t in data.TUTORIAL_TOPICS:
+        index.append({
+            "title": t["title"], "desc": t.get("desc", ""), "body": "",
+            "kind": "Tutorial", "url": url_for("tutorials") + "#" + t["slug"],
+        })
+    for r in data.RESOURCES:
+        index.append({
+            "title": r["title"], "desc": r.get("desc", ""), "body": "",
+            "kind": "Sumber Daya", "url": url_for("resources"),
+        })
+    for o in data.BUSINESS_OFFERS:
+        index.append({
+            "title": o["title"], "desc": o.get("desc", ""), "body": "",
+            "kind": "Untuk Bisnis", "url": url_for("business"),
+        })
+    return index
+
+
+@app.route("/cari")
+def search():
+    query = request.args.get("q", "").strip()
+    results = []
+    if query:
+        q = query.lower()
+        for item in _build_search_index():
+            haystack = f"{item['title']} {item['desc']} {item['body']}".lower()
+            if q in haystack:
+                results.append(item)
+    return render_template("search.html", query=query, results=results, active="")
+
+
 @app.route("/bergabung", methods=["GET", "POST"])
 def join():
     if request.method == "POST":

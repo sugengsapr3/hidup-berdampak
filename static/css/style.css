@@ -275,3 +275,33 @@ h1, h2, h3 { line-height: 1.15; letter-spacing: .01em; }
     transform: none; box-shadow: none; margin-top: 4px; background: transparent; border: none;
   }
 }
+
+/* ---------- Halaman pencarian ---------- */
+.search-page-form {
+  display: flex; gap: 10px; max-width: 560px; margin: 26px auto 0; flex-wrap: wrap;
+}
+.search-page-form input {
+  flex: 1; min-width: 220px; padding: 14px 20px; border-radius: 40px; font: inherit;
+  background: var(--bg-2); border: 1px solid var(--line); color: var(--ink);
+}
+.search-page-form input:focus { outline: none; border-color: var(--gold); }
+.search-page-form .btn { white-space: nowrap; }
+
+.search-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.search-result {
+  display: block; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 24px; transition: transform .2s, border-color .2s;
+}
+.search-result:hover { transform: translateY(-4px); border-color: rgba(212,162,83,.45); }
+.result-kind {
+  display: inline-block; font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--gold); font-weight: 700; margin-bottom: 8px;
+}
+.search-result h3 { font-size: 1.1rem; margin-bottom: 8px; }
+.search-result p { color: var(--muted); font-size: .95rem; }
+.search-empty { text-align: center; padding: 30px 0; }
+.search-empty p { margin-bottom: 8px; }
+
+@media (max-width: 900px) {
+  .search-results { grid-template-columns: 1fr; }
+}

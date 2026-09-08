@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Cari | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Pencarian</p>
+    <h1>Cari di HIDUP. BERDAMPAK</h1>
+    <form method="get" action="{{ url_for('search') }}" class="search-page-form">
+      <input type="search" name="q" value="{{ query }}" placeholder="Ketik kata kunci, misal: produktivitas" autofocus>
+      <button type="submit" class="btn btn-gold">Cari</button>
+    </form>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% if query %}
+      <p style="color:var(--muted); margin-bottom:24px;">
+        {{ results|length }} hasil untuk "<strong style="color:var(--ink);">{{ query }}</strong>"
+      </p>
+      {% if results %}
+      <div class="search-results">
+        {% for r in results %}
+        <a href="{{ r.url }}" class="search-result">
+          <span class="result-kind">{{ r.kind }}</span>
+          <h3>{{ r.title }}</h3>
+          <p>{{ r.desc }}</p>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="search-empty">
+        <p>Tidak ada hasil untuk "<strong>{{ query }}</strong>".</p>
+        <p style="color:var(--muted);">Coba kata kunci lain seperti <em>produktivitas</em>, <em>keuangan</em>, atau <em>keluarga</em>.</p>
+      </div>
+      {% endif %}
+    {% else %}
+      <p style="color:var(--muted); text-align:center;">
+        Masukkan kata kunci di atas untuk mulai mencari.
+      </p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
