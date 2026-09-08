@@ -294,6 +294,17 @@ FEATURED = [
 ]
 
 # =====================================================================
+# LOGIN — penyedia social login (UI; OAuth diaktifkan nanti)
+# "key" dipakai untuk styling ikon di CSS/SVG.
+# =====================================================================
+AUTH_PROVIDERS = [
+    {"key": "google", "label": "Google"},
+    {"key": "facebook", "label": "Facebook"},
+    {"key": "tiktok", "label": "TikTok"},
+    {"key": "apple", "label": "Apple"},
+]
+
+# =====================================================================
 # NAVIGASI
 # type "link"     -> tautan biasa
 # type "dropdown" -> punya submenu (items: label + endpoint + optional slug)

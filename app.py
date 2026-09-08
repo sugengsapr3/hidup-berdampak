@@ -99,7 +99,7 @@ def about():
 # ---------------------------------------------------------------- Login
 @app.route("/login")
 def login():
-    return render_template("login.html", active="login")
+    return render_template("login.html", providers=data.AUTH_PROVIDERS, active="login")
 
 
 # ---------------------------------------------------------------- Pencarian
