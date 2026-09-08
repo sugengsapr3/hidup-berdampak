@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Belajar | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}Enam ruang untuk belajar dan bertumbuh: Manusia & Lobang, Financial Freedom, Pengembangan Diri, Islam & Bekal Akhirat, Keluarga & Legacy, URAT MALU?{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Belajar</span>
+    <h1>Temukan Jalanmu</h1>
+    <p>Enam ruang untuk merenung, bertumbuh, dan meninggalkan jejak yang berarti.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card-grid grid-3">
+      {% for t in topics %}
+      <a href="{{ url_for('learn_detail', slug=t.slug) }}" class="content-card">
+        <div class="emoji">{{ t.emoji }}</div>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.desc }}</p>
+        <span class="link-arrow">Jelajahi &rarr;</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

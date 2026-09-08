@@ -1,64 +1,106 @@
 {% extends "base.html" %}
-{% block title %}{{ site.brand }} | Hidup yang meninggalkan makna{% endblock %}
+{% block title %}HIDUP. BERDAMPAK — {{ site.tagline }}{% endblock %}
 
 {% block content %}
+<!-- HERO -->
 <section class="hero">
-  <div class="container hero-content">
-    <h1>HIDUP<span class="dot">.</span> BERDAMPAK</h1>
+  <div class="container hero-inner">
+    <p class="eyebrow">HIDUP • BERDAMPAK</p>
+    <h1>
+      {{ site.hero_title_1 }}<br>
+      <span class="soft">{{ site.hero_title_2 }}</span>
+    </h1>
     <p class="lead">{{ site.hero_sub }}</p>
     <div class="hero-actions">
-      <a href="{{ url_for('journeys') }}" class="btn btn-gold">Mulai Perjalanan</a>
-      <a href="{{ site.youtube_url }}" class="btn btn-ghost">Tonton di YouTube</a>
+      <a href="{{ url_for('learn') }}" class="btn btn-gold">Mulai Hidup Berdampak</a>
+      <a href="{{ url_for('resources') }}" class="btn btn-ghost">Jelajahi Konten</a>
     </div>
-    <div class="scroll-hint">&#8595;</div>
+    <p class="tagline">{{ site.tagline }}</p>
   </div>
 </section>
 
-<section class="section section-2">
+<!-- TEMUKAN JALANMU -->
+<section class="section section-surface">
   <div class="container">
     <div class="section-head">
-      <p class="kicker">Pilihan Perjalanan</p>
-      <h2>Mau mulai dari mana?</h2>
-      <p>Enam jalur untuk merenung, tumbuh, dan meninggalkan jejak yang berarti.</p>
+      <p class="kicker">Temukan Jalanmu</p>
+      <h2>Enam ruang untuk belajar dan bertumbuh</h2>
+      <p>Pilih tema yang paling dekat dengan perjalananmu saat ini.</p>
     </div>
-    <div class="journey-grid">
-      {% for j in journeys %}
-      <a href="{{ url_for('journey_detail', slug=j.slug) }}" class="journey-card">
-        <div class="emoji">{{ j.emoji }}</div>
-        <h3>{{ j.title }}</h3>
-        <p>{{ j.desc }}</p>
-        <span class="arrow">Telusuri &rarr;</span>
+    <div class="card-grid grid-3">
+      {% for t in learn_topics %}
+      <a href="{{ url_for('learn_detail', slug=t.slug) }}" class="content-card">
+        <div class="emoji">{{ t.emoji }}</div>
+        <h3>{{ t.title }}</h3>
+        <p>{{ t.desc }}</p>
+        <span class="link-arrow">Jelajahi &rarr;</span>
       </a>
       {% endfor %}
     </div>
   </div>
 </section>
 
+<!-- PILIHAN MINGGU INI -->
 <section class="section">
   <div class="container">
     <div class="section-head">
-      <p class="kicker">Bukan sekadar website</p>
-      <h2>Sebuah gerakan jangka panjang</h2>
-      <p>Tumbuh dari YouTube menjadi ekosistem yang lebih luas.</p>
+      <p class="kicker">Pilihan Minggu Ini</p>
+      <h2>Yang layak kamu baca dan tonton</h2>
     </div>
-    <div class="pillar-grid">
-      {% for p in pillars %}
-      <div class="pillar">
-        <div class="emoji">{{ p.emoji }}</div>
-        <h3>{{ p.title }}</h3>
-        <p>{{ p.desc }}</p>
-      </div>
+    <div class="featured-grid">
+      {% for f in featured %}
+      <a href="{% if f.slug %}{{ url_for(f.endpoint, slug=f.slug) }}{% else %}{{ url_for(f.endpoint) }}{% endif %}" class="featured-card">
+        <div class="featured-thumb">{{ f.emoji }}</div>
+        <div class="featured-body">
+          <span class="featured-kind">{{ f.kind }}</span>
+          <h3>{{ f.title }}</h3>
+          <p>{{ f.desc }}</p>
+        </div>
+      </a>
       {% endfor %}
     </div>
   </div>
 </section>
 
-<section class="closing">
+<!-- BUKU: MANUSIA DAN LOBANG -->
+<section class="section section-surface">
   <div class="container">
-    {% for line in site.closing %}
-    <p class="{{ 'accent' if loop.last else '' }}">{{ line }}</p>
-    {% endfor %}
-    <a href="{{ url_for('join') }}" class="btn btn-gold">Bergabung dengan HIDUP. BERDAMPAK</a>
+    <div class="book-feature">
+      <div class="book-cover-lg">
+        <div>
+          <div class="cover-brand">HIDUP • BERDAMPAK</div>
+          <div class="cover-title">{{ book.title }}</div>
+        </div>
+      </div>
+      <div>
+        <span class="kicker">Buku</span>
+        <h2>{{ book.tagline }}</h2>
+        <div class="book-sub">
+          <p>Sebagian jatuh karena keadaan.</p>
+          <p>Sebagian karena pilihan.</p>
+          <p>Tetapi tidak semua orang memilih untuk tetap tinggal di sana.</p>
+        </div>
+        <div class="book-actions">
+          <a href="{{ url_for('book_detail', slug=book.slug) }}" class="btn btn-gold">Pelajari Buku</a>
+          <a href="{{ url_for('book_detail', slug=book.slug) }}#cuplikan" class="btn btn-ghost">Baca Cuplikan</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section">
+  <div class="container">
+    <div class="newsletter-band">
+      <h2>{{ site.newsletter.headline }}</h2>
+      <p>{{ site.newsletter.desc }}</p>
+      <form class="newsletter-form" method="post" action="{{ url_for('join') }}">
+        <input type="email" name="email" placeholder="Alamat email kamu" aria-label="Email" required>
+        <button type="submit" class="btn btn-gold">Bergabung</button>
+      </form>
+      <p class="newsletter-note">{{ site.newsletter.note }}</p>
+    </div>
   </div>
 </section>
 {% endblock %}

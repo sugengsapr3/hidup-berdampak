@@ -7,7 +7,7 @@
     <p class="kicker">Pencarian</p>
     <h1>Cari di HIDUP. BERDAMPAK</h1>
     <form method="get" action="{{ url_for('search') }}" class="search-page-form">
-      <input type="search" name="q" value="{{ query }}" placeholder="Ketik kata kunci, misal: produktivitas" autofocus>
+      <input type="search" name="q" value="{{ query }}" placeholder="Ketik kata kunci, misal: manusia dan lobang" autofocus>
       <button type="submit" class="btn btn-gold">Cari</button>
     </form>
   </div>
@@ -32,7 +32,7 @@
       {% else %}
       <div class="search-empty">
         <p>Tidak ada hasil untuk "<strong>{{ query }}</strong>".</p>
-        <p style="color:var(--muted);">Coba kata kunci lain seperti <em>produktivitas</em>, <em>keuangan</em>, atau <em>keluarga</em>.</p>
+        <p style="color:var(--muted);">Coba kata kunci lain seperti <em>lobang</em>, <em>finansial</em>, atau <em>keluarga</em>.</p>
       </div>
       {% endif %}
     {% else %}

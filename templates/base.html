@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}{{ site.brand }}{% endblock %}</title>
-  <meta name="description" content="{{ site.hero_sub }}">
+  <title>{% block title %}{{ site.brand }} — {{ site.tagline }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.hero_sub }}{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a href="{{ url_for('home') }}" class="brand">
-        HIDUP<span class="brand-mark">.</span> BERDAMPAK
-      </a>
+      <a href="{{ url_for('home') }}" class="brand">HIDUP<span class="brand-mark">.</span> BERDAMPAK</a>
+
       <input type="checkbox" id="nav-toggle" class="nav-toggle">
       <label for="nav-toggle" class="nav-burger" aria-label="Menu">&#9776;</label>
-      <nav class="main-nav">
+
+      <nav class="main-nav" aria-label="Navigasi utama">
         <ul>
           {% for item in nav %}
             {% if item.type == 'dropdown' %}
@@ -25,32 +28,37 @@
                 {{ item.label }} <span class="caret">&#9662;</span>
               </a>
               <div class="dropdown-menu">
-                {% for t in tutorial_topics %}
-                <a href="{{ url_for('tutorial_detail', slug=t.slug) }}" class="dropdown-item">
-                  <span class="dd-emoji">{{ t.emoji }}</span>
-                  <span>
-                    <strong>{{ t.title }}</strong>
-                    <small>{{ t.desc }}</small>
-                  </span>
-                </a>
-                {% endfor %}
+                {% if item.menu == 'learn' %}
+                  {% for t in learn_topics %}
+                  <a href="{{ url_for('learn_detail', slug=t.slug) }}" class="dropdown-item">
+                    <span class="dd-emoji">{{ t.emoji }}</span>
+                    <span><strong>{{ t.title }}</strong><small>{{ t.desc }}</small></span>
+                  </a>
+                  {% endfor %}
+                  <a href="{{ url_for('learn') }}" class="dropdown-simple">Semua Artikel / Semua Konten &rarr;</a>
+                {% elif item.menu == 'business' %}
+                  {% for b in nav_business_items %}
+                  <a href="{{ url_for(b.endpoint) }}" class="dropdown-simple">{{ b.label }}</a>
+                  {% endfor %}
+                {% elif item.menu == 'resources' %}
+                  {% for r in nav_resources_items %}
+                  <a href="{{ url_for(r.endpoint) }}" class="dropdown-simple">{{ r.label }}</a>
+                  {% endfor %}
+                {% endif %}
               </div>
             </li>
             {% else %}
             <li>
               <a href="{{ url_for(item.endpoint) }}"
-                 class="{{ 'active' if active == item.endpoint else '' }}">
-                {{ item.label }}
-              </a>
+                 class="{{ 'active' if active == item.endpoint else '' }}">{{ item.label }}</a>
             </li>
             {% endif %}
           {% endfor %}
         </ul>
       </nav>
+
       <div class="nav-actions">
-        <a href="{{ url_for('login') }}" class="btn-login">
-          <span class="login-icon">&#128100;</span> Login
-        </a>
+        <a href="{{ url_for('login') }}" class="btn-login"><span aria-hidden="true">&#128100;</span> Login</a>
         <a href="{{ url_for('search') }}" class="btn-search" aria-label="Cari">&#128269;</a>
       </div>
     </div>
@@ -72,17 +80,35 @@
 
   <footer class="site-footer">
     <div class="container">
-      <div class="footer-inner">
-        <div class="footer-brand">HIDUP<span>.</span> BERDAMPAK</div>
+      <div class="footer-top">
+        <div class="footer-brand-block">
+          <div class="footer-brand">HIDUP<span>.</span> BERDAMPAK</div>
+          <div class="footer-tagline">{{ site.tagline }}</div>
+        </div>
+        {% for col in footer_columns %}
+        <div class="footer-col">
+          <h4>{{ col.title }}</h4>
+          <ul>
+            {% for link in col.links %}
+            <li>
+              {% if link.slug %}
+              <a href="{{ url_for(link.endpoint, slug=link.slug) }}">{{ link.label }}</a>
+              {% else %}
+              <a href="{{ url_for(link.endpoint) }}">{{ link.label }}</a>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="footer-bottom">
         <ul class="footer-socials">
           {% for s in site.socials %}
           <li><a href="{{ s.url }}">{{ s.label }}</a></li>
           {% endfor %}
-          <li><a href="mailto:{{ site.email }}">Email</a></li>
         </ul>
-      </div>
-      <div class="footer-bottom">
-        &copy; {{ current_year }} {{ site.name }} &middot; Meninggalkan sesuatu yang berarti.
+        <div class="footer-copy">&copy; {{ current_year }} HIDUP BERDAMPAK. All rights reserved.</div>
       </div>
     </div>
   </footer>

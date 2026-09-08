@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.title }} | Belajar | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}{{ topic.desc }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Belajar</span>
+    <h1>{{ topic.emoji }} {{ topic.title }}</h1>
+    <p>{{ topic.desc }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container prose">
+    <p class="lead-quote">{{ topic.intro }}</p>
+
+    {% for s in topic.sections %}
+    <h2>{{ s.heading }}</h2>
+    <p>{{ s.text }}</p>
+    {% endfor %}
+
+    <div class="page-actions">
+      <a href="{{ url_for('learn') }}" class="btn btn-outline">&larr; Semua Konten</a>
+      <a href="{{ url_for('join') }}" class="btn btn-gold">Dapat refleksi tiap pekan</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

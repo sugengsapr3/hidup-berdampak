@@ -1,13 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Login | {{ site.brand }}{% endblock %}
+{% block title %}Login | HIDUP. BERDAMPAK{% endblock %}
 
 {% block content %}
 <section class="section">
   <div class="container">
-    <div class="join-card" style="max-width:420px;">
-      <h1 style="font-size:1.8rem; text-align:center; margin-bottom:8px;">Masuk</h1>
+    <div class="form-card">
+      <h1 style="font-size:1.7rem; text-align:center; margin-bottom:8px;">Masuk</h1>
       <p style="color:var(--muted); text-align:center; margin-bottom:24px;">
-        Masuk untuk mengakses kelas dan sumber dayamu.
+        Masuk untuk mengakses konten dan sumber dayamu.
       </p>
       <form method="get" action="{{ url_for('login') }}">
         <div class="form-group">
@@ -21,8 +21,8 @@
         <button type="submit" class="btn btn-gold" style="width:100%;">Masuk</button>
       </form>
       <p style="color:var(--muted); text-align:center; margin-top:18px; font-size:.9rem;">
-        Belum punya akun?
-        <a href="{{ url_for('join') }}" style="color:var(--gold);">Bergabung</a>
+        Belum bergabung?
+        <a href="{{ url_for('join') }}" class="link-arrow">Bergabung</a>
       </p>
     </div>
   </div>

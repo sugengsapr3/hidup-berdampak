@@ -1,42 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Bergabung | {{ site.brand }}{% endblock %}
+{% block title %}Bergabung | HIDUP. BERDAMPAK{% endblock %}
 
 {% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Newsletter</span>
+    <h1>{{ site.newsletter.headline }}</h1>
+    <p>{{ site.newsletter.desc }}</p>
+  </div>
+</section>
+
 <section class="section">
   <div class="container">
-    <div class="subscribe-card">
-      <div class="subscribe-left">
-        <h1 class="subscribe-title">
-          Berlangganan <span class="brand-accent">{{ site.newsletter.name }}</span> ✈️
-        </h1>
-        <p class="subscribe-readers">
-          Bergabunglah dengan komunitas yang terus tumbuh, lebih dari
-          <strong>{{ site.newsletter.readers }} pembaca setia.</strong>
-        </p>
-        <div class="subscribe-social-proof">
-          <div class="avatars">
-            <span class="avatar">🙂</span>
-            <span class="avatar">😊</span>
-            <span class="avatar">🙌</span>
-          </div>
-          <div class="reviews">
-            <span class="stars">★★★★★</span>
-            <span class="review-count">{{ site.newsletter.reviews }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="subscribe-right">
-        <p class="subscribe-desc">{{ site.newsletter.desc }}</p>
-        <form method="post" action="{{ url_for('join') }}" class="subscribe-form">
-          <input type="text" name="name" placeholder="Namamu" aria-label="Nama" required>
-          <div class="subscribe-input-row">
-            <input type="email" name="email" placeholder="Alamat email kamu" aria-label="Email" required>
-            <button type="submit" class="btn btn-gold">Langganan</button>
-          </div>
-        </form>
-        <p class="subscribe-disclaimer">{{ site.newsletter.disclaimer }} 😊</p>
-      </div>
+    <div class="newsletter-band">
+      <h2>Bergabung Gratis</h2>
+      <p>Satu email berisi refleksi, pelajaran, dan ide pilihan dari HIDUP BERDAMPAK.</p>
+      <form class="newsletter-form" method="post" action="{{ url_for('join') }}">
+        <input type="email" name="email" placeholder="Alamat email kamu" aria-label="Email" required>
+        <button type="submit" class="btn btn-gold">Bergabung</button>
+      </form>
+      <p class="newsletter-note">{{ site.newsletter.note }}</p>
     </div>
   </div>
 </section>

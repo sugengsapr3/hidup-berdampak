@@ -1,25 +1,39 @@
 {% extends "base.html" %}
-{% block title %}Sumber Daya | {{ site.brand }}{% endblock %}
+{% block title %}Sumber Daya | HIDUP. BERDAMPAK{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container">
-    <p class="kicker">Sumber Daya</p>
-    <h1>Perlengkapan untuk perjalananmu</h1>
-    <p>Template, daftar bacaan, dan panduan gratis untuk membantumu mulai.</p>
+    <span class="kicker">Sumber Daya</span>
+    <h1>Perlengkapan untuk Perjalananmu</h1>
+    <p>Artikel, video, tools, worksheet, dan unduhan gratis untuk membantumu bertumbuh.</p>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="journey-grid">
+    <div class="card-grid grid-3">
       {% for r in resources %}
-      <div class="journey-card">
+      <div class="content-card">
         <div class="emoji">{{ r.emoji }}</div>
         <h3>{{ r.title }}</h3>
         <p>{{ r.desc }}</p>
       </div>
       {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-surface">
+  <div class="container">
+    <div class="newsletter-band">
+      <h2>{{ site.newsletter.headline }}</h2>
+      <p>{{ site.newsletter.desc }}</p>
+      <form class="newsletter-form" method="post" action="{{ url_for('join') }}">
+        <input type="email" name="email" placeholder="Alamat email kamu" aria-label="Email" required>
+        <button type="submit" class="btn btn-gold">Bergabung</button>
+      </form>
+      <p class="newsletter-note">{{ site.newsletter.note }}</p>
     </div>
   </div>
 </section>

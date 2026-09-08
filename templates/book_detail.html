@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} | Buku | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}{{ book.blurb }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="book-feature">
+      <div class="book-cover-lg">
+        <div>
+          <div class="cover-brand">HIDUP • BERDAMPAK</div>
+          <div class="cover-title">{{ book.title }}</div>
+        </div>
+      </div>
+      <div>
+        <span class="kicker">Buku</span>
+        <h2>{{ book.tagline }}</h2>
+        <div class="book-sub"><p>{{ book.blurb }}</p></div>
+        <div class="book-actions">
+          <a href="{{ url_for('join') }}" class="btn btn-gold">Pelajari Buku</a>
+          <a href="#cuplikan" class="btn btn-ghost">Baca Cuplikan</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if book.desc %}
+<section class="section section-surface">
+  <div class="container prose">
+    <h2>Tentang Buku</h2>
+    <p>{{ book.desc }}</p>
+  </div>
+</section>
+{% endif %}
+
+{% if book.excerpt %}
+<section id="cuplikan" class="section">
+  <div class="container prose">
+    <span class="kicker">Cuplikan</span>
+    <p class="lead-quote" style="margin-top:16px;">{{ book.excerpt }}</p>
+    <div class="page-actions">
+      <a href="{{ url_for('books') }}" class="btn btn-outline">&larr; Semua Buku</a>
+      <a href="{{ url_for('join') }}" class="btn btn-gold">Kabari saya saat tersedia</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

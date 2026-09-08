@@ -1,354 +1,366 @@
 """
 Konten statis untuk website brand "HIDUP. BERDAMPAK".
-Tema reflektif tentang makna hidup, warisan, dan pengembangan diri.
+Ecosystem edukasi, pengembangan diri, kepemimpinan, dan dampak.
+
+Semua konten ditarik dari file ini agar mudah dikembangkan menjadi CMS.
 """
 
 SITE = {
-    "name": "hidup.berdampak.id",
+    "name": "HIDUP BERDAMPAK",
     "brand": "HIDUP. BERDAMPAK",
+    "tagline": "Live with Purpose. Create Impact.",
     "owner": "Abi Albarra",
-    "first_name": "Abi",
-    "role": "Gerakan tentang hidup yang bermakna dan berdampak",
-    "hero_title": "HIDUP. BERDAMPAK",
+    # Hero utama beranda
+    "hero_title_1": "Hidup bukan hanya tentang apa yang kita capai.",
+    "hero_title_2": "Tetapi tentang apa yang tertinggal karena kita pernah ada.",
     "hero_sub": (
-        "Karena pada akhirnya, bukan berapa lama kita hidup yang penting. "
-        "Tapi apa yang kita tinggalkan setelah kita pergi."
+        "Belajar, bertumbuh, membangun kehidupan yang bermakna, dan memberi "
+        "manfaat yang terus hidup melampaui diri kita."
     ),
-    # Manifesto penutup
-    "closing": [
-        "Suatu hari kita semua akan pergi.",
-        "Pertanyaannya bukan apakah kita akan meninggalkan dunia.",
-        "Pertanyaannya: apa yang kita tinggalkan?",
-    ],
     "email": "hidup.berdampak.media@gmail.com",
     "youtube_url": "#",
-    # Konten halaman berlangganan (newsletter)
+    # Newsletter (dipakai di beranda & footer)
     "newsletter": {
-        "name": "Catatan Berdampak",
-        "desc": (
-            "Setiap pekan, aku berbagi tips produktivitas yang bisa langsung "
-            "dipraktikkan, refleksi hidup, dan sorotan dari buku-buku favoritku, "
-            "langsung ke inbox-mu. Gratis, dan akan selalu gratis."
-        ),
-        "readers": "12.000+",
-        "reviews": "200+ ulasan",
-        "disclaimer": (
-            "Dengan mengirim formulir ini, kamu akan berlangganan newsletter "
-            "gratisku, yang sesekali memuat info soal buku, aplikasi, dan kelasku. "
-            "Kamu bisa berhenti berlangganan kapan saja tanpa masalah."
-        ),
+        "headline": "Satu Refleksi. Satu Pelajaran. Satu Dampak.",
+        "desc": "Dapatkan tulisan, video, dan ide pilihan dari HIDUP BERDAMPAK.",
+        "note": "No spam. Hanya sesuatu yang layak dibaca.",
     },
     "socials": [
         {"label": "YouTube", "url": "#"},
         {"label": "Instagram", "url": "#"},
+        {"label": "LinkedIn", "url": "#"},
         {"label": "TikTok", "url": "#"},
-        {"label": "X/Twitter", "url": "#"},
     ],
 }
 
-# Enam "Pilihan Perjalanan" di beranda
-JOURNEYS = [
+# =====================================================================
+# BELAJAR — enam jalur utama ("Temukan Jalanmu")
+# =====================================================================
+LEARN_TOPICS = [
     {
         "slug": "manusia-dan-lobang",
         "emoji": "🕳️",
-        "title": "MANUSIA DAN LOBANG",
-        "desc": "Tentang jatuh, bangkit, dan memahami hidup.",
-        "body": (
-            "Setiap orang pernah terjatuh ke dalam lubangnya masing-masing. "
-            "Yang membedakan bukan seberapa dalam kita jatuh, tapi seberapa "
-            "kita mau belajar untuk bangkit dan memahami kenapa kita ada di "
-            "sana. Perjalanan ini tentang menerima luka, memaknai kegagalan, "
-            "dan tumbuh darinya."
+        "title": "Manusia & Lobang",
+        "desc": "Refleksi tentang jatuh, bangkit, pilihan hidup, dan makna perjalanan manusia.",
+        "intro": (
+            "Setiap manusia pernah jatuh ke dalam lobangnya masing-masing. Yang "
+            "membedakan bukan seberapa dalam kita jatuh, tapi seberapa kita mau "
+            "belajar untuk bangkit dan memahami kenapa kita ada di sana."
         ),
+        "sections": [
+            {"heading": "Jatuh adalah bagian dari perjalanan", "text": (
+                "Tidak ada kehidupan yang lurus tanpa lubang. Menerima bahwa jatuh "
+                "adalah bagian dari proses membuat kita lebih lapang menghadapinya.")},
+            {"heading": "Pilihan untuk tidak tinggal di sana", "text": (
+                "Sebagian jatuh karena keadaan, sebagian karena pilihan. Tapi tidak "
+                "semua orang memilih untuk tetap tinggal di dalam lobang.")},
+            {"heading": "Makna di balik luka", "text": (
+                "Luka yang dimaknai menjadi pelajaran. Perjalanan ini tentang "
+                "menerima, memaknai kegagalan, dan tumbuh darinya.")},
+        ],
     },
     {
         "slug": "financial-freedom",
         "emoji": "💰",
-        "title": "FINANCIAL FREEDOM",
-        "desc": "Membangun kebebasan finansial tanpa melupakan bekal akhirat.",
-        "body": (
-            "Kebebasan finansial bukan tujuan akhir, tapi alat untuk hidup "
-            "lebih bermakna dan memberi lebih banyak. Perjalanan ini tentang "
-            "mengelola harta dengan bijak, membangun sumber penghasilan, dan "
-            "memastikan dunia tidak membuat kita lupa pada akhirat."
+        "title": "Financial Freedom",
+        "desc": "Bangun kebebasan finansial tanpa kehilangan arah dan tujuan hidup.",
+        "intro": (
+            "Kebebasan finansial bukan tujuan akhir, tapi alat untuk hidup lebih "
+            "bermakna dan memberi lebih banyak, tanpa membuat kita lupa pada arah "
+            "dan tujuan hidup."
         ),
+        "sections": [
+            {"heading": "Uang sebagai alat, bukan tujuan", "text": (
+                "Ketika uang menjadi tujuan, ia tidak pernah cukup. Ketika ia menjadi "
+                "alat, ia membantu kita hidup dan memberi lebih leluasa.")},
+            {"heading": "Kelola dengan sadar", "text": (
+                "Sadari ke mana uang pergi, bangun dana darurat, dan tumbuhkan aset "
+                "secara bertahap dengan pemahaman, bukan ikut-ikutan.")},
+            {"heading": "Jangan lupa bekal jangka panjang", "text": (
+                "Sebagian rezeki terbaik justru yang kita berikan. Kebebasan sejati "
+                "adalah ketika kita mampu memberi tanpa merasa kekurangan.")},
+        ],
     },
     {
-        "slug": "bekal-akhirat",
-        "emoji": "🕌",
-        "title": "BEKAL AKHIRAT",
-        "desc": "Karena investasi terbaik tidak semuanya memberikan return di dunia.",
-        "body": (
-            "Ada investasi yang hasilnya tidak kita nikmati di dunia, tapi "
-            "menjadi bekal yang paling berharga kelak. Perjalanan ini tentang "
-            "amal yang mengalir, ilmu yang bermanfaat, dan niat yang lurus."
+        "slug": "pengembangan-diri",
+        "emoji": "🌱",
+        "title": "Pengembangan Diri",
+        "desc": "Menjadi pribadi yang lebih kuat, sadar, disiplin, dan bertumbuh.",
+        "intro": (
+            "Perubahan besar lahir dari langkah-langkah kecil yang konsisten. "
+            "Pengembangan diri adalah proses menjadi pribadi yang lebih kuat, "
+            "sadar, dan disiplin, sedikit demi sedikit."
         ),
+        "sections": [
+            {"heading": "Fokus pada sistem, bukan hasil", "text": (
+                "Hasil datang dan pergi, tapi sistem harian yang kita jalankan "
+                "menentukan arah jangka panjang. Perbaiki prosesnya.")},
+            {"heading": "Disiplin melampaui motivasi", "text": (
+                "Motivasi naik-turun. Disiplin yang dibangun lewat kebiasaan kecil "
+                "membuat kita tetap bergerak bahkan di hari yang berat.")},
+            {"heading": "Kesadaran diri", "text": (
+                "Bertumbuh dimulai dari mengenali diri sendiri: kekuatan, "
+                "kelemahan, dan pola yang perlu diperbaiki.")},
+        ],
+    },
+    {
+        "slug": "islam-bekal-akhirat",
+        "emoji": "🕌",
+        "title": "Islam & Bekal Akhirat",
+        "desc": "Karena investasi terbaik bukan hanya untuk kehidupan hari ini.",
+        "intro": (
+            "Ada investasi yang hasilnya tidak kita nikmati di dunia, tapi menjadi "
+            "bekal yang paling berharga kelak. Karena investasi terbaik bukan hanya "
+            "untuk kehidupan hari ini."
+        ),
+        "sections": [
+            {"heading": "Amal yang mengalir", "text": (
+                "Sebagian amal terus mengalir pahalanya meski kita telah tiada. "
+                "Itulah salah satu warisan paling berharga.")},
+            {"heading": "Ilmu yang bermanfaat", "text": (
+                "Ilmu yang diajarkan dan diamalkan orang lain menjadi bekal yang "
+                "tidak terputus. Berbagi ilmu adalah bentuk dampak yang abadi.")},
+            {"heading": "Niat yang lurus", "text": (
+                "Nilai sebuah amal bergantung pada niatnya. Meluruskan niat membuat "
+                "hal biasa menjadi bernilai di sisi-Nya.")},
+        ],
     },
     {
         "slug": "keluarga-legacy",
         "emoji": "👨‍👩‍👧‍👦",
-        "title": "KELUARGA & LEGACY",
-        "desc": "Apa yang akan kita wariskan kepada anak-anak kita?",
-        "body": (
+        "title": "Keluarga & Legacy",
+        "desc": "Tentang keluarga, pendidikan, nilai, dan apa yang kita wariskan.",
+        "intro": (
             "Warisan terbesar bukan harta, tapi nilai, teladan, dan cinta. "
-            "Perjalanan ini tentang membangun keluarga yang kuat dan "
-            "mewariskan sesuatu yang bertahan lebih lama dari diri kita."
+            "Perjalanan ini tentang keluarga, pendidikan, dan apa yang kita "
+            "wariskan kepada anak-anak kita."
         ),
+        "sections": [
+            {"heading": "Nilai lebih tahan lama dari harta", "text": (
+                "Harta bisa habis, tapi nilai yang tertanam akan diteruskan lintas "
+                "generasi. Wariskan prinsip, bukan sekadar materi.")},
+            {"heading": "Pendidikan dimulai dari rumah", "text": (
+                "Teladan orang tua adalah kurikulum pertama anak. Apa yang kita "
+                "lakukan lebih berbicara daripada apa yang kita katakan.")},
+            {"heading": "Membangun legacy", "text": (
+                "Legacy adalah apa yang tetap hidup setelah kita pergi. Bangun "
+                "keluarga yang menjadi sumber kebaikan yang terus mengalir.")},
+        ],
     },
     {
         "slug": "urat-malu",
         "emoji": "😶",
         "title": "URAT MALU?",
-        "desc": "Ketika sesuatu yang salah mulai dianggap biasa.",
-        "body": (
-            "Ada masa ketika hal yang keliru perlahan dianggap wajar, dan rasa "
-            "malu menghilang. Perjalanan ini tentang menjaga hati nurani, "
-            "berani berbeda, dan tidak ikut arus hanya karena semua orang "
-            "melakukannya."
-        ),
-    },
-    {
-        "slug": "pengembangan-diri",
-        "emoji": "🌱",
-        "title": "PENGEMBANGAN DIRI",
-        "desc": "Menjadi manusia yang lebih baik, sedikit demi sedikit.",
-        "body": (
-            "Perubahan besar lahir dari langkah-langkah kecil yang konsisten. "
-            "Perjalanan ini tentang kebiasaan, disiplin, dan proses menjadi "
-            "versi diri yang lebih baik setiap hari."
-        ),
-    },
-]
-
-# Arah pengembangan brand jangka panjang (10-20 tahun)
-PILLARS = [
-    {"emoji": "📺", "title": "Media", "desc": "Konten video dan tulisan yang menginspirasi."},
-    {"emoji": "📚", "title": "Penerbitan Buku", "desc": "Karya yang bertahan lintas generasi."},
-    {"emoji": "🤝", "title": "Komunitas", "desc": "Ruang tumbuh bersama orang-orang sevisi."},
-    {"emoji": "🎓", "title": "Kelas Online", "desc": "Belajar terstruktur untuk berkembang."},
-    {"emoji": "👕", "title": "Merchandise", "desc": "Pengingat nilai dalam keseharian."},
-    {"emoji": "❤️", "title": "Social Impact", "desc": "Dampak nyata bagi sesama."},
-]
-
-# Kategori di dalam dropdown "Tutorial".
-# Tiap topik punya artikel lengkap (intro + beberapa bagian).
-TUTORIAL_TOPICS = [
-    {
-        "emoji": "⚡",
-        "title": "Produktivitas",
-        "desc": "Kelola waktu dan energi dengan lebih baik.",
-        "slug": "produktivitas",
-        "read_time": "6 menit",
+        "desc": "Melihat fenomena sosial dengan refleksi, satire, dan pelajaran moral.",
         "intro": (
-            "Produktivitas sejati bukan soal melakukan lebih banyak hal, tapi "
-            "melakukan hal yang tepat dengan tenang. Panduan ini merangkum prinsip "
-            "dan langkah praktis untuk mengelola waktu serta energimu."
+            "Ada masa ketika hal yang keliru perlahan dianggap wajar, dan rasa malu "
+            "menghilang. Kolom ini melihat fenomena sosial dengan refleksi, satire, "
+            "dan pelajaran moral."
         ),
         "sections": [
-            {"heading": "Mulai dari prioritas, bukan daftar tugas", "text": (
-                "Sebelum menyusun to-do list, tanyakan: dari semua ini, mana yang "
-                "paling penting hari ini? Satu atau dua tugas utama lebih berharga "
-                "daripada sepuluh tugas kecil yang tidak menggerakkan apa-apa.")},
-            {"heading": "Lindungi energi, bukan hanya waktu", "text": (
-                "Waktu terbaik untuk kerja yang menuntut fokus adalah saat energimu "
-                "paling tinggi. Kenali ritme harianmu dan tempatkan pekerjaan berat "
-                "di jam tersebut.")},
-            {"heading": "Kurangi gesekan untuk kebiasaan baik", "text": (
-                "Semakin mudah sebuah kebiasaan dimulai, semakin besar peluang kamu "
-                "menjalankannya. Siapkan lingkungan agar pilihan yang baik menjadi "
-                "pilihan yang paling gampang.")},
-        ],
-    },
-    {
-        "emoji": "💰",
-        "title": "Keuangan",
-        "desc": "Bangun kebebasan finansial yang sehat.",
-        "slug": "keuangan",
-        "read_time": "7 menit",
-        "intro": (
-            "Mengatur keuangan tidak harus rumit. Dengan beberapa prinsip dasar, "
-            "kamu bisa lebih tenang menghadapi masa depan tanpa melupakan bekal "
-            "jangka panjang."
-        ),
-        "sections": [
-            {"heading": "Kenali ke mana uangmu pergi", "text": (
-                "Langkah pertama selalu kesadaran. Catat pemasukan dan pengeluaran "
-                "selama sebulan. Angka yang jujur sering mengejutkan, dan dari situ "
-                "perubahan dimulai.")},
-            {"heading": "Bangun dana darurat lebih dulu", "text": (
-                "Sebelum berinvestasi, siapkan dana darurat setara beberapa bulan "
-                "pengeluaran. Ini bantalan yang membuatmu tidak panik saat keadaan "
-                "tak terduga datang.")},
-            {"heading": "Investasi terbaik melampaui dunia", "text": (
-                "Selain menumbuhkan aset, sisihkan untuk memberi. Sebagian investasi "
-                "terbaik justru tidak memberi return di dunia, tapi menjadi bekal "
-                "yang jauh lebih berharga.")},
-        ],
-    },
-    {
-        "emoji": "🌱",
-        "title": "Pengembangan Diri",
-        "desc": "Tumbuh jadi versi terbaik dirimu.",
-        "slug": "pengembangan-diri",
-        "read_time": "5 menit",
-        "intro": (
-            "Pertumbuhan besar jarang terjadi dalam semalam. Ia lahir dari langkah "
-            "kecil yang diulang dengan konsisten. Panduan ini soal cara tumbuh "
-            "sedikit demi sedikit, tanpa membakar diri."
-        ),
-        "sections": [
-            {"heading": "Fokus pada sistem, bukan hasil", "text": (
-                "Hasil datang dan pergi, tapi sistem harian yang kamu jalankan "
-                "menentukan arah jangka panjang. Perbaiki prosesnya, hasil akan "
-                "menyusul.")},
-            {"heading": "Rangkul ketidaknyamanan yang sehat", "text": (
-                "Pertumbuhan terjadi di tepi zona nyaman. Cari tantangan kecil yang "
-                "sedikit di atas kemampuanmu saat ini, lalu naik bertahap.")},
-            {"heading": "Refleksi rutin", "text": (
-                "Luangkan waktu tiap pekan untuk merenung: apa yang berjalan baik, "
-                "apa yang perlu diubah. Refleksi mengubah pengalaman menjadi "
-                "pelajaran.")},
-        ],
-    },
-    {
-        "emoji": "🎥",
-        "title": "Membuat Konten",
-        "desc": "Berbagi ide lewat video dan tulisan.",
-        "slug": "konten",
-        "read_time": "6 menit",
-        "intro": (
-            "Membuat konten adalah cara berbagi nilai sekaligus tumbuh bersama "
-            "orang lain. Kamu tidak butuh peralatan mahal untuk memulai, cukup "
-            "sesuatu yang ingin kamu sampaikan."
-        ),
-        "sections": [
-            {"heading": "Mulai dengan satu ide jelas", "text": (
-                "Konten terbaik lahir dari satu pesan yang ingin kamu sampaikan. "
-                "Tentukan idenya dulu, baru pikirkan bentuknya, video, tulisan, "
-                "atau audio.")},
-            {"heading": "Selesai lebih baik daripada sempurna", "text": (
-                "Karya pertamamu tidak akan sempurna, dan itu wajar. Yang penting "
-                "kamu menyelesaikan dan mempublikasikannya, lalu belajar dari "
-                "sana.")},
-            {"heading": "Konsistensi mengalahkan intensitas", "text": (
-                "Membuat satu konten sederhana secara rutin jauh lebih berdampak "
-                "daripada satu karya besar yang jarang. Bangun ritme yang "
-                "sanggup kamu jaga.")},
+            {"heading": "Ketika yang salah dianggap biasa", "text": (
+                "Normalisasi hal keliru terjadi perlahan, hampir tak terasa. "
+                "Menyadarinya adalah langkah pertama untuk tidak ikut hanyut.")},
+            {"heading": "Menjaga hati nurani", "text": (
+                "Rasa malu yang sehat adalah penjaga. Ia mengingatkan kita pada "
+                "batas antara yang pantas dan tidak.")},
+            {"heading": "Berani berbeda", "text": (
+                "Tidak semua yang populer itu benar. Keberanian untuk berbeda "
+                "menjaga integritas di tengah arus.")},
         ],
     },
 ]
 
-# Daftar kelas untuk halaman "Kelas"
-COURSES = [
+# =====================================================================
+# BUKU
+# =====================================================================
+BOOKS = [
     {
-        "slug": "sistem-produktif-30-hari",
-        "emoji": "⚡",
-        "title": "Sistem Produktif 30 Hari",
-        "desc": "Bangun kebiasaan produktif yang bertahan, langkah demi langkah.",
-        "level": "Pemula",
-        "duration": "4 minggu",
-        "lessons": 24,
-        "price": "Rp 349.000",
-        "intro": (
-            "Kebanyakan sistem produktivitas gagal karena terlalu rumit dan "
-            "mengandalkan motivasi. Kelas ini mengajarkan pendekatan yang berbeda: "
-            "membangun sistem sederhana yang berjalan otomatis, bahkan di hari-hari "
-            "ketika semangatmu sedang turun. Dalam 30 hari, kamu akan memasang "
-            "fondasi kebiasaan yang bertahan jauh setelah kelas selesai."
+        "slug": "manusia-dan-lobang",
+        "title": "Manusia dan Lobang",
+        "status": "available",
+        "tagline": "Setiap manusia pernah jatuh ke dalam \u201clobang\u201d.",
+        "blurb": (
+            "Sebagian jatuh karena keadaan. Sebagian karena pilihan. Tetapi tidak "
+            "semua orang memilih untuk tetap tinggal di sana."
         ),
-        "outcomes": [
-            "Merancang rutinitas harian di sekitar hal yang benar-benar penting",
-            "Menguasai teknik fokus mendalam tanpa kelelahan",
-            "Membangun sistem pencatatan tugas yang tidak berantakan",
-            "Menjaga konsistensi lewat kebiasaan mikro yang mudah dijalankan",
-        ],
-        "curriculum": [
-            {"week": "Minggu 1", "title": "Fondasi", "topics": ["Menemukan prioritas sejati", "Audit waktu dan energi", "Menyiapkan lingkungan kerja"]},
-            {"week": "Minggu 2", "title": "Fokus", "topics": ["Deep work untuk pemula", "Mengelola distraksi digital", "Teknik time-blocking"]},
-            {"week": "Minggu 3", "title": "Sistem", "topics": ["Menata daftar tugas", "Review mingguan", "Otomatisasi hal kecil"]},
-            {"week": "Minggu 4", "title": "Konsistensi", "topics": ["Kebiasaan mikro", "Bangkit setelah gagal", "Rencana 90 hari ke depan"]},
-        ],
+        "desc": (
+            "Sebuah buku refleksi tentang jatuh, bangkit, dan menemukan makna di "
+            "balik perjalanan hidup manusia. Ditulis untuk menemani siapa pun yang "
+            "sedang berada di titik terendah, dan ingin menemukan jalan keluar."
+        ),
+        "excerpt": (
+            "Kita semua punya lobang. Ada yang menganga di siang hari, ada yang "
+            "hanya terlihat saat malam sunyi. Pertanyaannya bukan bagaimana caranya "
+            "tidak pernah jatuh, tapi bagaimana kita memilih untuk tidak tinggal di "
+            "dasar terlalu lama."
+        ),
     },
     {
-        "slug": "dasar-kebebasan-finansial",
-        "emoji": "💰",
-        "title": "Dasar Kebebasan Finansial",
-        "desc": "Kelola uang, menabung, dan berinvestasi dengan bijak.",
-        "level": "Pemula",
-        "duration": "6 minggu",
-        "lessons": 30,
-        "price": "Rp 499.000",
-        "intro": (
-            "Kebebasan finansial bukan soal menjadi kaya raya, tapi soal memiliki "
-            "kendali atas uangmu sehingga bisa hidup lebih tenang dan memberi lebih "
-            "banyak. Kelas ini membongkar dasar-dasar keuangan pribadi dengan bahasa "
-            "sederhana, dari mengatur arus kas sampai memulai investasi pertama, "
-            "tanpa melupakan nilai dan bekal jangka panjang."
-        ),
-        "outcomes": [
-            "Menyusun anggaran yang realistis dan mudah dijaga",
-            "Membangun dana darurat yang menenangkan",
-            "Memahami dasar investasi dan risikonya",
-            "Menyeimbangkan tujuan dunia dan bekal akhirat",
-        ],
-        "curriculum": [
-            {"week": "Minggu 1-2", "title": "Fondasi Keuangan", "topics": ["Mindset uang yang sehat", "Mencatat dan mengatur arus kas", "Membedakan kebutuhan dan keinginan"]},
-            {"week": "Minggu 3-4", "title": "Menabung & Melindungi", "topics": ["Dana darurat", "Mengelola utang dengan bijak", "Proteksi dasar"]},
-            {"week": "Minggu 5-6", "title": "Menumbuhkan", "topics": ["Dasar investasi", "Instrumen untuk pemula", "Rencana keuangan jangka panjang"]},
-        ],
-    },
-    {
-        "slug": "mulai-channel-youtube",
-        "emoji": "🎥",
-        "title": "Mulai Channel YouTube",
-        "desc": "Dari ide pertama sampai video yang konsisten.",
-        "level": "Menengah",
-        "duration": "5 minggu",
-        "lessons": 27,
-        "price": "Rp 449.000",
-        "intro": (
-            "Berbagi ide lewat video adalah salah satu cara paling berdampak untuk "
-            "menjangkau orang. Kelas ini menemanimu dari nol: menemukan sudut pandang "
-            "yang khas, membuat video pertama tanpa peralatan mahal, sampai menjaga "
-            "ritme unggah yang berkelanjutan tanpa kehabisan ide."
-        ),
-        "outcomes": [
-            "Menemukan niche dan sudut pandang yang otentik",
-            "Membuat video dengan alat sederhana yang sudah kamu punya",
-            "Menyusun naskah dan struktur cerita yang menarik",
-            "Menjaga konsistensi unggah tanpa kelelahan kreatif",
-        ],
-        "curriculum": [
-            {"week": "Minggu 1", "title": "Arah", "topics": ["Menemukan niche", "Riset audiens", "Menyusun ide konten"]},
-            {"week": "Minggu 2", "title": "Produksi", "topics": ["Peralatan minimal", "Dasar pengambilan gambar", "Menulis naskah"]},
-            {"week": "Minggu 3", "title": "Editing", "topics": ["Alur cerita", "Editing dasar", "Thumbnail dan judul"]},
-            {"week": "Minggu 4-5", "title": "Bertumbuh", "topics": ["Konsistensi unggah", "Membaca analitik", "Membangun komunitas"]},
-        ],
+        "slug": "coming-soon",
+        "title": "Buku Berikutnya",
+        "status": "coming_soon",
+        "tagline": "Sedang dalam proses penulisan.",
+        "blurb": "Karya berikutnya sedang disiapkan. Nantikan kabarnya.",
+        "desc": "",
+        "excerpt": "",
     },
 ]
 
-# Sumber daya gratis untuk halaman "Sumber Daya"
+# =====================================================================
+# UNTUK BISNIS
+# =====================================================================
+BUSINESS_HERO = {
+    "title_1": "Bangun Tim yang Produktif,",
+    "title_2": "Bertumbuh, dan Berdampak.",
+    "sub": (
+        "Program workshop, leadership, dan pengembangan budaya kerja untuk "
+        "membantu organisasi bertumbuh tanpa kehilangan makna."
+    ),
+}
+
+BUSINESS_SERVICES = [
+    {
+        "slug": "corporate-workshop",
+        "emoji": "🎤",
+        "title": "Corporate Workshop",
+        "desc": (
+            "Sesi inspiratif dan praktis untuk meningkatkan produktivitas, "
+            "leadership, komunikasi, ownership, dan makna kerja."
+        ),
+    },
+    {
+        "slug": "team-development",
+        "emoji": "🤝",
+        "title": "Team Development Program",
+        "desc": (
+            "Program pendampingan berkelanjutan untuk membangun tim yang lebih "
+            "sehat, kuat, dan kolaboratif."
+        ),
+    },
+    {
+        "slug": "leadership-advisory",
+        "emoji": "🧭",
+        "title": "Leadership & Culture Advisory",
+        "desc": (
+            "Pendampingan bagi organisasi dan leaders dalam membangun budaya kerja "
+            "yang sehat, produktif, dan berdampak."
+        ),
+    },
+]
+
+BUSINESS_CAPABILITIES = [
+    "Leadership Development",
+    "Productivity",
+    "Communication",
+    "Ownership",
+    "Culture",
+    "Employee Engagement",
+    "Personal Effectiveness",
+    "Team Collaboration",
+]
+
+# =====================================================================
+# TENTANG — filosofi
+# =====================================================================
+PHILOSOPHY = [
+    {"step": "Learn", "title": "Belajar", "desc": "Belajar dari ilmu, pengalaman, sejarah, dan kehidupan."},
+    {"step": "Grow", "title": "Bertumbuh", "desc": "Mengubah pengetahuan menjadi pertumbuhan pribadi."},
+    {"step": "Impact", "title": "Berdampak", "desc": "Mengubah pertumbuhan menjadi manfaat untuk orang lain."},
+]
+
+# =====================================================================
+# SUMBER DAYA
+# =====================================================================
 RESOURCES = [
-    {"emoji": "📄", "title": "Template Perencana Harian", "desc": "Rencanakan harimu di sekitar hal yang benar-benar penting."},
-    {"emoji": "📚", "title": "Daftar Buku Pilihan", "desc": "Rekomendasi buku tentang hidup, produktivitas, dan makna."},
-    {"emoji": "🎧", "title": "Rekomendasi Podcast", "desc": "Teman belajar di perjalanan dan waktu senggang."},
-    {"emoji": "🧭", "title": "Panduan Memulai", "desc": "Langkah awal membangun hidup yang lebih berdampak."},
+    {"emoji": "📝", "title": "Artikel", "desc": "Tulisan reflektif dan praktis untuk menemani perjalananmu."},
+    {"emoji": "🎬", "title": "Video", "desc": "Konten video dari kanal HIDUP BERDAMPAK."},
+    {"emoji": "🛠️", "title": "Tools", "desc": "Alat sederhana untuk membantu keseharianmu."},
+    {"emoji": "📄", "title": "Worksheet", "desc": "Lembar kerja untuk merefleksikan dan menata langkah."},
+    {"emoji": "⬇️", "title": "Download Gratis", "desc": "Sumber daya pilihan yang bisa kamu unduh cuma-cuma."},
+    {"emoji": "✉️", "title": "Newsletter", "desc": "Satu refleksi pilihan langsung ke inbox-mu."},
 ]
 
-# Nilai jual untuk halaman "Untuk Bisnis"
-BUSINESS_OFFERS = [
-    {"emoji": "🎤", "title": "Sesi & Workshop", "desc": "Sesi inspiratif soal produktivitas dan makna kerja untuk tim."},
-    {"emoji": "🤝", "title": "Program Tim", "desc": "Pendampingan berkelanjutan untuk budaya kerja yang lebih sehat."},
-    {"emoji": "📈", "title": "Konsultasi", "desc": "Bantu organisasi tumbuh dengan nilai yang berdampak."},
+# =====================================================================
+# PILIHAN MINGGU INI (featured content editorial)
+# =====================================================================
+FEATURED = [
+    {"kind": "Artikel", "emoji": "📝", "title": "Ketika Yang Salah Dianggap Biasa", "desc": "Refleksi soal normalisasi hal keliru di sekitar kita.", "endpoint": "learn_detail", "slug": "urat-malu"},
+    {"kind": "Video", "emoji": "🎬", "title": "Keluar dari Lobang", "desc": "Percakapan tentang bangkit dari titik terendah.", "endpoint": "learn_detail", "slug": "manusia-dan-lobang"},
+    {"kind": "Buku", "emoji": "📖", "title": "Manusia dan Lobang", "desc": "Buku refleksi tentang jatuh, bangkit, dan makna.", "endpoint": "book_detail", "slug": "manusia-dan-lobang"},
+    {"kind": "Sumber Daya", "emoji": "📄", "title": "Worksheet Refleksi Pekanan", "desc": "Lembar kerja untuk menata langkah tiap pekan.", "endpoint": "resources", "slug": None},
 ]
 
-# Menu navigasi utama.
+# =====================================================================
+# NAVIGASI
 # type "link"     -> tautan biasa
-# type "dropdown" -> punya submenu (items)
+# type "dropdown" -> punya submenu (items: label + endpoint + optional slug)
+# =====================================================================
 NAV = [
-    {"type": "link", "endpoint": "courses", "label": "Kelas"},
-    {"type": "link", "endpoint": "business", "label": "Untuk Bisnis"},
-    {"type": "dropdown", "endpoint": "tutorials", "label": "Tutorial"},
-    {"type": "link", "endpoint": "resources", "label": "Sumber Daya"},
+    {"type": "link", "endpoint": "home", "label": "Home"},
+    {"type": "dropdown", "endpoint": "learn", "label": "Belajar", "menu": "learn"},
+    {"type": "dropdown", "endpoint": "business", "label": "Untuk Bisnis", "menu": "business"},
+    {"type": "link", "endpoint": "books", "label": "Buku"},
+    {"type": "dropdown", "endpoint": "resources", "label": "Sumber Daya", "menu": "resources"},
     {"type": "link", "endpoint": "about", "label": "Tentang"},
+]
+
+# Item submenu untuk tiap dropdown (dibangun sebagian dari list di atas)
+NAV_BUSINESS_ITEMS = [
+    {"label": "Corporate Workshop", "endpoint": "business"},
+    {"label": "Team Development Program", "endpoint": "business"},
+    {"label": "Leadership & Culture Advisory", "endpoint": "business"},
+    {"label": "Custom Corporate Program", "endpoint": "business"},
+]
+
+NAV_RESOURCES_ITEMS = [
+    {"label": "Artikel", "endpoint": "resources"},
+    {"label": "Video", "endpoint": "resources"},
+    {"label": "Tools", "endpoint": "resources"},
+    {"label": "Worksheet", "endpoint": "resources"},
+    {"label": "Download Gratis", "endpoint": "resources"},
+    {"label": "Newsletter", "endpoint": "join"},
+]
+
+# =====================================================================
+# FOOTER
+# =====================================================================
+FOOTER_COLUMNS = [
+    {
+        "title": "Belajar",
+        "links": [
+            {"label": "Manusia & Lobang", "endpoint": "learn_detail", "slug": "manusia-dan-lobang"},
+            {"label": "Financial Freedom", "endpoint": "learn_detail", "slug": "financial-freedom"},
+            {"label": "Pengembangan Diri", "endpoint": "learn_detail", "slug": "pengembangan-diri"},
+            {"label": "Islam & Bekal Akhirat", "endpoint": "learn_detail", "slug": "islam-bekal-akhirat"},
+            {"label": "Keluarga & Legacy", "endpoint": "learn_detail", "slug": "keluarga-legacy"},
+        ],
+    },
+    {
+        "title": "Explore",
+        "links": [
+            {"label": "Artikel", "endpoint": "learn", "slug": None},
+            {"label": "Video", "endpoint": "resources", "slug": None},
+            {"label": "Buku", "endpoint": "books", "slug": None},
+            {"label": "Resources", "endpoint": "resources", "slug": None},
+        ],
+    },
+    {
+        "title": "Business",
+        "links": [
+            {"label": "Workshop", "endpoint": "business", "slug": None},
+            {"label": "Team Program", "endpoint": "business", "slug": None},
+            {"label": "Consulting", "endpoint": "business", "slug": None},
+            {"label": "Partnership", "endpoint": "business", "slug": None},
+        ],
+    },
+    {
+        "title": "About",
+        "links": [
+            {"label": "Tentang", "endpoint": "about", "slug": None},
+            {"label": "Contact", "endpoint": "join", "slug": None},
+            {"label": "Privacy", "endpoint": "about", "slug": None},
+            {"label": "Terms", "endpoint": "about", "slug": None},
+        ],
+    },
 ]

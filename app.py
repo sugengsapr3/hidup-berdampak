@@ -1,5 +1,6 @@
 """
 Website brand "HIDUP. BERDAMPAK".
+Ecosystem edukasi, pengembangan diri, kepemimpinan, dan dampak.
 Dibangun dengan Python + Flask.
 
 Menjalankan:
@@ -19,111 +20,112 @@ app.secret_key = "ganti-dengan-secret-key-anda"
 
 @app.context_processor
 def inject_globals():
-    """Sisipkan data yang dipakai di semua template (navbar, footer)."""
+    """Data yang dipakai di semua template (navbar, footer)."""
     return {
         "site": data.SITE,
         "nav": data.NAV,
-        "tutorial_topics": data.TUTORIAL_TOPICS,
+        "learn_topics": data.LEARN_TOPICS,
+        "nav_business_items": data.NAV_BUSINESS_ITEMS,
+        "nav_resources_items": data.NAV_RESOURCES_ITEMS,
+        "footer_columns": data.FOOTER_COLUMNS,
         "current_year": datetime.now().year,
     }
 
 
+# ---------------------------------------------------------------- Beranda
 @app.route("/")
 def home():
     return render_template(
         "home.html",
-        journeys=data.JOURNEYS,
-        pillars=data.PILLARS,
+        learn_topics=data.LEARN_TOPICS,
+        featured=data.FEATURED,
+        book=data.BOOKS[0],
         active="home",
     )
 
 
-@app.route("/perjalanan")
-def journeys():
-    return render_template("journeys.html", journeys=data.JOURNEYS, active="journeys")
+# ---------------------------------------------------------------- Belajar
+@app.route("/belajar")
+def learn():
+    return render_template("learn.html", topics=data.LEARN_TOPICS, active="learn")
 
 
-@app.route("/perjalanan/<slug>")
-def journey_detail(slug):
-    journey = next((j for j in data.JOURNEYS if j["slug"] == slug), None)
-    if journey is None:
-        abort(404)
-    return render_template("journey_detail.html", journey=journey, active="journeys")
-
-
-@app.route("/tentang")
-def about():
-    return render_template("about.html", pillars=data.PILLARS, active="about")
-
-
-@app.route("/kelas")
-def courses():
-    return render_template("courses.html", courses=data.COURSES, active="courses")
-
-
-@app.route("/kelas/<slug>")
-def course_detail(slug):
-    course = next((c for c in data.COURSES if c["slug"] == slug), None)
-    if course is None:
-        abort(404)
-    return render_template("course_detail.html", course=course, active="courses")
-
-
-@app.route("/untuk-bisnis")
-def business():
-    return render_template("business.html", offers=data.BUSINESS_OFFERS, active="business")
-
-
-@app.route("/tutorial")
-def tutorials():
-    return render_template("tutorials.html", topics=data.TUTORIAL_TOPICS, active="tutorials")
-
-
-@app.route("/tutorial/<slug>")
-def tutorial_detail(slug):
-    topic = next((t for t in data.TUTORIAL_TOPICS if t["slug"] == slug), None)
+@app.route("/belajar/<slug>")
+def learn_detail(slug):
+    topic = next((t for t in data.LEARN_TOPICS if t["slug"] == slug), None)
     if topic is None:
         abort(404)
-    return render_template("tutorial_detail.html", topic=topic, active="tutorials")
+    return render_template("learn_detail.html", topic=topic, active="learn")
 
 
+# ---------------------------------------------------------------- Untuk Bisnis
+@app.route("/untuk-bisnis")
+def business():
+    return render_template(
+        "business.html",
+        hero=data.BUSINESS_HERO,
+        services=data.BUSINESS_SERVICES,
+        capabilities=data.BUSINESS_CAPABILITIES,
+        active="business",
+    )
+
+
+# ---------------------------------------------------------------- Buku
+@app.route("/buku")
+def books():
+    return render_template("books.html", books=data.BOOKS, active="books")
+
+
+@app.route("/buku/<slug>")
+def book_detail(slug):
+    book = next((b for b in data.BOOKS if b["slug"] == slug), None)
+    if book is None:
+        abort(404)
+    return render_template("book_detail.html", book=book, active="books")
+
+
+# ---------------------------------------------------------------- Sumber Daya
 @app.route("/sumber-daya")
 def resources():
     return render_template("resources.html", resources=data.RESOURCES, active="resources")
 
 
+# ---------------------------------------------------------------- Tentang
+@app.route("/tentang")
+def about():
+    return render_template("about.html", philosophy=data.PHILOSOPHY, active="about")
+
+
+# ---------------------------------------------------------------- Login
 @app.route("/login")
 def login():
     return render_template("login.html", active="login")
 
 
+# ---------------------------------------------------------------- Pencarian
 def _build_search_index():
     """Kumpulkan semua konten yang bisa dicari menjadi satu daftar seragam."""
     index = []
-    for j in data.JOURNEYS:
-        index.append({
-            "title": j["title"], "desc": j.get("desc", ""), "body": j.get("body", ""),
-            "kind": "Perjalanan", "url": url_for("journey_detail", slug=j["slug"]),
-        })
-    for c in data.COURSES:
-        index.append({
-            "title": c["title"], "desc": c.get("desc", ""), "body": c.get("intro", ""),
-            "kind": "Kelas", "url": url_for("course_detail", slug=c["slug"]),
-        })
-    for t in data.TUTORIAL_TOPICS:
+    for t in data.LEARN_TOPICS:
         index.append({
             "title": t["title"], "desc": t.get("desc", ""), "body": t.get("intro", ""),
-            "kind": "Tutorial", "url": url_for("tutorial_detail", slug=t["slug"]),
+            "kind": "Belajar", "url": url_for("learn_detail", slug=t["slug"]),
+        })
+    for b in data.BOOKS:
+        if b["status"] == "available":
+            index.append({
+                "title": b["title"], "desc": b.get("blurb", ""), "body": b.get("desc", ""),
+                "kind": "Buku", "url": url_for("book_detail", slug=b["slug"]),
+            })
+    for s in data.BUSINESS_SERVICES:
+        index.append({
+            "title": s["title"], "desc": s.get("desc", ""), "body": "",
+            "kind": "Untuk Bisnis", "url": url_for("business"),
         })
     for r in data.RESOURCES:
         index.append({
             "title": r["title"], "desc": r.get("desc", ""), "body": "",
             "kind": "Sumber Daya", "url": url_for("resources"),
-        })
-    for o in data.BUSINESS_OFFERS:
-        index.append({
-            "title": o["title"], "desc": o.get("desc", ""), "body": "",
-            "kind": "Untuk Bisnis", "url": url_for("business"),
         })
     return index
 
@@ -141,17 +143,17 @@ def search():
     return render_template("search.html", query=query, results=results, active="")
 
 
+# ---------------------------------------------------------------- Bergabung
 @app.route("/bergabung", methods=["GET", "POST"])
 def join():
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip()
-        if not name or not email:
-            flash("Mohon isi nama dan email kamu.", "error")
+        if not email:
+            flash("Mohon isi alamat email kamu.", "error")
         else:
             flash(
-                f"Selamat datang di gerakan HIDUP. BERDAMPAK, {name}. "
-                "Mari tinggalkan sesuatu yang berarti 🌱",
+                "Terima kasih sudah bergabung. Satu refleksi pilihan akan segera "
+                "hadir di inbox-mu 🌱",
                 "success",
             )
             return redirect(url_for("join"))

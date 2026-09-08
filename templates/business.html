@@ -1,29 +1,73 @@
 {% extends "base.html" %}
-{% block title %}Untuk Bisnis | {{ site.brand }}{% endblock %}
+{% block title %}Untuk Bisnis | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}Program workshop, leadership, dan pengembangan budaya kerja untuk membantu organisasi bertumbuh tanpa kehilangan makna.{% endblock %}
 
 {% block content %}
 <section class="page-hero">
   <div class="container">
-    <p class="kicker">Untuk Bisnis</p>
-    <h1>Bawa dampak ke dalam timmu</h1>
-    <p>Program dan sesi untuk membangun budaya kerja yang produktif dan bermakna.</p>
+    <span class="kicker">Untuk Bisnis</span>
+    <h1>{{ hero.title_1 }}<br>{{ hero.title_2 }}</h1>
+    <p>{{ hero.sub }}</p>
+    <div class="hero-actions" style="justify-content:center; margin-top:26px;">
+      <a href="{{ url_for('join') }}" class="btn btn-gold">Diskusikan Kebutuhan Tim Anda</a>
+      <a href="#program" class="btn btn-ghost">Lihat Program</a>
+    </div>
   </div>
 </section>
 
-<section class="section">
+<!-- 3 SERVICE CARDS -->
+<section id="program" class="section">
   <div class="container">
-    <div class="journey-grid">
-      {% for o in offers %}
-      <div class="journey-card">
-        <div class="emoji">{{ o.emoji }}</div>
-        <h3>{{ o.title }}</h3>
-        <p>{{ o.desc }}</p>
+    <div class="section-head">
+      <p class="kicker">Program</p>
+      <h2>Tiga cara kami membantu</h2>
+    </div>
+    <div class="card-grid grid-3">
+      {% for s in services %}
+      <div class="content-card">
+        <div class="emoji">{{ s.emoji }}</div>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.desc }}</p>
       </div>
       {% endfor %}
     </div>
-    <div style="text-align:center; margin-top:44px;">
-      <a href="mailto:{{ site.email }}" class="btn btn-gold">Hubungi untuk kerja sama</a>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section class="section section-surface">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Fokus Pengembangan</p>
+      <h2>Kami membantu organisasi dalam</h2>
     </div>
+    <ul class="capability-list">
+      {% for c in capabilities %}
+      <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+    <p class="business-note">Program dapat disesuaikan dengan kebutuhan organisasi.</p>
+  </div>
+</section>
+
+<!-- TRUST PLACEHOLDER (tanpa data palsu) -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <p class="kicker">Dipercaya oleh</p>
+      <h2>Kolaborasi & dampak</h2>
+    </div>
+    <div class="trust-placeholder">
+      <p>Case studies, testimonial, dan corporate impact akan ditampilkan di sini.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container">
+    <h2>Siap membangun tim yang berdampak?</h2>
+    <p>Ceritakan kebutuhan organisasi Anda, kami bantu rancang programnya.</p>
+    <a href="{{ url_for('join') }}" class="btn btn-gold">Diskusikan Kebutuhan Tim Anda</a>
   </div>
 </section>
 {% endblock %}

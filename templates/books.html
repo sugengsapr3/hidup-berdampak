@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Buku | HIDUP. BERDAMPAK{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Buku</span>
+    <h1>Karya yang Bertahan</h1>
+    <p>Buku-buku yang lahir dari refleksi tentang hidup, makna, dan dampak.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="book-grid">
+      {% for b in books %}
+      {% if b.status == 'available' %}
+      <a href="{{ url_for('book_detail', slug=b.slug) }}" class="book-item">
+        <div class="mini-cover">📖</div>
+        <div>
+          <span class="badge badge-available">Tersedia</span>
+          <h3>{{ b.title }}</h3>
+          <p>{{ b.blurb }}</p>
+        </div>
+      </a>
+      {% else %}
+      <div class="book-item">
+        <div class="mini-cover">🕓</div>
+        <div>
+          <span class="badge badge-soon">Coming Soon</span>
+          <h3>{{ b.title }}</h3>
+          <p>{{ b.blurb }}</p>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
