@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}{{ site.brand }} — {{ site.tagline }}{% endblock %}</title>
   <meta name="description" content="{% block description %}{{ site.hero_sub }}{% endblock %}">
+  <meta name="theme-color" content="#0D0F12">
+  <!-- Open Graph / social -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HIDUP BERDAMPAK">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  <meta property="og:locale" content="id_ID">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
@@ -54,6 +62,10 @@
             </li>
             {% endif %}
           {% endfor %}
+          <li class="nav-mobile-actions">
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('search') }}">Cari</a>
+          </li>
         </ul>
       </nav>
 
@@ -112,5 +124,16 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // Tutup menu mobile otomatis saat sebuah tautan navigasi diklik.
+    (function () {
+      var toggle = document.getElementById('nav-toggle');
+      if (!toggle) return;
+      document.querySelectorAll('.main-nav a').forEach(function (link) {
+        link.addEventListener('click', function () { toggle.checked = false; });
+      });
+    })();
+  </script>
 </body>
 </html>

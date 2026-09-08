@@ -83,6 +83,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
 .nav-burger { font-size: 1.6rem; cursor: pointer; color: var(--ink); line-height: 1; }
 
 .nav-actions { display: flex; align-items: center; gap: 10px; }
+.nav-mobile-actions { display: none; }
 .btn-login {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 8px 18px; border-radius: 30px; border: 1px solid var(--line);
@@ -164,6 +165,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
 .hero .lead { font-size: 1.18rem; color: var(--muted); max-width: 660px; margin: 0 auto 34px; }
 .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 .hero .tagline { margin-top: 30px; color: var(--gold); letter-spacing: .12em; font-size: .82rem; text-transform: uppercase; font-weight: 600; }
+.hero .hero-meaning { margin-top: 10px; color: var(--muted); font-size: .95rem; }
 
 /* =====================================================================
    Card grids (reusable ContentCard)
@@ -393,6 +395,9 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
     box-shadow: none; margin-top: 4px; background: transparent; border: none; padding: 4px 0 4px 12px;
   }
   .nav-toggle:checked ~ .main-nav { max-height: 900px; }
+  .nav-mobile-actions { display: flex !important; gap: 10px; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .nav-mobile-actions a { flex: 1; text-align: center; padding: 10px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); }
+  .nav-mobile-actions a:hover { border-color: var(--gold); color: var(--gold); }
 }
 @media (max-width: 560px) {
   .footer-top { grid-template-columns: 1fr; }

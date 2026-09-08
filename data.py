@@ -17,6 +17,8 @@ SITE = {
         "Belajar, bertumbuh, membangun kehidupan yang bermakna, dan memberi "
         "manfaat yang terus hidup melampaui diri kita."
     ),
+    # Baris makna singkat di hero (menjelaskan arti brand)
+    "hero_meaning": "Sebuah ruang belajar, bertumbuh, dan menciptakan dampak yang bertahan.",
     "email": "hidup.berdampak.media@gmail.com",
     "youtube_url": "#",
     # Newsletter (dipakai di beranda & footer)
