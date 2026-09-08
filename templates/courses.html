@@ -14,14 +14,15 @@
   <div class="container">
     <div class="journey-grid">
       {% for c in courses %}
-      <div class="journey-card">
+      <a href="{{ url_for('course_detail', slug=c.slug) }}" class="journey-card">
         <div class="emoji">{{ c.emoji }}</div>
         <h3>{{ c.title }}</h3>
         <p>{{ c.desc }}</p>
         <p style="color:var(--gold); font-size:.85rem; margin-top:14px;">
-          {{ c.level }} &middot; {{ c.duration }}
+          {{ c.level }} &middot; {{ c.duration }} &middot; {{ c.price }}
         </p>
-      </div>
+        <span class="arrow">Lihat detail &rarr;</span>
+      </a>
       {% endfor %}
     </div>
     <div style="text-align:center; margin-top:44px;">

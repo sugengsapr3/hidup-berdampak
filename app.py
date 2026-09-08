@@ -61,6 +61,14 @@ def courses():
     return render_template("courses.html", courses=data.COURSES, active="courses")
 
 
+@app.route("/kelas/<slug>")
+def course_detail(slug):
+    course = next((c for c in data.COURSES if c["slug"] == slug), None)
+    if course is None:
+        abort(404)
+    return render_template("course_detail.html", course=course, active="courses")
+
+
 @app.route("/untuk-bisnis")
 def business():
     return render_template("business.html", offers=data.BUSINESS_OFFERS, active="business")
@@ -69,6 +77,14 @@ def business():
 @app.route("/tutorial")
 def tutorials():
     return render_template("tutorials.html", topics=data.TUTORIAL_TOPICS, active="tutorials")
+
+
+@app.route("/tutorial/<slug>")
+def tutorial_detail(slug):
+    topic = next((t for t in data.TUTORIAL_TOPICS if t["slug"] == slug), None)
+    if topic is None:
+        abort(404)
+    return render_template("tutorial_detail.html", topic=topic, active="tutorials")
 
 
 @app.route("/sumber-daya")
@@ -91,13 +107,13 @@ def _build_search_index():
         })
     for c in data.COURSES:
         index.append({
-            "title": c["title"], "desc": c.get("desc", ""), "body": "",
-            "kind": "Kelas", "url": url_for("courses"),
+            "title": c["title"], "desc": c.get("desc", ""), "body": c.get("intro", ""),
+            "kind": "Kelas", "url": url_for("course_detail", slug=c["slug"]),
         })
     for t in data.TUTORIAL_TOPICS:
         index.append({
-            "title": t["title"], "desc": t.get("desc", ""), "body": "",
-            "kind": "Tutorial", "url": url_for("tutorials") + "#" + t["slug"],
+            "title": t["title"], "desc": t.get("desc", ""), "body": t.get("intro", ""),
+            "kind": "Tutorial", "url": url_for("tutorial_detail", slug=t["slug"]),
         })
     for r in data.RESOURCES:
         index.append({

@@ -26,7 +26,7 @@
               </a>
               <div class="dropdown-menu">
                 {% for t in tutorial_topics %}
-                <a href="{{ url_for('tutorials') }}#{{ t.slug }}" class="dropdown-item">
+                <a href="{{ url_for('tutorial_detail', slug=t.slug) }}" class="dropdown-item">
                   <span class="dd-emoji">{{ t.emoji }}</span>
                   <span>
                     <strong>{{ t.title }}</strong>

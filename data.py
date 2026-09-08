@@ -130,19 +130,201 @@ PILLARS = [
     {"emoji": "❤️", "title": "Social Impact", "desc": "Dampak nyata bagi sesama."},
 ]
 
-# Kategori di dalam dropdown "Tutorial"
+# Kategori di dalam dropdown "Tutorial".
+# Tiap topik punya artikel lengkap (intro + beberapa bagian).
 TUTORIAL_TOPICS = [
-    {"emoji": "⚡", "title": "Produktivitas", "desc": "Kelola waktu dan energi dengan lebih baik.", "slug": "produktivitas"},
-    {"emoji": "💰", "title": "Keuangan", "desc": "Bangun kebebasan finansial yang sehat.", "slug": "keuangan"},
-    {"emoji": "🌱", "title": "Pengembangan Diri", "desc": "Tumbuh jadi versi terbaik dirimu.", "slug": "pengembangan-diri"},
-    {"emoji": "🎥", "title": "Membuat Konten", "desc": "Berbagi ide lewat video dan tulisan.", "slug": "konten"},
+    {
+        "emoji": "⚡",
+        "title": "Produktivitas",
+        "desc": "Kelola waktu dan energi dengan lebih baik.",
+        "slug": "produktivitas",
+        "read_time": "6 menit",
+        "intro": (
+            "Produktivitas sejati bukan soal melakukan lebih banyak hal, tapi "
+            "melakukan hal yang tepat dengan tenang. Panduan ini merangkum prinsip "
+            "dan langkah praktis untuk mengelola waktu serta energimu."
+        ),
+        "sections": [
+            {"heading": "Mulai dari prioritas, bukan daftar tugas", "text": (
+                "Sebelum menyusun to-do list, tanyakan: dari semua ini, mana yang "
+                "paling penting hari ini? Satu atau dua tugas utama lebih berharga "
+                "daripada sepuluh tugas kecil yang tidak menggerakkan apa-apa.")},
+            {"heading": "Lindungi energi, bukan hanya waktu", "text": (
+                "Waktu terbaik untuk kerja yang menuntut fokus adalah saat energimu "
+                "paling tinggi. Kenali ritme harianmu dan tempatkan pekerjaan berat "
+                "di jam tersebut.")},
+            {"heading": "Kurangi gesekan untuk kebiasaan baik", "text": (
+                "Semakin mudah sebuah kebiasaan dimulai, semakin besar peluang kamu "
+                "menjalankannya. Siapkan lingkungan agar pilihan yang baik menjadi "
+                "pilihan yang paling gampang.")},
+        ],
+    },
+    {
+        "emoji": "💰",
+        "title": "Keuangan",
+        "desc": "Bangun kebebasan finansial yang sehat.",
+        "slug": "keuangan",
+        "read_time": "7 menit",
+        "intro": (
+            "Mengatur keuangan tidak harus rumit. Dengan beberapa prinsip dasar, "
+            "kamu bisa lebih tenang menghadapi masa depan tanpa melupakan bekal "
+            "jangka panjang."
+        ),
+        "sections": [
+            {"heading": "Kenali ke mana uangmu pergi", "text": (
+                "Langkah pertama selalu kesadaran. Catat pemasukan dan pengeluaran "
+                "selama sebulan. Angka yang jujur sering mengejutkan, dan dari situ "
+                "perubahan dimulai.")},
+            {"heading": "Bangun dana darurat lebih dulu", "text": (
+                "Sebelum berinvestasi, siapkan dana darurat setara beberapa bulan "
+                "pengeluaran. Ini bantalan yang membuatmu tidak panik saat keadaan "
+                "tak terduga datang.")},
+            {"heading": "Investasi terbaik melampaui dunia", "text": (
+                "Selain menumbuhkan aset, sisihkan untuk memberi. Sebagian investasi "
+                "terbaik justru tidak memberi return di dunia, tapi menjadi bekal "
+                "yang jauh lebih berharga.")},
+        ],
+    },
+    {
+        "emoji": "🌱",
+        "title": "Pengembangan Diri",
+        "desc": "Tumbuh jadi versi terbaik dirimu.",
+        "slug": "pengembangan-diri",
+        "read_time": "5 menit",
+        "intro": (
+            "Pertumbuhan besar jarang terjadi dalam semalam. Ia lahir dari langkah "
+            "kecil yang diulang dengan konsisten. Panduan ini soal cara tumbuh "
+            "sedikit demi sedikit, tanpa membakar diri."
+        ),
+        "sections": [
+            {"heading": "Fokus pada sistem, bukan hasil", "text": (
+                "Hasil datang dan pergi, tapi sistem harian yang kamu jalankan "
+                "menentukan arah jangka panjang. Perbaiki prosesnya, hasil akan "
+                "menyusul.")},
+            {"heading": "Rangkul ketidaknyamanan yang sehat", "text": (
+                "Pertumbuhan terjadi di tepi zona nyaman. Cari tantangan kecil yang "
+                "sedikit di atas kemampuanmu saat ini, lalu naik bertahap.")},
+            {"heading": "Refleksi rutin", "text": (
+                "Luangkan waktu tiap pekan untuk merenung: apa yang berjalan baik, "
+                "apa yang perlu diubah. Refleksi mengubah pengalaman menjadi "
+                "pelajaran.")},
+        ],
+    },
+    {
+        "emoji": "🎥",
+        "title": "Membuat Konten",
+        "desc": "Berbagi ide lewat video dan tulisan.",
+        "slug": "konten",
+        "read_time": "6 menit",
+        "intro": (
+            "Membuat konten adalah cara berbagi nilai sekaligus tumbuh bersama "
+            "orang lain. Kamu tidak butuh peralatan mahal untuk memulai, cukup "
+            "sesuatu yang ingin kamu sampaikan."
+        ),
+        "sections": [
+            {"heading": "Mulai dengan satu ide jelas", "text": (
+                "Konten terbaik lahir dari satu pesan yang ingin kamu sampaikan. "
+                "Tentukan idenya dulu, baru pikirkan bentuknya, video, tulisan, "
+                "atau audio.")},
+            {"heading": "Selesai lebih baik daripada sempurna", "text": (
+                "Karya pertamamu tidak akan sempurna, dan itu wajar. Yang penting "
+                "kamu menyelesaikan dan mempublikasikannya, lalu belajar dari "
+                "sana.")},
+            {"heading": "Konsistensi mengalahkan intensitas", "text": (
+                "Membuat satu konten sederhana secara rutin jauh lebih berdampak "
+                "daripada satu karya besar yang jarang. Bangun ritme yang "
+                "sanggup kamu jaga.")},
+        ],
+    },
 ]
 
 # Daftar kelas untuk halaman "Kelas"
 COURSES = [
-    {"emoji": "⚡", "title": "Sistem Produktif 30 Hari", "desc": "Bangun kebiasaan produktif yang bertahan, langkah demi langkah.", "level": "Pemula", "duration": "4 minggu"},
-    {"emoji": "💰", "title": "Dasar Kebebasan Finansial", "desc": "Kelola uang, menabung, dan berinvestasi dengan bijak.", "level": "Pemula", "duration": "6 minggu"},
-    {"emoji": "🎥", "title": "Mulai Channel YouTube", "desc": "Dari ide pertama sampai video yang konsisten.", "level": "Menengah", "duration": "5 minggu"},
+    {
+        "slug": "sistem-produktif-30-hari",
+        "emoji": "⚡",
+        "title": "Sistem Produktif 30 Hari",
+        "desc": "Bangun kebiasaan produktif yang bertahan, langkah demi langkah.",
+        "level": "Pemula",
+        "duration": "4 minggu",
+        "lessons": 24,
+        "price": "Rp 349.000",
+        "intro": (
+            "Kebanyakan sistem produktivitas gagal karena terlalu rumit dan "
+            "mengandalkan motivasi. Kelas ini mengajarkan pendekatan yang berbeda: "
+            "membangun sistem sederhana yang berjalan otomatis, bahkan di hari-hari "
+            "ketika semangatmu sedang turun. Dalam 30 hari, kamu akan memasang "
+            "fondasi kebiasaan yang bertahan jauh setelah kelas selesai."
+        ),
+        "outcomes": [
+            "Merancang rutinitas harian di sekitar hal yang benar-benar penting",
+            "Menguasai teknik fokus mendalam tanpa kelelahan",
+            "Membangun sistem pencatatan tugas yang tidak berantakan",
+            "Menjaga konsistensi lewat kebiasaan mikro yang mudah dijalankan",
+        ],
+        "curriculum": [
+            {"week": "Minggu 1", "title": "Fondasi", "topics": ["Menemukan prioritas sejati", "Audit waktu dan energi", "Menyiapkan lingkungan kerja"]},
+            {"week": "Minggu 2", "title": "Fokus", "topics": ["Deep work untuk pemula", "Mengelola distraksi digital", "Teknik time-blocking"]},
+            {"week": "Minggu 3", "title": "Sistem", "topics": ["Menata daftar tugas", "Review mingguan", "Otomatisasi hal kecil"]},
+            {"week": "Minggu 4", "title": "Konsistensi", "topics": ["Kebiasaan mikro", "Bangkit setelah gagal", "Rencana 90 hari ke depan"]},
+        ],
+    },
+    {
+        "slug": "dasar-kebebasan-finansial",
+        "emoji": "💰",
+        "title": "Dasar Kebebasan Finansial",
+        "desc": "Kelola uang, menabung, dan berinvestasi dengan bijak.",
+        "level": "Pemula",
+        "duration": "6 minggu",
+        "lessons": 30,
+        "price": "Rp 499.000",
+        "intro": (
+            "Kebebasan finansial bukan soal menjadi kaya raya, tapi soal memiliki "
+            "kendali atas uangmu sehingga bisa hidup lebih tenang dan memberi lebih "
+            "banyak. Kelas ini membongkar dasar-dasar keuangan pribadi dengan bahasa "
+            "sederhana, dari mengatur arus kas sampai memulai investasi pertama, "
+            "tanpa melupakan nilai dan bekal jangka panjang."
+        ),
+        "outcomes": [
+            "Menyusun anggaran yang realistis dan mudah dijaga",
+            "Membangun dana darurat yang menenangkan",
+            "Memahami dasar investasi dan risikonya",
+            "Menyeimbangkan tujuan dunia dan bekal akhirat",
+        ],
+        "curriculum": [
+            {"week": "Minggu 1-2", "title": "Fondasi Keuangan", "topics": ["Mindset uang yang sehat", "Mencatat dan mengatur arus kas", "Membedakan kebutuhan dan keinginan"]},
+            {"week": "Minggu 3-4", "title": "Menabung & Melindungi", "topics": ["Dana darurat", "Mengelola utang dengan bijak", "Proteksi dasar"]},
+            {"week": "Minggu 5-6", "title": "Menumbuhkan", "topics": ["Dasar investasi", "Instrumen untuk pemula", "Rencana keuangan jangka panjang"]},
+        ],
+    },
+    {
+        "slug": "mulai-channel-youtube",
+        "emoji": "🎥",
+        "title": "Mulai Channel YouTube",
+        "desc": "Dari ide pertama sampai video yang konsisten.",
+        "level": "Menengah",
+        "duration": "5 minggu",
+        "lessons": 27,
+        "price": "Rp 449.000",
+        "intro": (
+            "Berbagi ide lewat video adalah salah satu cara paling berdampak untuk "
+            "menjangkau orang. Kelas ini menemanimu dari nol: menemukan sudut pandang "
+            "yang khas, membuat video pertama tanpa peralatan mahal, sampai menjaga "
+            "ritme unggah yang berkelanjutan tanpa kehabisan ide."
+        ),
+        "outcomes": [
+            "Menemukan niche dan sudut pandang yang otentik",
+            "Membuat video dengan alat sederhana yang sudah kamu punya",
+            "Menyusun naskah dan struktur cerita yang menarik",
+            "Menjaga konsistensi unggah tanpa kelelahan kreatif",
+        ],
+        "curriculum": [
+            {"week": "Minggu 1", "title": "Arah", "topics": ["Menemukan niche", "Riset audiens", "Menyusun ide konten"]},
+            {"week": "Minggu 2", "title": "Produksi", "topics": ["Peralatan minimal", "Dasar pengambilan gambar", "Menulis naskah"]},
+            {"week": "Minggu 3", "title": "Editing", "topics": ["Alur cerita", "Editing dasar", "Thumbnail dan judul"]},
+            {"week": "Minggu 4-5", "title": "Bertumbuh", "topics": ["Konsistensi unggah", "Membaca analitik", "Membangun komunitas"]},
+        ],
+    },
 ]
 
 # Sumber daya gratis untuk halaman "Sumber Daya"

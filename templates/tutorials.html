@@ -14,11 +14,12 @@
   <div class="container">
     <div class="journey-grid">
       {% for t in topics %}
-      <div id="{{ t.slug }}" class="journey-card">
+      <a id="{{ t.slug }}" href="{{ url_for('tutorial_detail', slug=t.slug) }}" class="journey-card">
         <div class="emoji">{{ t.emoji }}</div>
         <h3>{{ t.title }}</h3>
         <p>{{ t.desc }}</p>
-      </div>
+        <span class="arrow">Baca panduan &rarr;</span>
+      </a>
       {% endfor %}
     </div>
   </div>
