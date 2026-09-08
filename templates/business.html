@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Untuk Bisnis | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Untuk Bisnis</p>
+    <h1>Bawa dampak ke dalam timmu</h1>
+    <p>Program dan sesi untuk membangun budaya kerja yang produktif dan bermakna.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="journey-grid">
+      {% for o in offers %}
+      <div class="journey-card">
+        <div class="emoji">{{ o.emoji }}</div>
+        <h3>{{ o.title }}</h3>
+        <p>{{ o.desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="text-align:center; margin-top:44px;">
+      <a href="mailto:{{ site.email }}" class="btn btn-gold">Hubungi untuk kerja sama</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

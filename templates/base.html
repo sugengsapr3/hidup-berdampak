@@ -18,15 +18,41 @@
       <nav class="main-nav">
         <ul>
           {% for item in nav %}
-          <li>
-            <a href="{{ url_for(item.endpoint) }}"
-               class="{{ 'active' if active == item.endpoint else '' }}">
-              {{ item.label }}
-            </a>
-          </li>
+            {% if item.type == 'dropdown' %}
+            <li class="has-dropdown">
+              <a href="{{ url_for(item.endpoint) }}"
+                 class="{{ 'active' if active == item.endpoint else '' }}">
+                {{ item.label }} <span class="caret">&#9662;</span>
+              </a>
+              <div class="dropdown-menu">
+                {% for t in tutorial_topics %}
+                <a href="{{ url_for('tutorials') }}#{{ t.slug }}" class="dropdown-item">
+                  <span class="dd-emoji">{{ t.emoji }}</span>
+                  <span>
+                    <strong>{{ t.title }}</strong>
+                    <small>{{ t.desc }}</small>
+                  </span>
+                </a>
+                {% endfor %}
+              </div>
+            </li>
+            {% else %}
+            <li>
+              <a href="{{ url_for(item.endpoint) }}"
+                 class="{{ 'active' if active == item.endpoint else '' }}">
+                {{ item.label }}
+              </a>
+            </li>
+            {% endif %}
           {% endfor %}
         </ul>
       </nav>
+      <div class="nav-actions">
+        <a href="{{ url_for('login') }}" class="btn-login">
+          <span class="login-icon">&#128100;</span> Login
+        </a>
+        <a href="{{ url_for('resources') }}" class="btn-search" aria-label="Cari">&#128269;</a>
+      </div>
     </div>
   </header>
 

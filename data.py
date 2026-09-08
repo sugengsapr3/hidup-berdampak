@@ -130,9 +130,43 @@ PILLARS = [
     {"emoji": "❤️", "title": "Social Impact", "desc": "Dampak nyata bagi sesama."},
 ]
 
+# Kategori di dalam dropdown "Tutorial"
+TUTORIAL_TOPICS = [
+    {"emoji": "⚡", "title": "Produktivitas", "desc": "Kelola waktu dan energi dengan lebih baik.", "slug": "produktivitas"},
+    {"emoji": "💰", "title": "Keuangan", "desc": "Bangun kebebasan finansial yang sehat.", "slug": "keuangan"},
+    {"emoji": "🌱", "title": "Pengembangan Diri", "desc": "Tumbuh jadi versi terbaik dirimu.", "slug": "pengembangan-diri"},
+    {"emoji": "🎥", "title": "Membuat Konten", "desc": "Berbagi ide lewat video dan tulisan.", "slug": "konten"},
+]
+
+# Daftar kelas untuk halaman "Kelas"
+COURSES = [
+    {"emoji": "⚡", "title": "Sistem Produktif 30 Hari", "desc": "Bangun kebiasaan produktif yang bertahan, langkah demi langkah.", "level": "Pemula", "duration": "4 minggu"},
+    {"emoji": "💰", "title": "Dasar Kebebasan Finansial", "desc": "Kelola uang, menabung, dan berinvestasi dengan bijak.", "level": "Pemula", "duration": "6 minggu"},
+    {"emoji": "🎥", "title": "Mulai Channel YouTube", "desc": "Dari ide pertama sampai video yang konsisten.", "level": "Menengah", "duration": "5 minggu"},
+]
+
+# Sumber daya gratis untuk halaman "Sumber Daya"
+RESOURCES = [
+    {"emoji": "📄", "title": "Template Perencana Harian", "desc": "Rencanakan harimu di sekitar hal yang benar-benar penting."},
+    {"emoji": "📚", "title": "Daftar Buku Pilihan", "desc": "Rekomendasi buku tentang hidup, produktivitas, dan makna."},
+    {"emoji": "🎧", "title": "Rekomendasi Podcast", "desc": "Teman belajar di perjalanan dan waktu senggang."},
+    {"emoji": "🧭", "title": "Panduan Memulai", "desc": "Langkah awal membangun hidup yang lebih berdampak."},
+]
+
+# Nilai jual untuk halaman "Untuk Bisnis"
+BUSINESS_OFFERS = [
+    {"emoji": "🎤", "title": "Sesi & Workshop", "desc": "Sesi inspiratif soal produktivitas dan makna kerja untuk tim."},
+    {"emoji": "🤝", "title": "Program Tim", "desc": "Pendampingan berkelanjutan untuk budaya kerja yang lebih sehat."},
+    {"emoji": "📈", "title": "Konsultasi", "desc": "Bantu organisasi tumbuh dengan nilai yang berdampak."},
+]
+
+# Menu navigasi utama.
+# type "link"     -> tautan biasa
+# type "dropdown" -> punya submenu (items)
 NAV = [
-    {"endpoint": "home", "label": "Beranda"},
-    {"endpoint": "journeys", "label": "Perjalanan"},
-    {"endpoint": "about", "label": "Tentang"},
-    {"endpoint": "join", "label": "Bergabung"},
+    {"type": "link", "endpoint": "courses", "label": "Kelas"},
+    {"type": "link", "endpoint": "business", "label": "Untuk Bisnis"},
+    {"type": "dropdown", "endpoint": "tutorials", "label": "Tutorial"},
+    {"type": "link", "endpoint": "resources", "label": "Sumber Daya"},
+    {"type": "link", "endpoint": "about", "label": "Tentang"},
 ]

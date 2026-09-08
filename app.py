@@ -23,6 +23,7 @@ def inject_globals():
     return {
         "site": data.SITE,
         "nav": data.NAV,
+        "tutorial_topics": data.TUTORIAL_TOPICS,
         "current_year": datetime.now().year,
     }
 
@@ -53,6 +54,31 @@ def journey_detail(slug):
 @app.route("/tentang")
 def about():
     return render_template("about.html", pillars=data.PILLARS, active="about")
+
+
+@app.route("/kelas")
+def courses():
+    return render_template("courses.html", courses=data.COURSES, active="courses")
+
+
+@app.route("/untuk-bisnis")
+def business():
+    return render_template("business.html", offers=data.BUSINESS_OFFERS, active="business")
+
+
+@app.route("/tutorial")
+def tutorials():
+    return render_template("tutorials.html", topics=data.TUTORIAL_TOPICS, active="tutorials")
+
+
+@app.route("/sumber-daya")
+def resources():
+    return render_template("resources.html", resources=data.RESOURCES, active="resources")
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html", active="login")
 
 
 @app.route("/bergabung", methods=["GET", "POST"])

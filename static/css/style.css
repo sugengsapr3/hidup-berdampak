@@ -225,3 +225,53 @@ h1, h2, h3 { line-height: 1.15; letter-spacing: .01em; }
   .subscribe-input-row { flex-direction: column; }
   .subscribe-input-row .btn { width: 100%; }
 }
+
+/* ---------- Nav actions (Login + Search) ---------- */
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+.btn-login {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 18px; border-radius: 30px;
+  border: 1px solid var(--line); color: var(--ink); font-weight: 600; font-size: .95rem;
+  transition: all .2s;
+}
+.btn-login:hover { border-color: var(--gold); color: var(--gold); }
+.btn-login .login-icon { font-size: .95rem; }
+.btn-search {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line); color: var(--ink); font-size: 1rem; transition: all .2s;
+}
+.btn-search:hover { border-color: var(--gold); color: var(--gold); }
+
+/* ---------- Dropdown (Tutorial) ---------- */
+.main-nav .has-dropdown { position: relative; }
+.main-nav .caret { font-size: .7rem; opacity: .7; }
+.dropdown-menu {
+  position: absolute; top: 100%; left: 0; margin-top: 8px;
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: 14px;
+  padding: 10px; width: 320px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+  opacity: 0; visibility: hidden; transform: translateY(6px);
+  transition: all .18s; z-index: 60;
+}
+.main-nav .has-dropdown:hover .dropdown-menu,
+.main-nav .has-dropdown:focus-within .dropdown-menu {
+  opacity: 1; visibility: visible; transform: translateY(0);
+}
+.dropdown-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: 10px; transition: background .18s;
+}
+.dropdown-item:hover { background: rgba(212, 162, 83, .12); }
+.dropdown-item .dd-emoji { font-size: 1.4rem; line-height: 1.2; }
+.dropdown-item strong { display: block; color: var(--ink); font-size: .98rem; }
+.dropdown-item small { display: block; color: var(--muted); font-size: .84rem; }
+
+/* ---------- Responsive nav actions ---------- */
+@media (max-width: 900px) {
+  .nav-actions { display: none; }
+  .dropdown-menu {
+    position: static; width: 100%; opacity: 1; visibility: visible;
+    transform: none; box-shadow: none; margin-top: 4px; background: transparent; border: none;
+  }
+}

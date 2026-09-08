@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sumber Daya | {{ site.brand }}{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="kicker">Sumber Daya</p>
+    <h1>Perlengkapan untuk perjalananmu</h1>
+    <p>Template, daftar bacaan, dan panduan gratis untuk membantumu mulai.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="journey-grid">
+      {% for r in resources %}
+      <div class="journey-card">
+        <div class="emoji">{{ r.emoji }}</div>
+        <h3>{{ r.title }}</h3>
+        <p>{{ r.desc }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
