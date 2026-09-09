@@ -36,9 +36,10 @@ app.config.update(
 
 # --- Konfigurasi OAuth Google -----------------------------------------
 # Client ID & Secret diambil dari environment variable (tidak di-hardcode),
-# sehingga aman di repo publik. Set di Vercel: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+# sehingga aman di repo publik. Set di Vercel (SEMUA environment):
+# GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
+GOOGLE_CLIENT_ID = (os.environ.get("GOOGLE_CLIENT_ID") or "").strip()
+GOOGLE_CLIENT_SECRET = (os.environ.get("GOOGLE_CLIENT_SECRET") or "").strip()
 
 oauth = OAuth(app)
 if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
