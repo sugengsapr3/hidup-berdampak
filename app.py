@@ -9,11 +9,14 @@ Menjalankan:
 Lalu buka http://127.0.0.1:5000
 """
 import os
+import secrets
 from datetime import datetime
 
 from flask import (
-    Flask, render_template, request, abort, flash, redirect, url_for, session
+    Flask, render_template, request, abort, flash, redirect, url_for, session,
+    make_response,
 )
+from itsdangerous import URLSafeSerializer, BadSignature
 from authlib.integrations.flask_client import OAuth
 
 import data
@@ -143,34 +146,86 @@ def login():
 
 
 # ---------------------------------------------------------------- OAuth Google
+# Nama cookie khusus untuk menyimpan state OAuth (terpisah dari session Flask).
+OAUTH_STATE_COOKIE = "g_oauth_state"
+
+
+def _state_serializer():
+    return URLSafeSerializer(app.secret_key, salt="oauth-state")
+
+
 @app.route("/auth/google")
 def auth_google():
     if not google_enabled():
         flash("Login Google belum dikonfigurasi. Coba lagi nanti.", "error")
         return redirect(url_for("login"))
+
+    # Buat state acak sendiri; JANGAN mengandalkan session Flask (rapuh di serverless).
+    state = secrets.token_urlsafe(24)
     redirect_uri = url_for("auth_google_callback", _external=True)
-    return oauth.google.authorize_redirect(redirect_uri)
+
+    # Bangun URL otorisasi Google secara manual dengan state kita.
+    metadata = oauth.google.load_server_metadata()
+    auth_endpoint = metadata["authorization_endpoint"]
+    params = {
+        "response_type": "code",
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    }
+    from urllib.parse import urlencode
+    auth_url = f"{auth_endpoint}?{urlencode(params)}"
+
+    # Simpan state di cookie terpisah yang ditandatangani (bertahan antar-invocation).
+    resp = make_response(redirect(auth_url))
+    signed = _state_serializer().dumps(state)
+    resp.set_cookie(
+        OAUTH_STATE_COOKIE, signed,
+        max_age=600, httponly=True, secure=True, samesite="Lax",
+    )
+    return resp
 
 
 @app.route("/auth/google/callback")
 def auth_google_callback():
     if not google_enabled():
         abort(404)
-    # Jika Google mengembalikan error langsung (mis. akses ditolak user).
     if request.args.get("error"):
         flash("Login Google dibatalkan.", "error")
         return redirect(url_for("login"))
 
+    # Verifikasi state: bandingkan query 'state' dengan cookie bertanda tangan.
+    returned_state = request.args.get("state", "")
+    signed_cookie = request.cookies.get(OAUTH_STATE_COOKIE, "")
     try:
-        token = oauth.google.authorize_access_token()
-        info = token.get("userinfo") or {}
-        # Fallback: bila userinfo tidak ada di token, ambil dari endpoint userinfo.
-        if not info:
-            resp = oauth.google.get("https://openidconnect.googleapis.com/v1/userinfo")
-            info = resp.json()
+        expected_state = _state_serializer().loads(signed_cookie)
+    except BadSignature:
+        expected_state = None
+    if not returned_state or returned_state != expected_state:
+        app.logger.error("OAuth state mismatch (cookie hilang/berbeda).")
+        flash("Sesi login kedaluwarsa. Silakan coba lagi.", "error")
+        return redirect(url_for("login"))
+
+    code = request.args.get("code")
+    if not code:
+        flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
+        return redirect(url_for("login"))
+
+    try:
+        # Tukar authorization code -> token secara manual (tanpa cek session).
+        redirect_uri = url_for("auth_google_callback", _external=True)
+        token = oauth.google.fetch_access_token(
+            redirect_uri=redirect_uri, code=code, grant_type="authorization_code",
+        )
+        # Ambil profil user dari endpoint userinfo memakai access token.
+        resp = oauth.google.get(
+            "https://openidconnect.googleapis.com/v1/userinfo", token=token
+        )
+        info = resp.json()
     except Exception as e:
-        # Catat penyebab asli ke log server (terlihat di Vercel logs).
-        app.logger.error("OAuth callback gagal: %s", repr(e))
+        app.logger.error("OAuth token exchange gagal: %s", repr(e))
         flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
         return redirect(url_for("login"))
 
@@ -183,8 +238,11 @@ def auth_google_callback():
         "email": info["email"],
         "picture": info.get("picture", ""),
     }
+    # Hapus cookie state yang sudah dipakai.
+    resp = make_response(redirect(url_for("account")))
+    resp.delete_cookie(OAUTH_STATE_COOKIE)
     flash(f"Selamat datang, {session['user']['name']} 👋", "success")
-    return redirect(url_for("account"))
+    return resp
 
 
 @app.route("/logout")
