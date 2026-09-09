@@ -47,7 +47,10 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         client_id=GOOGLE_CLIENT_ID,
         client_secret=GOOGLE_CLIENT_SECRET,
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-        client_kwargs={"scope": "openid email profile"},
+        client_kwargs={
+            "scope": "openid email profile",
+            "token_endpoint_auth_method": "client_secret_post",
+        },
     )
 
 
@@ -226,7 +229,9 @@ def auth_google_callback():
         info = resp.json()
     except Exception as e:
         app.logger.error("OAuth token exchange gagal: %s", repr(e))
-        flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
+        # Tampilkan kode error singkat dari Google untuk mempermudah diagnosa.
+        detail = getattr(e, "error", None) or str(e)
+        flash(f"Gagal masuk dengan Google ({detail}). Silakan coba lagi.", "error")
         return redirect(url_for("login"))
 
     if not info.get("email"):
