@@ -90,6 +90,7 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
   color: var(--ink); font-weight: 600; font-size: .92rem; transition: border-color .2s, color .2s;
 }
 .btn-login:hover { border-color: var(--gold); color: var(--gold); }
+.nav-avatar { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
 .btn-search {
   width: 40px; height: 40px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;

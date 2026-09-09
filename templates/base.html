@@ -64,7 +64,7 @@
           {% endfor %}
           <li class="nav-mobile-actions">
             {% if current_user %}
-            <a href="{{ url_for('account') }}">Akun</a>
+            <a href="{{ url_for('account') }}">{{ current_user.name.split(' ')[0] }}</a>
             <a href="{{ url_for('logout') }}">Keluar</a>
             {% else %}
             <a href="{{ url_for('login') }}">Login</a>
@@ -76,7 +76,14 @@
 
       <div class="nav-actions">
         {% if current_user %}
-        <a href="{{ url_for('account') }}" class="btn-login"><span aria-hidden="true">&#128100;</span> Akun</a>
+        <a href="{{ url_for('account') }}" class="btn-login">
+          {% if current_user.picture %}
+          <img class="nav-avatar" src="{{ current_user.picture }}" alt="" referrerpolicy="no-referrer">
+          {% else %}
+          <span aria-hidden="true">&#128100;</span>
+          {% endif %}
+          {{ current_user.name.split(' ')[0] }}
+        </a>
         {% else %}
         <a href="{{ url_for('login') }}" class="btn-login"><span aria-hidden="true">&#128100;</span> Login</a>
         {% endif %}
