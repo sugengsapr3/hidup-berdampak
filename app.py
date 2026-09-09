@@ -22,6 +22,15 @@ app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
+# Konfigurasi cookie session agar andal saat alur OAuth (kembali dari Google).
+# SameSite=Lax + Secure diperlukan supaya cookie 'state' OAuth tetap terbaca
+# saat callback di lingkungan HTTPS/serverless (Vercel).
+app.config.update(
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+)
+
 # --- Konfigurasi OAuth Google -----------------------------------------
 # Client ID & Secret diambil dari environment variable (tidak di-hardcode),
 # sehingga aman di repo publik. Set di Vercel: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
@@ -147,10 +156,21 @@ def auth_google():
 def auth_google_callback():
     if not google_enabled():
         abort(404)
+    # Jika Google mengembalikan error langsung (mis. akses ditolak user).
+    if request.args.get("error"):
+        flash("Login Google dibatalkan.", "error")
+        return redirect(url_for("login"))
+
     try:
         token = oauth.google.authorize_access_token()
         info = token.get("userinfo") or {}
-    except Exception:
+        # Fallback: bila userinfo tidak ada di token, ambil dari endpoint userinfo.
+        if not info:
+            resp = oauth.google.get("https://openidconnect.googleapis.com/v1/userinfo")
+            info = resp.json()
+    except Exception as e:
+        # Catat penyebab asli ke log server (terlihat di Vercel logs).
+        app.logger.error("OAuth callback gagal: %s", repr(e))
         flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
         return redirect(url_for("login"))
 
