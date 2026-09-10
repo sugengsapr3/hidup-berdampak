@@ -9,14 +9,11 @@ Menjalankan:
 Lalu buka http://127.0.0.1:5000
 """
 import os
-import secrets
 from datetime import datetime
 
 from flask import (
-    Flask, render_template, request, abort, flash, redirect, url_for, session,
-    make_response,
+    Flask, render_template, request, abort, flash, redirect, url_for, session
 )
-from itsdangerous import URLSafeSerializer, BadSignature
 from authlib.integrations.flask_client import OAuth
 
 import data
@@ -25,21 +22,11 @@ app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
-# Konfigurasi cookie session agar andal saat alur OAuth (kembali dari Google).
-# SameSite=Lax + Secure diperlukan supaya cookie 'state' OAuth tetap terbaca
-# saat callback di lingkungan HTTPS/serverless (Vercel).
-app.config.update(
-    SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_HTTPONLY=True,
-)
-
 # --- Konfigurasi OAuth Google -----------------------------------------
 # Client ID & Secret diambil dari environment variable (tidak di-hardcode),
-# sehingga aman di repo publik. Set di Vercel (SEMUA environment):
-# GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
-GOOGLE_CLIENT_ID = (os.environ.get("GOOGLE_CLIENT_ID") or "").strip()
-GOOGLE_CLIENT_SECRET = (os.environ.get("GOOGLE_CLIENT_SECRET") or "").strip()
+# sehingga aman di repo publik. Set di Vercel: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 
 oauth = OAuth(app)
 if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
@@ -48,10 +35,7 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         client_id=GOOGLE_CLIENT_ID,
         client_secret=GOOGLE_CLIENT_SECRET,
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-        client_kwargs={
-            "scope": "openid email profile",
-            "token_endpoint_auth_method": "client_secret_post",
-        },
+        client_kwargs={"scope": "openid email profile"},
     )
 
 
@@ -150,89 +134,24 @@ def login():
 
 
 # ---------------------------------------------------------------- OAuth Google
-# Nama cookie khusus untuk menyimpan state OAuth (terpisah dari session Flask).
-OAUTH_STATE_COOKIE = "g_oauth_state"
-
-
-def _state_serializer():
-    return URLSafeSerializer(app.secret_key, salt="oauth-state")
-
-
 @app.route("/auth/google")
 def auth_google():
     if not google_enabled():
         flash("Login Google belum dikonfigurasi. Coba lagi nanti.", "error")
         return redirect(url_for("login"))
-
-    # Buat state acak sendiri; JANGAN mengandalkan session Flask (rapuh di serverless).
-    state = secrets.token_urlsafe(24)
     redirect_uri = url_for("auth_google_callback", _external=True)
-
-    # Bangun URL otorisasi Google secara manual dengan state kita.
-    metadata = oauth.google.load_server_metadata()
-    auth_endpoint = metadata["authorization_endpoint"]
-    params = {
-        "response_type": "code",
-        "client_id": GOOGLE_CLIENT_ID,
-        "redirect_uri": redirect_uri,
-        "scope": "openid email profile",
-        "state": state,
-        "prompt": "select_account",
-    }
-    from urllib.parse import urlencode
-    auth_url = f"{auth_endpoint}?{urlencode(params)}"
-
-    # Simpan state di cookie terpisah yang ditandatangani (bertahan antar-invocation).
-    resp = make_response(redirect(auth_url))
-    signed = _state_serializer().dumps(state)
-    resp.set_cookie(
-        OAUTH_STATE_COOKIE, signed,
-        max_age=600, httponly=True, secure=True, samesite="Lax",
-    )
-    return resp
+    return oauth.google.authorize_redirect(redirect_uri)
 
 
 @app.route("/auth/google/callback")
 def auth_google_callback():
     if not google_enabled():
         abort(404)
-    if request.args.get("error"):
-        flash("Login Google dibatalkan.", "error")
-        return redirect(url_for("login"))
-
-    # Verifikasi state: bandingkan query 'state' dengan cookie bertanda tangan.
-    returned_state = request.args.get("state", "")
-    signed_cookie = request.cookies.get(OAUTH_STATE_COOKIE, "")
     try:
-        expected_state = _state_serializer().loads(signed_cookie)
-    except BadSignature:
-        expected_state = None
-    if not returned_state or returned_state != expected_state:
-        app.logger.error("OAuth state mismatch (cookie hilang/berbeda).")
-        flash("Sesi login kedaluwarsa. Silakan coba lagi.", "error")
-        return redirect(url_for("login"))
-
-    code = request.args.get("code")
-    if not code:
+        token = oauth.google.authorize_access_token()
+        info = token.get("userinfo") or {}
+    except Exception:
         flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
-        return redirect(url_for("login"))
-
-    try:
-        # Tukar authorization code -> token secara manual (tanpa cek session).
-        redirect_uri = url_for("auth_google_callback", _external=True)
-        token = oauth.google.fetch_access_token(
-            redirect_uri=redirect_uri, code=code, grant_type="authorization_code",
-        )
-        # Ambil profil user dari endpoint userinfo memakai access token.
-        resp = oauth.google.get(
-            "https://openidconnect.googleapis.com/v1/userinfo", token=token
-        )
-        info = resp.json()
-    except Exception as e:
-        app.logger.error("OAuth token exchange gagal: %s", repr(e))
-        # Tampilkan kode error singkat dari Google untuk mempermudah diagnosa.
-        detail = getattr(e, "error", None) or str(e)
-        flash(f"Gagal masuk dengan Google ({detail}). Silakan coba lagi.", "error")
         return redirect(url_for("login"))
 
     if not info.get("email"):
@@ -244,11 +163,8 @@ def auth_google_callback():
         "email": info["email"],
         "picture": info.get("picture", ""),
     }
-    # Hapus cookie state yang sudah dipakai.
-    resp = make_response(redirect(url_for("account")))
-    resp.delete_cookie(OAUTH_STATE_COOKIE)
     flash(f"Selamat datang, {session['user']['name']} 👋", "success")
-    return resp
+    return redirect(url_for("account"))
 
 
 @app.route("/logout")
