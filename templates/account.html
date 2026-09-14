@@ -13,9 +13,27 @@
       <h1 class="auth-title">Halo, {{ current_user.name if current_user else 'Teman' }}</h1>
       <p class="auth-sub">{{ current_user.email if current_user else '' }}</p>
       <div class="auth-providers" style="margin-top:20px;">
-        <a href="{{ url_for('learn') }}" class="btn btn-gold" style="width:100%;">Mulai Belajar</a>
+        <a href="{{ url_for('courses') }}" class="btn btn-gold" style="width:100%;">Jelajahi Kelas</a>
         <a href="{{ url_for('logout') }}" class="auth-btn">Keluar</a>
       </div>
+    </div>
+
+    <div class="account-courses reading">
+      <h2 class="account-section-title">Kelas Saya</h2>
+      {% if owned %}
+      <div class="my-course-list">
+        {% for c in owned %}
+        <a href="{{ url_for('course_detail', slug=c.slug) }}" class="my-course-item">
+          <span>{{ c.title }}</span>
+          <span class="my-course-status">{{ 'Aktif' if c.status == 'paid' else c.status }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="account-empty">
+        Kamu belum punya kelas. <a href="{{ url_for('courses') }}" class="link-arrow">Lihat kelas yang tersedia &rarr;</a>
+      </p>
+      {% endif %}
     </div>
   </div>
 </section>

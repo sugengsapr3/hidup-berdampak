@@ -9,24 +9,38 @@ Menjalankan:
 Lalu buka http://127.0.0.1:5000
 """
 import os
+import secrets
 from datetime import datetime
 
 from flask import (
-    Flask, render_template, request, abort, flash, redirect, url_for, session
+    Flask, render_template, request, abort, flash, redirect, url_for, session,
+    make_response,
 )
+from itsdangerous import URLSafeSerializer, BadSignature
 from authlib.integrations.flask_client import OAuth
 
 import data
+import db
 
 app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
+# Konfigurasi cookie session agar andal saat alur OAuth (kembali dari Google).
+# SameSite=Lax + Secure diperlukan supaya cookie 'state' OAuth tetap terbaca
+# saat callback di lingkungan HTTPS/serverless (Vercel).
+app.config.update(
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+)
+
 # --- Konfigurasi OAuth Google -----------------------------------------
 # Client ID & Secret diambil dari environment variable (tidak di-hardcode),
-# sehingga aman di repo publik. Set di Vercel: GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+# sehingga aman di repo publik. Set di Vercel (SEMUA environment):
+# GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET.
+GOOGLE_CLIENT_ID = (os.environ.get("GOOGLE_CLIENT_ID") or "").strip()
+GOOGLE_CLIENT_SECRET = (os.environ.get("GOOGLE_CLIENT_SECRET") or "").strip()
 
 oauth = OAuth(app)
 if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
@@ -35,7 +49,10 @@ if GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET:
         client_id=GOOGLE_CLIENT_ID,
         client_secret=GOOGLE_CLIENT_SECRET,
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
-        client_kwargs={"scope": "openid email profile"},
+        client_kwargs={
+            "scope": "openid email profile",
+            "token_endpoint_auth_method": "client_secret_post",
+        },
     )
 
 
@@ -134,23 +151,105 @@ def login():
 
 
 # ---------------------------------------------------------------- OAuth Google
+# Nama cookie khusus untuk menyimpan state OAuth (terpisah dari session Flask).
+OAUTH_STATE_COOKIE = "g_oauth_state"
+
+
+def _state_serializer():
+    return URLSafeSerializer(app.secret_key, salt="oauth-state")
+
+
 @app.route("/auth/google")
 def auth_google():
     if not google_enabled():
         flash("Login Google belum dikonfigurasi. Coba lagi nanti.", "error")
         return redirect(url_for("login"))
+
+    # Buat state acak sendiri; JANGAN mengandalkan session Flask (rapuh di serverless).
+    state = secrets.token_urlsafe(24)
     redirect_uri = url_for("auth_google_callback", _external=True)
-    return oauth.google.authorize_redirect(redirect_uri)
+
+    # Bangun URL otorisasi Google secara manual dengan state kita.
+    metadata = oauth.google.load_server_metadata()
+    auth_endpoint = metadata["authorization_endpoint"]
+    params = {
+        "response_type": "code",
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "scope": "openid email profile",
+        "state": state,
+        "prompt": "select_account",
+    }
+    from urllib.parse import urlencode
+    auth_url = f"{auth_endpoint}?{urlencode(params)}"
+
+    # Simpan state di cookie terpisah yang ditandatangani (bertahan antar-invocation).
+    resp = make_response(redirect(auth_url))
+    signed = _state_serializer().dumps(state)
+    resp.set_cookie(
+        OAUTH_STATE_COOKIE, signed,
+        max_age=600, httponly=True, secure=True, samesite="Lax",
+    )
+    return resp
 
 
 @app.route("/auth/google/callback")
 def auth_google_callback():
     if not google_enabled():
         abort(404)
+    if request.args.get("error"):
+        flash("Login Google dibatalkan.", "error")
+        return redirect(url_for("login"))
+
+    # Verifikasi state: bandingkan query 'state' dengan cookie bertanda tangan.
+    returned_state = request.args.get("state", "")
+    signed_cookie = request.cookies.get(OAUTH_STATE_COOKIE, "")
     try:
-        token = oauth.google.authorize_access_token()
-        info = token.get("userinfo") or {}
-    except Exception:
+        expected_state = _state_serializer().loads(signed_cookie)
+    except BadSignature:
+        expected_state = None
+    if not returned_state or returned_state != expected_state:
+        app.logger.error("OAuth state mismatch (cookie hilang/berbeda).")
+        flash("Sesi login kedaluwarsa. Silakan coba lagi.", "error")
+        return redirect(url_for("login"))
+
+    code = request.args.get("code")
+    if not code:
+        flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
+        return redirect(url_for("login"))
+
+    try:
+        # Tukar authorization code -> token via requests langsung ke token endpoint,
+        # menyertakan client_id & client_secret secara eksplisit (client_secret_post).
+        import requests as _requests
+        metadata = oauth.google.load_server_metadata()
+        token_endpoint = metadata["token_endpoint"]
+        redirect_uri = url_for("auth_google_callback", _external=True)
+        token_resp = _requests.post(
+            token_endpoint,
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": redirect_uri,
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+            },
+            timeout=15,
+        )
+        if token_resp.status_code != 200:
+            app.logger.error("Token endpoint %s: %s", token_resp.status_code, token_resp.text)
+            flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
+            return redirect(url_for("login"))
+        access_token = token_resp.json().get("access_token")
+        # Ambil profil user dari endpoint userinfo memakai access token.
+        info_resp = _requests.get(
+            "https://openidconnect.googleapis.com/v1/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=15,
+        )
+        info = info_resp.json()
+    except Exception as e:
+        app.logger.error("OAuth token exchange gagal: %s", repr(e))
         flash("Gagal masuk dengan Google. Silakan coba lagi.", "error")
         return redirect(url_for("login"))
 
@@ -163,8 +262,22 @@ def auth_google_callback():
         "email": info["email"],
         "picture": info.get("picture", ""),
     }
+    # Simpan/update user ke database (jika DB tersedia). Jangan gagalkan login
+    # kalau DB bermasalah, cukup catat error.
+    if db.db_enabled():
+        try:
+            db.upsert_user(
+                session["user"]["email"],
+                session["user"]["name"],
+                session["user"]["picture"],
+            )
+        except Exception as e:
+            app.logger.error("Gagal simpan user ke DB: %s", repr(e))
+    # Hapus cookie state yang sudah dipakai.
+    resp = make_response(redirect(url_for("account")))
+    resp.delete_cookie(OAUTH_STATE_COOKIE)
     flash(f"Selamat datang, {session['user']['name']} 👋", "success")
-    return redirect(url_for("account"))
+    return resp
 
 
 @app.route("/logout")
@@ -176,9 +289,59 @@ def logout():
 
 @app.route("/akun")
 def account():
-    if not session.get("user"):
+    user = session.get("user")
+    if not user:
         return redirect(url_for("login"))
-    return render_template("account.html", active="")
+    owned = []
+    if db.db_enabled():
+        try:
+            owned = db.my_courses(user["email"])
+        except Exception as e:
+            app.logger.error("Gagal ambil kelas user: %s", repr(e))
+    return render_template("account.html", owned=owned, active="")
+
+
+# ---------------------------------------------------------------- Kelas (berbayar)
+@app.route("/kelas")
+def courses():
+    items = db.list_courses() if db.db_enabled() else []
+    return render_template("courses.html", courses=items, active="courses")
+
+
+@app.route("/kelas/<slug>")
+def course_detail(slug):
+    course = db.get_course(slug) if db.db_enabled() else None
+    if not course:
+        abort(404)
+    user = session.get("user")
+    owned = bool(user) and db.has_access(user["email"], slug)
+    return render_template(
+        "course_detail.html", course=course, owned=owned, active="courses"
+    )
+
+
+@app.route("/kelas/<slug>/beli", methods=["POST"])
+def course_buy(slug):
+    """Pembelian kelas.
+
+    CATATAN: ini BELUM pembayaran sungguhan. Untuk sekarang, saat integrasi
+    pembayaran (Midtrans/Xendit) belum ada, tombol ini memberi akses langsung
+    agar alur bisa diuji. Nanti diganti: redirect ke payment gateway, dan akses
+    diberikan lewat webhook setelah pembayaran benar-benar berhasil.
+    """
+    user = session.get("user")
+    if not user:
+        return redirect(url_for("login"))
+    course = db.get_course(slug) if db.db_enabled() else None
+    if not course:
+        abort(404)
+    try:
+        db.enroll(user["email"], slug, status="paid")
+        flash(f"Kamu sekarang punya akses ke \u201c{course['title']}\u201d.", "success")
+    except Exception as e:
+        app.logger.error("Gagal enroll: %s", repr(e))
+        flash("Terjadi kesalahan. Coba lagi.", "error")
+    return redirect(url_for("course_detail", slug=slug))
 
 
 # ---------------------------------------------------------------- Pencarian

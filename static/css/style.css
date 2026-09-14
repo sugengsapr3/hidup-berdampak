@@ -384,6 +384,30 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
 .auth-terms a:hover { color: var(--gold-hover); }
 
 /* =====================================================================
+   Kelas (courses)
+   ===================================================================== */
+.course-price { color: var(--gold); font-weight: 700; font-family: var(--font-head); margin-top: 14px; }
+.course-buy-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 34px; text-align: center;
+}
+.course-price-lg { font-size: 2rem; font-weight: 800; font-family: var(--font-head); color: var(--gold); margin-bottom: 20px; }
+.course-note { color: var(--muted); font-size: .88rem; margin-top: 14px; }
+.course-owned { color: var(--gold); font-weight: 600; margin-bottom: 18px; }
+
+.account-courses { margin-top: 40px; }
+.account-section-title { font-size: 1.3rem; margin-bottom: 18px; text-align: center; }
+.my-course-list { display: grid; gap: 12px; }
+.my-course-item {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 16px 20px; transition: border-color .2s;
+}
+.my-course-item:hover { border-color: rgba(217,164,65,.5); }
+.my-course-status { color: var(--gold); font-size: .82rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.account-empty { text-align: center; color: var(--muted); }
+
+/* =====================================================================
    Flash messages
    ===================================================================== */
 .flash-wrap { max-width: var(--reading); margin: 24px auto 0; padding: 0 24px; }

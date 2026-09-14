@@ -312,6 +312,7 @@ AUTH_PROVIDERS = [
 NAV = [
     {"type": "link", "endpoint": "home", "label": "Home"},
     {"type": "dropdown", "endpoint": "learn", "label": "Belajar", "menu": "learn"},
+    {"type": "link", "endpoint": "courses", "label": "Kelas"},
     {"type": "dropdown", "endpoint": "business", "label": "Untuk Bisnis", "menu": "business"},
     {"type": "link", "endpoint": "books", "label": "Buku"},
     {"type": "dropdown", "endpoint": "resources", "label": "Sumber Daya", "menu": "resources"},

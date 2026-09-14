@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Kelas | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}Kelas online HIDUP BERDAMPAK: belajar terstruktur untuk hidup yang lebih bermakna dan berdampak.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Kelas</span>
+    <h1>Belajar Lebih Dalam, Bertumbuh Lebih Jauh</h1>
+    <p>Kelas online terstruktur untuk membangun hidup yang bermakna dan berdampak.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    {% if courses %}
+    <div class="card-grid grid-3">
+      {% for c in courses %}
+      <a href="{{ url_for('course_detail', slug=c.slug) }}" class="content-card">
+        <h3>{{ c.title }}</h3>
+        <p>{{ c.description }}</p>
+        <p class="course-price">Rp {{ '{:,.0f}'.format(c.price).replace(',', '.') }}</p>
+        <span class="link-arrow">Lihat kelas &rarr;</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center; color:var(--muted);">Kelas akan segera hadir. Nantikan ya.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
