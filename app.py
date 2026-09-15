@@ -19,8 +19,11 @@ from flask import (
 from itsdangerous import URLSafeSerializer, BadSignature
 from authlib.integrations.flask_client import OAuth
 
+import uuid
+
 import data
 import db
+import payments
 
 app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
@@ -322,12 +325,12 @@ def course_detail(slug):
 
 @app.route("/kelas/<slug>/beli", methods=["POST"])
 def course_buy(slug):
-    """Pembelian kelas.
+    """Mulai pembelian kelas.
 
-    CATATAN: ini BELUM pembayaran sungguhan. Untuk sekarang, saat integrasi
-    pembayaran (Midtrans/Xendit) belum ada, tombol ini memberi akses langsung
-    agar alur bisa diuji. Nanti diganti: redirect ke payment gateway, dan akses
-    diberikan lewat webhook setelah pembayaran benar-benar berhasil.
+    - Jika Midtrans aktif: buat order (pending) + transaksi Snap, arahkan user
+      ke halaman pembayaran Midtrans. Akses diberikan lewat webhook setelah bayar.
+    - Jika Midtrans belum dikonfigurasi: fallback beri akses langsung (mode uji),
+      supaya alur tetap bisa dicoba sebelum key pembayaran dipasang.
     """
     user = session.get("user")
     if not user:
@@ -335,13 +338,75 @@ def course_buy(slug):
     course = db.get_course(slug) if db.db_enabled() else None
     if not course:
         abort(404)
+
+    # Fallback mode uji (belum ada Midtrans): beri akses langsung.
+    if not payments.is_enabled():
+        try:
+            db.enroll(user["email"], slug, status="paid")
+            flash(f"(Mode uji) Kamu sekarang punya akses ke \u201c{course['title']}\u201d.", "success")
+        except Exception as e:
+            app.logger.error("Gagal enroll (mode uji): %s", repr(e))
+            flash("Terjadi kesalahan. Coba lagi.", "error")
+        return redirect(url_for("course_detail", slug=slug))
+
+    # Mode pembayaran sungguhan (Midtrans Snap).
+    order_id = f"HB-{slug[:12]}-{uuid.uuid4().hex[:10]}"
+    amount = int(course["price"])
     try:
-        db.enroll(user["email"], slug, status="paid")
-        flash(f"Kamu sekarang punya akses ke \u201c{course['title']}\u201d.", "success")
+        db.create_order(order_id, user["email"], slug, amount, status="pending")
     except Exception as e:
-        app.logger.error("Gagal enroll: %s", repr(e))
+        app.logger.error("Gagal buat order: %s", repr(e))
         flash("Terjadi kesalahan. Coba lagi.", "error")
-    return redirect(url_for("course_detail", slug=slug))
+        return redirect(url_for("course_detail", slug=slug))
+
+    redirect_url, err = payments.create_snap_transaction(
+        order_id, amount, course["title"], user["email"], user["name"]
+    )
+    if err:
+        app.logger.error("Midtrans gagal: %s", err)
+        flash("Gagal memulai pembayaran. Coba lagi nanti.", "error")
+        return redirect(url_for("course_detail", slug=slug))
+    return redirect(redirect_url)
+
+
+@app.route("/midtrans/notify", methods=["POST"])
+def midtrans_notify():
+    """Webhook dari Midtrans. Set order 'paid' dan beri akses bila pembayaran sukses."""
+    payload = request.get_json(silent=True) or {}
+    order_id = payload.get("order_id", "")
+    status_code = payload.get("status_code", "")
+    gross_amount = payload.get("gross_amount", "")
+    signature = payload.get("signature_key", "")
+    txn_status = payload.get("transaction_status", "")
+    fraud = payload.get("fraud_status", "accept")
+
+    if not payments.verify_signature(order_id, status_code, gross_amount, signature):
+        app.logger.error("Webhook signature tidak valid untuk %s", order_id)
+        abort(403)
+
+    order = db.get_order(order_id)
+    if not order:
+        abort(404)
+
+    if txn_status in ("capture", "settlement") and fraud == "accept":
+        db.set_order_status(order_id, "paid")
+        db.enroll(order["email"], order["course_slug"], status="paid")
+    elif txn_status in ("cancel", "deny", "expire"):
+        db.set_order_status(order_id, "failed")
+    return "OK", 200
+
+
+@app.route("/kelas/<slug>/selesai")
+def course_finish(slug):
+    """Halaman kembali setelah user menyelesaikan pembayaran di Midtrans."""
+    course = db.get_course(slug) if db.db_enabled() else None
+    if not course:
+        abort(404)
+    user = session.get("user")
+    owned = bool(user) and db.has_access(user["email"], slug)
+    return render_template(
+        "course_finish.html", course=course, owned=owned, active="courses"
+    )
 
 
 # ---------------------------------------------------------------- Pencarian

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Status Pembayaran | HIDUP. BERDAMPAK{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container reading">
+    <div class="course-buy-card">
+      {% if owned %}
+        <div class="course-price-lg">✓</div>
+        <h1 class="auth-title">Pembayaran Berhasil</h1>
+        <p class="course-note">Kamu sekarang punya akses ke "{{ course.title }}".</p>
+        <a href="{{ url_for('account') }}" class="btn btn-gold" style="width:100%; margin-top:16px;">Buka Kelas Saya</a>
+      {% else %}
+        <h1 class="auth-title">Menunggu Konfirmasi</h1>
+        <p class="course-note">
+          Kalau kamu sudah menyelesaikan pembayaran, akses akan terbuka otomatis
+          dalam beberapa saat. Cek kembali di halaman Akun.
+        </p>
+        <a href="{{ url_for('account') }}" class="btn btn-outline" style="width:100%; margin-top:16px;">Ke Akun Saya</a>
+        <a href="{{ url_for('course_detail', slug=course.slug) }}" class="course-back" style="display:block; margin-top:12px;">Kembali ke kelas</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -67,6 +67,20 @@ def init_db():
             );
             """
         )
+        # Pesanan/transaksi pembayaran (Midtrans).
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS orders (
+                id           SERIAL PRIMARY KEY,
+                order_id     TEXT UNIQUE NOT NULL,
+                email        TEXT NOT NULL,
+                course_slug  TEXT NOT NULL,
+                amount       INTEGER NOT NULL,
+                status       TEXT NOT NULL DEFAULT 'pending',
+                created_at   TIMESTAMPTZ DEFAULT now()
+            );
+            """
+        )
         conn.commit()
     _seed_courses()
 
@@ -172,6 +186,41 @@ def has_access(email, course_slug):
         )
         r = cur.fetchone()
     return bool(r and r[0] == "paid")
+
+
+# ------------------------------------------------------------------ Orders
+def create_order(order_id, email, course_slug, amount, status="pending"):
+    """Catat pesanan baru sebelum diarahkan ke pembayaran."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO orders (order_id, email, course_slug, amount, status)
+            VALUES (%s, %s, %s, %s, %s);
+            """,
+            (order_id, email, course_slug, amount, status),
+        )
+        conn.commit()
+
+
+def get_order(order_id):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT order_id, email, course_slug, amount, status FROM orders WHERE order_id = %s;",
+            (order_id,),
+        )
+        r = cur.fetchone()
+    if not r:
+        return None
+    return {"order_id": r[0], "email": r[1], "course_slug": r[2], "amount": r[3], "status": r[4]}
+
+
+def set_order_status(order_id, status):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE orders SET status = %s WHERE order_id = %s;",
+            (status, order_id),
+        )
+        conn.commit()
 
 
 def my_courses(email):
