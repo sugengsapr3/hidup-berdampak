@@ -18,7 +18,7 @@
 
       {% if owned %}
         <p class="course-owned">✓ Kamu sudah punya akses ke kelas ini.</p>
-        <a href="{{ url_for('account') }}" class="btn btn-gold">Buka di Akun Saya</a>
+        <a href="{{ url_for('course_learn', slug=course.slug) }}" class="btn btn-gold" style="width:100%;">Mulai Belajar</a>
       {% elif current_user %}
         <form method="post" action="{{ url_for('course_buy', slug=course.slug) }}">
           <button type="submit" class="btn btn-gold" style="width:100%;">Beli Kelas Ini</button>

@@ -23,9 +23,9 @@
       {% if owned %}
       <div class="my-course-list">
         {% for c in owned %}
-        <a href="{{ url_for('course_detail', slug=c.slug) }}" class="my-course-item">
+        <a href="{{ url_for('course_learn', slug=c.slug) }}" class="my-course-item">
           <span>{{ c.title }}</span>
-          <span class="my-course-status">{{ 'Aktif' if c.status == 'paid' else c.status }}</span>
+          <span class="my-course-status">{{ 'Buka Materi →' if c.status == 'paid' else c.status }}</span>
         </a>
         {% endfor %}
       </div>

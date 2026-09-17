@@ -305,6 +305,76 @@ AUTH_PROVIDERS = [
 ]
 
 # =====================================================================
+# MATERI KELAS (modul yang tampil setelah user punya akses)
+# Di-keyed berdasarkan slug kelas. Tiap modul: judul, video (YouTube embed
+# opsional), dan catatan/isi teks. Ganti "video" dengan ID video YouTube kamu.
+# =====================================================================
+COURSE_MATERIALS = {
+    "dasar-hidup-berdampak": [
+        {
+            "title": "Modul 1 — Menemukan Tujuan Hidup",
+            "video": "",  # contoh isi nanti: "dQw4w9WgXcQ" (ID video YouTube)
+            "notes": (
+                "Kita mulai dari pertanyaan paling mendasar: untuk apa kita hidup? "
+                "Modul ini membantumu menemukan alasan yang lebih besar dari sekadar "
+                "rutinitas harian."
+            ),
+        },
+        {
+            "title": "Modul 2 — Membangun Kebiasaan yang Berdampak",
+            "video": "",
+            "notes": (
+                "Perubahan besar lahir dari kebiasaan kecil yang konsisten. Pelajari "
+                "cara merancang kebiasaan yang bertahan dan selaras dengan tujuanmu."
+            ),
+        },
+        {
+            "title": "Modul 3 — Meninggalkan Jejak yang Berarti",
+            "video": "",
+            "notes": (
+                "Bagaimana memastikan hidup kita memberi manfaat yang terus mengalir, "
+                "bahkan setelah kita tiada."
+            ),
+        },
+    ],
+    "financial-freedom-berkah": [
+        {
+            "title": "Modul 1 — Mindset Uang yang Sehat",
+            "video": "",
+            "notes": "Meluruskan cara pandang terhadap uang: alat, bukan tujuan.",
+        },
+        {
+            "title": "Modul 2 — Mengatur Arus Kas & Menabung",
+            "video": "",
+            "notes": "Langkah praktis mencatat, mengatur, dan menyisihkan penghasilan.",
+        },
+        {
+            "title": "Modul 3 — Investasi & Bekal Akhirat",
+            "video": "",
+            "notes": "Menumbuhkan aset dunia sambil menyiapkan bekal yang abadi.",
+        },
+    ],
+    "keluarga-legacy": [
+        {
+            "title": "Modul 1 — Fondasi Keluarga yang Kuat",
+            "video": "",
+            "notes": "Nilai dan komunikasi sebagai pondasi keluarga.",
+        },
+        {
+            "title": "Modul 2 — Mendidik dengan Teladan",
+            "video": "",
+            "notes": "Anak belajar dari apa yang kita lakukan, bukan yang kita katakan.",
+        },
+        {
+            "title": "Modul 3 — Mewariskan Legacy",
+            "video": "",
+            "notes": "Membangun warisan nilai yang bertahan lintas generasi.",
+        },
+    ],
+}
+
+
+# =====================================================================
 # NAVIGASI
 # type "link"     -> tautan biasa
 # type "dropdown" -> punya submenu (items: label + endpoint + optional slug)

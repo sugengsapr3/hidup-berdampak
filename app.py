@@ -409,6 +409,27 @@ def course_finish(slug):
     )
 
 
+@app.route("/kelas/<slug>/belajar")
+def course_learn(slug):
+    """Ruang belajar: hanya untuk user yang sudah punya akses (sudah bayar)."""
+    course = db.get_course(slug) if db.db_enabled() else None
+    if not course:
+        abort(404)
+    user = session.get("user")
+    # Wajib login.
+    if not user:
+        flash("Silakan masuk untuk mengakses materi kelas.", "error")
+        return redirect(url_for("login"))
+    # Wajib punya akses (sudah bayar).
+    if not db.has_access(user["email"], slug):
+        flash("Kamu belum punya akses ke kelas ini.", "error")
+        return redirect(url_for("course_detail", slug=slug))
+    materials = data.COURSE_MATERIALS.get(slug, [])
+    return render_template(
+        "course_learn.html", course=course, materials=materials, active="courses"
+    )
+
+
 # ---------------------------------------------------------------- Pencarian
 def _build_search_index():
     """Kumpulkan semua konten yang bisa dicari menjadi satu daftar seragam."""

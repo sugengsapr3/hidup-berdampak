@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }} — Materi | HIDUP. BERDAMPAK{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Ruang Belajar</span>
+    <h1>{{ course.title }}</h1>
+    <p>{{ course.description }}</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container reading">
+    {% if materials %}
+      {% for m in materials %}
+      <div class="module-card">
+        <h2 class="module-title">{{ m.title }}</h2>
+        {% if m.video %}
+        <div class="module-video">
+          <iframe
+            src="https://www.youtube.com/embed/{{ m.video }}"
+            title="{{ m.title }}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen loading="lazy"></iframe>
+        </div>
+        {% else %}
+        <div class="module-video module-video-empty">
+          <span>Video segera hadir</span>
+        </div>
+        {% endif %}
+        {% if m.notes %}<p class="module-notes">{{ m.notes }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="text-align:center; color:var(--muted);">
+        Materi untuk kelas ini sedang disiapkan. Nantikan ya.
+      </p>
+    {% endif %}
+
+    <div class="page-actions">
+      <a href="{{ url_for('account') }}" class="btn btn-outline">&larr; Kelas Saya</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
