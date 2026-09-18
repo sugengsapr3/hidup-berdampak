@@ -47,6 +47,13 @@ Repo: github.com/sugengsapr3/hidup-berdampak (auto-deploy ke Vercel)
        - Payment Notification URL: https://hidupberdampak.vercel.app/midtrans/notify
        - Finish Redirect URL:      https://hidupberdampak.vercel.app/akun
 
+- ⬜ 3b. (OPSIONAL, saat launching) Buat webhook balas HTTP 200 untuk notifikasi
+       TES Midtrans (order_id diawali "payment_notif_test_"), supaya tombol
+       "Test notification" di dashboard sukses & email peringatan 403 berhenti.
+       Catatan: 403 saat ini adalah perilaku AMAN (menolak signature palsu),
+       pembayaran asli tetap berfungsi. Ini murni kosmetik. >> INGATKAN user
+       soal ini saat mau launching ke LIVE PRODUCTION. <<
+
 - ⬜ 4. Deploy ulang (push ke GitHub, Vercel auto-deploy)
 
 - ⬜ 5. Verifikasi rekening bank untuk pencairan dana di dashboard Midtrans
