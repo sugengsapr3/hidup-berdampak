@@ -426,7 +426,7 @@ CHILDREN = [
     },
     {
         "slug": "fiori",
-        "name": "Fiori",
+        "name": "Fiori Ghania Albina",
         "status": "coming_soon",
         "focus": "Curiosity, Science & Creativity",
         "short": (
@@ -444,7 +444,7 @@ CHILDREN = [
     },
     {
         "slug": "hazel",
-        "name": "Hazel",
+        "name": "Hazel Aghnia Dinara",
         "status": "coming_soon",
         "focus": "Learning, Exploration & Creativity",
         "short": (
