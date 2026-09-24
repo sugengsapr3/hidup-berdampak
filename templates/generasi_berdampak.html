@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Generasi Berdampak | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}Perjalanan generasi muda dalam belajar, berkarya, memimpin, bertumbuh, dan memberi dampak.{% endblock %}
+
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Keluarga &amp; Legacy</span>
+    <h1>Generasi Berdampak</h1>
+    <p>Learning. Growing. Creating. Contributing.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container reading">
+    <p class="lead-quote">
+      Setiap anak memiliki perjalanan yang berbeda. Di sini kami mendokumentasikan
+      proses mereka belajar, mencoba hal baru, memimpin, membangun project,
+      menghadapi tantangan, dan memberikan kontribusi kepada lingkungan di sekitarnya.
+    </p>
+    <p class="gb-principle">Activity → Evidence → Impact → Reflection</p>
+  </div>
+</section>
+
+<section class="section section-surface">
+  <div class="container">
+    <div class="card-grid grid-2">
+      {% for child in children %}
+      {% if child.status == 'active' %}
+      <a href="{{ url_for('child_profile', slug=child.slug) }}" class="content-card">
+        <h3>{{ child.name }}</h3>
+        <p class="gb-focus">{{ child.focus }}</p>
+        <p>{{ child.short }}</p>
+        <span class="link-arrow">Explore Journey &rarr;</span>
+      </a>
+      {% else %}
+      <div class="content-card gb-soon">
+        <span class="badge badge-soon">Coming Soon</span>
+        <h3>{{ child.name }}</h3>
+        <p class="gb-focus">{{ child.focus }}</p>
+        <p>{{ child.short }}</p>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

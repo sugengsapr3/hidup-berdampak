@@ -26,4 +26,21 @@
     </div>
   </div>
 </section>
+
+{% if topic.slug == 'keluarga-legacy' %}
+<section class="section section-surface">
+  <div class="container">
+    <a href="{{ url_for('generasi_berdampak') }}" class="feature-card">
+      <span class="kicker">Generasi Berdampak</span>
+      <h2>Perjalanan anak-anak untuk belajar, bertumbuh, memimpin, berkarya, dan memberi dampak.</h2>
+      <p>
+        Bukan tentang seberapa banyak pencapaian yang dikumpulkan, tetapi tentang
+        proses belajar, keberanian mencoba, kontribusi, dan nilai yang mereka bangun
+        sepanjang perjalanan.
+      </p>
+      <span class="link-arrow">Lihat Perjalanan Mereka &rarr;</span>
+    </a>
+  </div>
+</section>
+{% endif %}
 {% endblock %}

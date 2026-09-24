@@ -305,6 +305,165 @@ AUTH_PROVIDERS = [
 ]
 
 # =====================================================================
+# GENERASI BERDAMPAK (bagian dari Keluarga & Legacy)
+# Portofolio perjalanan anak: journey, projects, leadership, achievements,
+# learning, reflections, impact. Semua modular & mudah ditambah.
+#
+# CARA EDIT:
+# - Tambah anak baru  : tambahkan satu dict ke list CHILDREN.
+# - Tambah project     : tambahkan dict ke "projects" milik anak.
+# - Tambah achievement : tambahkan dict ke "achievements".
+# - Tambah reflection  : tambahkan dict ke "reflections".
+# Field yang belum ada faktanya: biarkan list-nya kosong ([]) -> tampil
+# empty-state yang rapi. JANGAN mengisi data fiktif.
+#
+# PRIVASI: jangan menaruh tanggal lahir lengkap, alamat, no. HP, no. induk
+# siswa, atau data pribadi sensitif anak di sini.
+# =====================================================================
+CHILDREN = [
+    {
+        "slug": "dzaky",
+        "name": "Dzaky Albarra",
+        "status": "active",  # "active" | "coming_soon"
+        "focus": "Business, Communication & Global Perspective",
+        "short": (
+            "Mengeksplorasi komunikasi, bisnis, bahasa, kepemimpinan, dan "
+            "perspektif global melalui berbagai pengalaman dan project."
+        ),
+        "intro": (
+            "A collection of experiences, projects, leadership moments and "
+            "reflections that shape his journey of learning and contribution."
+        ),
+        "journey": (
+            "Dzaky tertarik pada dunia komunikasi, bisnis, dan bahasa. Saat ini "
+            "ia sedang mengembangkan kemampuan bahasa Inggris dan Mandarin, serta "
+            "belajar dari pengalaman berorganisasi di sekolah. Arah perkembangannya "
+            "adalah memperkuat kemampuan berkomunikasi dan memahami perspektif global."
+        ),
+        "projects": [
+            {
+                "title": "Arabic & English Dictionary Project",
+                "challenge": (
+                    "Banyak teman kesulitan menghubungkan kosakata Arab dan Inggris "
+                    "dalam satu rujukan yang sederhana dan mudah dipakai."
+                ),
+                "idea": (
+                    "Menyusun kamus dwibahasa Arab-Inggris yang ringkas untuk "
+                    "membantu proses belajar sehari-hari."
+                ),
+                "process": (
+                    "Mengumpulkan kosakata, menyusunnya secara rapi, dan merapikan "
+                    "formatnya agar mudah dibaca."
+                ),
+                "role": "Penggagas dan penyusun.",
+                "learned": (
+                    "Belajar menyusun informasi secara terstruktur dan pentingnya "
+                    "ketekunan dalam menyelesaikan sebuah karya."
+                ),
+                "impact": "Impact details will be added later.",
+            },
+        ],
+        "leadership": [
+            {
+                "title": "Komunikasi Organisasi Sekolah",
+                "role": "Bagian komunikasi",
+                "organization": "Organisasi sekolah",
+                "year": "",
+                "description": (
+                    "Terlibat dalam area komunikasi kegiatan organisasi di sekolah."
+                ),
+                "responsibility": "Membantu menyampaikan informasi kegiatan.",
+                "learning": "Belajar menyampaikan pesan dengan jelas kepada banyak orang.",
+            },
+        ],
+        "achievements": [],
+        "learning": [
+            {"area": "English", "note": "Sedang dikembangkan secara aktif."},
+            {"area": "Mandarin", "note": "Sedang dipelajari."},
+            {"area": "Communication", "note": "Diasah lewat pengalaman berorganisasi."},
+        ],
+        "reflections": [],
+        "impact": [],
+    },
+    {
+        "slug": "hadziq",
+        "name": "Hadziq Dizhwar",
+        "status": "active",
+        "focus": "Science, Health & Leadership",
+        "short": (
+            "Membangun rasa ingin tahu terhadap sains dan kesehatan sambil "
+            "mengembangkan leadership, communication, dan kontribusi sosial."
+        ),
+        "intro": (
+            "A journey of curiosity in science and health, alongside growing "
+            "leadership, communication, and contribution."
+        ),
+        "journey": (
+            "Hadziq memiliki ketertarikan pada bidang sains dan kesehatan. Ia "
+            "pernah mendapat tanggung jawab (PIC) dalam kegiatan sekolah dan "
+            "memiliki pengalaman public speaking. Saat ini ia sedang mengembangkan "
+            "kemampuan bahasa Inggris."
+        ),
+        "projects": [],
+        "leadership": [
+            {
+                "title": "PIC Kegiatan Sekolah",
+                "role": "Penanggung jawab kegiatan",
+                "organization": "Kegiatan sekolah",
+                "year": "",
+                "description": "Mendapatkan tanggung jawab sebagai PIC dalam kegiatan sekolah.",
+                "responsibility": "Mengoordinasikan bagian dari kegiatan.",
+                "learning": "Belajar tanggung jawab dan mengelola tugas.",
+            },
+        ],
+        "achievements": [],
+        "learning": [
+            {"area": "English", "note": "Sedang dikembangkan."},
+            {"area": "Public Speaking", "note": "Diasah lewat kegiatan/event."},
+        ],
+        "reflections": [],
+        "impact": [],
+    },
+    {
+        "slug": "fiori",
+        "name": "Fiori",
+        "status": "coming_soon",
+        "focus": "Curiosity, Science & Creativity",
+        "short": (
+            "Belajar memahami dunia melalui rasa ingin tahu, project sederhana, "
+            "membaca, bereksperimen, dan berbagi pengetahuan."
+        ),
+        "intro": "",
+        "journey": "",
+        "projects": [],
+        "leadership": [],
+        "achievements": [],
+        "learning": [],
+        "reflections": [],
+        "impact": [],
+    },
+    {
+        "slug": "hazel",
+        "name": "Hazel",
+        "status": "coming_soon",
+        "focus": "Learning, Exploration & Creativity",
+        "short": (
+            "Membangun fondasi belajar melalui eksplorasi, kreativitas, kebiasaan "
+            "baik, dan pengalaman sehari-hari."
+        ),
+        "intro": "",
+        "journey": "",
+        "projects": [],
+        "leadership": [],
+        "achievements": [],
+        "learning": [],
+        "reflections": [],
+        "impact": [],
+    },
+]
+
+
+# =====================================================================
 # MATERI KELAS (modul yang tampil setelah user punya akses)
 # Di-keyed berdasarkan slug kelas. Tiap modul: judul, video (YouTube embed
 # opsional), dan catatan/isi teks. Ganti "video" dengan ID video YouTube kamu.

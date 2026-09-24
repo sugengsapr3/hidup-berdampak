@@ -104,6 +104,23 @@ def learn_detail(slug):
     return render_template("learn_detail.html", topic=topic, active="learn")
 
 
+# ---------------------------------------------------------------- Generasi Berdampak
+# Bagian dari Keluarga & Legacy: portofolio perjalanan anak.
+@app.route("/generasi-berdampak")
+def generasi_berdampak():
+    return render_template(
+        "generasi_berdampak.html", children=data.CHILDREN, active="learn"
+    )
+
+
+@app.route("/generasi-berdampak/<slug>")
+def child_profile(slug):
+    child = next((c for c in data.CHILDREN if c["slug"] == slug), None)
+    if child is None:
+        abort(404)
+    return render_template("child_profile.html", child=child, active="learn")
+
+
 # ---------------------------------------------------------------- Untuk Bisnis
 @app.route("/untuk-bisnis")
 def business():

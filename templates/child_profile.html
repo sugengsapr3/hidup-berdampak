@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ child.name }} | Generasi Berdampak | HIDUP. BERDAMPAK{% endblock %}
+{% block description %}{{ child.name }} — {{ child.focus }}. Perjalanan belajar, project, kepemimpinan, dan kontribusi.{% endblock %}
+
+{% block content %}
+<!-- A. HERO -->
+<section class="page-hero">
+  <div class="container">
+    <span class="kicker">Generasi Berdampak</span>
+    <h1>{{ child.name }}</h1>
+    <p>{{ child.focus }}</p>
+  </div>
+</section>
+
+{% if child.status == 'coming_soon' %}
+<section class="section">
+  <div class="container reading">
+    <div class="gb-empty">
+      <p>Halaman ini sedang disiapkan. Perjalanan {{ child.name }} akan segera hadir.</p>
+    </div>
+    <div class="page-actions">
+      <a href="{{ url_for('generasi_berdampak') }}" class="btn btn-outline">&larr; Generasi Berdampak</a>
+    </div>
+  </div>
+</section>
+{% else %}
+<section class="section">
+  <div class="container reading">
+    {% if child.intro %}<p class="lead-quote">{{ child.intro }}</p>{% endif %}
+
+    <!-- B. MY JOURNEY -->
+    {% if child.journey %}
+    <h2>My Journey</h2>
+    <p>{{ child.journey }}</p>
+    {% endif %}
+
+    <!-- C. PROJECTS -->
+    <h2>Projects &amp; Initiatives</h2>
+    {% if child.projects %}
+      {% for p in child.projects %}
+      <div class="gb-card">
+        <h3>{{ p.title }}</h3>
+        {% if p.challenge %}<p><strong>The Challenge.</strong> {{ p.challenge }}</p>{% endif %}
+        {% if p.idea %}<p><strong>The Idea.</strong> {{ p.idea }}</p>{% endif %}
+        {% if p.process %}<p><strong>The Process.</strong> {{ p.process }}</p>{% endif %}
+        {% if p.role %}<p><strong>My Role.</strong> {{ p.role }}</p>{% endif %}
+        {% if p.learned %}<p><strong>What I Learned.</strong> {{ p.learned }}</p>{% endif %}
+        {% if p.impact %}<p class="gb-muted"><strong>Result / Impact.</strong> {{ p.impact }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="gb-empty">Projects are being documented. More will be shared as the journey continues.</p>
+    {% endif %}
+
+    <!-- D. LEADERSHIP -->
+    <h2>Leadership &amp; Organization</h2>
+    {% if child.leadership %}
+      <div class="gb-timeline">
+        {% for l in child.leadership %}
+        <div class="gb-timeline-item">
+          <h3>{{ l.title }}</h3>
+          <p class="gb-meta">
+            {{ l.role }}{% if l.organization %} &middot; {{ l.organization }}{% endif %}{% if l.year %} &middot; {{ l.year }}{% endif %}
+          </p>
+          {% if l.description %}<p>{{ l.description }}</p>{% endif %}
+          {% if l.responsibility %}<p><strong>Responsibility.</strong> {{ l.responsibility }}</p>{% endif %}
+          {% if l.learning %}<p><strong>Learning.</strong> {{ l.learning }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="gb-empty">Leadership experiences will be added as the journey continues.</p>
+    {% endif %}
+
+    <!-- E. ACHIEVEMENTS -->
+    <h2>Achievements &amp; Milestones</h2>
+    {% if child.achievements %}
+      <div class="gb-timeline">
+        {% for a in child.achievements %}
+        <div class="gb-timeline-item">
+          <h3>{{ a.title }}</h3>
+          <p class="gb-meta">{{ a.type }}{% if a.year %} &middot; {{ a.year }}{% endif %}</p>
+          {% if a.description %}<p>{{ a.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="gb-empty">Every milestone is part of the journey. More stories will be added as the journey continues.</p>
+    {% endif %}
+
+    <!-- F. LEARNING JOURNEY -->
+    <h2>Learning Journey</h2>
+    {% if child.learning %}
+      <div class="gb-learn-grid">
+        {% for item in child.learning %}
+        <div class="gb-learn-item">
+          <strong>{{ item.area }}</strong>
+          {% if item.note %}<span>{{ item.note }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="gb-empty">Learning areas will be documented as the journey continues.</p>
+    {% endif %}
+
+    <!-- G. REFLECTIONS -->
+    <h2>Reflections</h2>
+    {% if child.reflections %}
+      {% for r in child.reflections %}
+      <div class="gb-card">
+        {% if r.title %}<h3>{{ r.title }}</h3>{% endif %}
+        {% if r.happened %}<p><strong>What happened.</strong> {{ r.happened }}</p>{% endif %}
+        {% if r.difficult %}<p><strong>What was difficult.</strong> {{ r.difficult }}</p>{% endif %}
+        {% if r.learned %}<p><strong>What I learned.</strong> {{ r.learned }}</p>{% endif %}
+        {% if r.differently %}<p><strong>What I would do differently.</strong> {{ r.differently }}</p>{% endif %}
+        {% if r.changed %}<p><strong>How this changed me.</strong> {{ r.changed }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="gb-empty">Reflections will be shared along the way.</p>
+    {% endif %}
+
+    <!-- H. CONTRIBUTION / IMPACT -->
+    <h2>Contribution &amp; Impact</h2>
+    {% if child.impact %}
+      <div class="gb-timeline">
+        {% for i in child.impact %}
+        <div class="gb-timeline-item">
+          <h3>{{ i.title }}</h3>
+          {% if i.description %}<p>{{ i.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="gb-empty">Small but real contributions will be documented here.</p>
+    {% endif %}
+
+    <div class="page-actions">
+      <a href="{{ url_for('generasi_berdampak') }}" class="btn btn-outline">&larr; Generasi Berdampak</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
