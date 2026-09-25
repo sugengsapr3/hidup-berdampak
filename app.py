@@ -24,6 +24,7 @@ import uuid
 import data
 import db
 import payments
+import emails
 
 app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
@@ -408,6 +409,18 @@ def midtrans_notify():
     if txn_status in ("capture", "settlement") and fraud == "accept":
         db.set_order_status(order_id, "paid")
         db.enroll(order["email"], order["course_slug"], status="paid")
+        # Kirim email notifikasi ke pembeli & admin (aman bila email belum dikonfigurasi).
+        if emails.emails_enabled():
+            try:
+                course = db.get_course(order["course_slug"])
+                course_title = course["title"] if course else order["course_slug"]
+                buyer_name = db.get_user_name(order["email"]) or ""
+                res = emails.send_purchase_emails(
+                    order["email"], buyer_name, course_title, order["amount"]
+                )
+                app.logger.info("Email notif pembelian: %s", res)
+            except Exception as e:
+                app.logger.error("Gagal kirim email notif: %s", repr(e))
     elif txn_status in ("cancel", "deny", "expire"):
         db.set_order_status(order_id, "failed")
     return "OK", 200

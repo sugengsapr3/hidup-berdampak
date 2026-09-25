@@ -124,6 +124,16 @@ def upsert_user(email, name, picture=""):
         return user_id
 
 
+def get_user_name(email):
+    """Ambil nama user dari email. Kembalikan None bila tidak ada."""
+    if not email:
+        return None
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT name FROM users WHERE email = %s;", (email,))
+        r = cur.fetchone()
+    return r[0] if r else None
+
+
 # ------------------------------------------------------------------ Courses
 def list_courses():
     with _conn() as conn, conn.cursor() as cur:
