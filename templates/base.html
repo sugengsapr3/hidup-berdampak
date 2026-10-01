@@ -63,6 +63,9 @@
             {% endif %}
           {% endfor %}
           <li class="nav-mobile-actions">
+            {% if is_admin %}
+            <a href="{{ url_for('admin_home') }}">Admin</a>
+            {% endif %}
             {% if current_user %}
             <a href="{{ url_for('account') }}">{{ current_user.name.split(' ')[0] }}</a>
             <a href="{{ url_for('logout') }}">Keluar</a>
@@ -75,6 +78,9 @@
       </nav>
 
       <div class="nav-actions">
+        {% if is_admin %}
+        <a href="{{ url_for('admin_home') }}" class="btn-login" style="margin-right:6px;">Admin</a>
+        {% endif %}
         {% if current_user %}
         <a href="{{ url_for('account') }}" class="btn-login">
           {% if current_user.picture %}

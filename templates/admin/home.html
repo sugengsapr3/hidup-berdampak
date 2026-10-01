@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin — {{ site.brand }}{% endblock %}
+{% block description %}Kelola konten Generasi Berdampak.{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 56px 0; max-width: 860px;">
+  <p style="color: var(--muted, #888); margin: 0 0 6px; font-size: .9rem; letter-spacing: .04em; text-transform: uppercase;">Dashboard Admin</p>
+  <h1 style="font-size: 2rem; margin: 0 0 10px;">Generasi Berdampak</h1>
+  <p style="color: var(--muted, #666); margin: 0 0 28px;">
+    Edit profil & portofolio anak langsung dari sini. Perubahan tersimpan di database
+    dan langsung tampil di situs tanpa perlu deploy ulang.
+  </p>
+
+  {% if not children %}
+  <div style="border: 1px dashed #d0cfc9; border-radius: 14px; padding: 28px; text-align: center; background: #faf9f6;">
+    <p style="margin: 0 0 16px; color: #666;">
+      Database anak masih kosong. Jalankan inisialisasi sekali untuk membuat tabel
+      dan memindahkan data awal 4 anak ke database.
+    </p>
+    <a href="{{ url_for('admin_init') }}" class="btn-login"
+       style="background:#0D0F12; color:#fff; padding:12px 22px; border-radius:999px; display:inline-block;">
+      Inisialisasi Database
+    </a>
+  </div>
+  {% else %}
+  <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+    <a href="{{ url_for('admin_init') }}" style="font-size:.85rem; color:#888; text-decoration:underline;">
+      Jalankan ulang inisialisasi
+    </a>
+  </div>
+  <div style="display:grid; gap:14px;">
+    {% for c in children %}
+    <a href="{{ url_for('admin_child', slug=c.slug) }}"
+       style="display:flex; align-items:center; justify-content:space-between; gap:16px;
+              border:1px solid #e7e5df; border-radius:14px; padding:18px 22px;
+              text-decoration:none; color:inherit; background:#fff;">
+      <div>
+        <div style="font-weight:700; font-size:1.1rem;">{{ c.name }}</div>
+        <div style="color:#888; font-size:.9rem; margin-top:2px;">{{ c.focus or 'Fokus belum diisi' }}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        {% if c.status == 'coming_soon' %}
+        <span style="font-size:.75rem; background:#fff4e0; color:#8a5a00; padding:4px 10px; border-radius:999px;">Segera hadir</span>
+        {% else %}
+        <span style="font-size:.75rem; background:#e5f5ea; color:#1f6b3a; padding:4px 10px; border-radius:999px;">Aktif</span>
+        {% endif %}
+        <span style="color:#bbb;">Edit &rarr;</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

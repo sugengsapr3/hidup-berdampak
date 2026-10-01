@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ child.name }} — Admin{% endblock %}
+{% block description %}Kelola konten {{ child.name }}.{% endblock %}
+
+{% set section_labels = {
+  'projects': 'Proyek',
+  'leadership': 'Kepemimpinan',
+  'achievements': 'Prestasi',
+  'learning': 'Yang Sedang Dipelajari',
+  'reflections': 'Refleksi',
+  'impact': 'Dampak'
+} %}
+
+{# Field (nama internal -> label tampil) untuk setiap section #}
+{% set section_fields = {
+  'projects': [
+    ['title','Judul proyek'], ['challenge','Tantangan'], ['idea','Ide / solusi'],
+    ['process','Proses'], ['role','Peran'], ['learned','Pelajaran'], ['impact','Dampak']
+  ],
+  'leadership': [
+    ['title','Judul'], ['role','Peran'], ['organization','Organisasi'], ['year','Tahun'],
+    ['description','Deskripsi'], ['responsibility','Tanggung jawab'], ['learning','Pelajaran']
+  ],
+  'achievements': [
+    ['title','Judul prestasi'], ['description','Deskripsi']
+  ],
+  'learning': [
+    ['area','Bidang'], ['note','Catatan']
+  ],
+  'reflections': [
+    ['happened','Apa yang terjadi'], ['difficult','Bagian tersulit'],
+    ['learned','Yang dipelajari'], ['differently','Yang akan dilakukan berbeda'],
+    ['changed','Apa yang berubah']
+  ],
+  'impact': [
+    ['title','Judul'], ['description','Deskripsi']
+  ]
+} %}
+
+{# Field yang pakai textarea (teks panjang) #}
+{% set long_fields = ['challenge','idea','process','learned','impact','description',
+                      'responsibility','learning','note','happened','difficult',
+                      'differently','changed'] %}
+
+{% block content %}
+<section class="container" style="padding: 48px 0; max-width: 820px;">
+  <a href="{{ url_for('admin_home') }}" style="color:#888; text-decoration:none; font-size:.9rem;">&larr; Semua anak</a>
+  <h1 style="font-size: 1.9rem; margin: 10px 0 24px;">{{ child.name }}</h1>
+
+  <!-- ========== PROFIL ========== -->
+  <div style="border:1px solid #e7e5df; border-radius:16px; padding:24px; background:#fff; margin-bottom:28px;">
+    <h2 style="font-size:1.15rem; margin:0 0 16px;">Profil</h2>
+    <form method="post" action="{{ url_for('admin_child_profile', slug=child.slug) }}" style="display:grid; gap:14px;">
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Nama</span>
+        <input name="name" value="{{ child.name }}" required
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Status</span>
+        <select name="status" style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+          <option value="active" {{ 'selected' if child.status == 'active' else '' }}>Aktif</option>
+          <option value="coming_soon" {{ 'selected' if child.status == 'coming_soon' else '' }}>Segera hadir</option>
+        </select>
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Fokus (mis. Business, Communication &amp; Global Perspective)</span>
+        <input name="focus" value="{{ child.focus or '' }}"
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Ringkasan singkat (tampil di kartu)</span>
+        <textarea name="short" rows="2"
+                  style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">{{ child.short or '' }}</textarea>
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Intro (paragraf pembuka halaman profil)</span>
+        <textarea name="intro" rows="3"
+                  style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">{{ child.intro or '' }}</textarea>
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Perjalanan (journey)</span>
+        <textarea name="journey" rows="3"
+                  style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">{{ child.journey or '' }}</textarea>
+      </label>
+      <div>
+        <button type="submit" class="btn-login"
+                style="background:#0D0F12; color:#fff; padding:11px 22px; border:none; border-radius:999px; cursor:pointer;">
+          Simpan Profil
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ========== SECTIONS ========== -->
+  {% for sec in sections %}
+  <div style="border:1px solid #e7e5df; border-radius:16px; padding:24px; background:#fff; margin-bottom:22px;">
+    <h2 style="font-size:1.15rem; margin:0 0 4px;">{{ section_labels.get(sec, sec) }}</h2>
+
+    {# Daftar item yang sudah ada #}
+    {% set items = child[sec] if child[sec] is defined else [] %}
+    {% if items %}
+    <div style="display:grid; gap:10px; margin:14px 0 20px;">
+      {% for item in items %}
+      <div style="border:1px solid #eee; border-radius:11px; padding:14px 16px; background:#fafafa;">
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:start;">
+          <div style="font-size:.92rem; line-height:1.5;">
+            {% for key, label in section_fields.get(sec, []) %}
+              {% if item.get(key) %}
+              <div><strong style="color:#555;">{{ label }}:</strong> {{ item.get(key) }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <form method="post" action="{{ url_for('admin_item_delete', item_id=item._id) }}"
+                onsubmit="return confirm('Hapus item ini?');">
+            <input type="hidden" name="slug" value="{{ child.slug }}">
+            <button type="submit"
+                    style="background:none; border:none; color:#b00; cursor:pointer; font-size:.85rem;">Hapus</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:#aaa; font-size:.9rem; margin:10px 0 18px;">Belum ada item.</p>
+    {% endif %}
+
+    {# Form tambah item #}
+    <details>
+      <summary style="cursor:pointer; color:#0D0F12; font-weight:600; font-size:.92rem;">+ Tambah {{ section_labels.get(sec, sec) }}</summary>
+      <form method="post" action="{{ url_for('admin_item_add', slug=child.slug) }}"
+            style="display:grid; gap:12px; margin-top:14px;">
+        <input type="hidden" name="section" value="{{ sec }}">
+        {% for key, label in section_fields.get(sec, []) %}
+        <label style="display:grid; gap:5px;">
+          <span style="font-size:.82rem; color:#555;">{{ label }}</span>
+          {% if key in long_fields %}
+          <textarea name="{{ key }}" rows="2"
+                    style="padding:9px 11px; border:1px solid #ddd; border-radius:9px;"></textarea>
+          {% else %}
+          <input name="{{ key }}"
+                 style="padding:9px 11px; border:1px solid #ddd; border-radius:9px;">
+          {% endif %}
+        </label>
+        {% endfor %}
+        <div>
+          <button type="submit"
+                  style="background:#0D0F12; color:#fff; padding:10px 20px; border:none; border-radius:999px; cursor:pointer;">
+            Tambah
+          </button>
+        </div>
+      </form>
+    </details>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

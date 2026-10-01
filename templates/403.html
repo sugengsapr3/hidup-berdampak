@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Akses Ditolak — {{ site.brand }}{% endblock %}
+{% block description %}Halaman ini hanya untuk admin.{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 80px 0; text-align: center;">
+  <h1 style="font-size: 2rem; margin-bottom: 12px;">403 — Akses Ditolak</h1>
+  <p style="max-width: 520px; margin: 0 auto 24px; color: var(--muted, #666);">
+    Halaman ini hanya bisa diakses oleh admin. Kalau kamu merasa ini keliru,
+    pastikan kamu login dengan akun admin yang terdaftar.
+  </p>
+  <a href="{{ url_for('home') }}" class="btn-login">&larr; Kembali ke Beranda</a>
+</section>
+{% endblock %}

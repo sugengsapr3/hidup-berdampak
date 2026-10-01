@@ -30,6 +30,19 @@ app = Flask(__name__)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
+# Email admin yang boleh mengakses dashboard (/admin). Pisah dengan koma di env
+# ADMIN_EMAILS. Default: pemilik situs. Login tetap lewat Google.
+ADMIN_EMAILS = [
+    e.strip().lower()
+    for e in os.environ.get("ADMIN_EMAILS", "sugengsapr3@gmail.com").split(",")
+    if e.strip()
+]
+
+
+def is_admin():
+    u = session.get("user")
+    return bool(u and u.get("email", "").lower() in ADMIN_EMAILS)
+
 # Konfigurasi cookie session agar andal saat alur OAuth (kembali dari Google).
 # SameSite=Lax + Secure diperlukan supaya cookie 'state' OAuth tetap terbaca
 # saat callback di lingkungan HTTPS/serverless (Vercel).
@@ -76,6 +89,7 @@ def inject_globals():
         "footer_columns": data.FOOTER_COLUMNS,
         "current_year": datetime.now().year,
         "current_user": session.get("user"),
+        "is_admin": is_admin(),
     }
 
 
@@ -107,16 +121,40 @@ def learn_detail(slug):
 
 # ---------------------------------------------------------------- Generasi Berdampak
 # Bagian dari Keluarga & Legacy: portofolio perjalanan anak.
+# Baca dari DATABASE bila tersedia & sudah ada data; jika tidak, fallback ke data.py.
+def _children_source():
+    """Daftar anak dari DB bila ada, selain itu dari data.CHILDREN."""
+    if db.db_enabled():
+        try:
+            rows = db.list_children()
+            if rows:
+                return rows
+        except Exception as e:
+            app.logger.error("Gagal baca children dari DB: %s", repr(e))
+    return data.CHILDREN
+
+
+def _child_source(slug):
+    if db.db_enabled():
+        try:
+            c = db.get_child(slug)
+            if c:
+                return c
+        except Exception as e:
+            app.logger.error("Gagal baca child dari DB: %s", repr(e))
+    return next((c for c in data.CHILDREN if c["slug"] == slug), None)
+
+
 @app.route("/generasi-berdampak")
 def generasi_berdampak():
     return render_template(
-        "generasi_berdampak.html", children=data.CHILDREN, active="learn"
+        "generasi_berdampak.html", children=_children_source(), active="learn"
     )
 
 
 @app.route("/generasi-berdampak/<slug>")
 def child_profile(slug):
-    child = next((c for c in data.CHILDREN if c["slug"] == slug), None)
+    child = _child_source(slug)
     if child is None:
         abort(404)
     return render_template("child_profile.html", child=child, active="learn")
@@ -516,6 +554,111 @@ def join():
             )
             return redirect(url_for("join"))
     return render_template("join.html", active="join")
+
+
+# ================================================================
+# ADMIN — Dashboard Generasi Berdampak (hanya untuk admin)
+# ================================================================
+def _require_admin():
+    """Kembalikan None bila admin; selain itu kembalikan redirect/abort."""
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    if not is_admin():
+        abort(403)
+    return None
+
+
+@app.route("/admin")
+def admin_home():
+    guard = _require_admin()
+    if guard:
+        return guard
+    children = db.list_children() if db.db_enabled() else []
+    return render_template("admin/home.html", children=children, active="")
+
+
+@app.route("/admin/init")
+def admin_init():
+    """Buat tabel & migrasi data anak dari data.py (sekali). Hanya admin."""
+    guard = _require_admin()
+    if guard:
+        return guard
+    try:
+        db.init_db()
+        db.seed_children(data.CHILDREN)
+        flash("Database siap & data anak dimigrasi (jika tabel masih kosong).", "success")
+    except Exception as e:
+        app.logger.error("admin_init gagal: %s", repr(e))
+        flash(f"Gagal inisialisasi: {e}", "error")
+    return redirect(url_for("admin_home"))
+
+
+@app.route("/admin/anak/<slug>")
+def admin_child(slug):
+    guard = _require_admin()
+    if guard:
+        return guard
+    child = db.get_child(slug)
+    if not child:
+        abort(404)
+    return render_template(
+        "admin/child.html", child=child, sections=db.CHILD_SECTIONS, active=""
+    )
+
+
+@app.route("/admin/anak/<slug>/profil", methods=["POST"])
+def admin_child_profile(slug):
+    guard = _require_admin()
+    if guard:
+        return guard
+    f = request.form
+    db.upsert_child(
+        slug,
+        f.get("name", "").strip(),
+        f.get("status", "active").strip(),
+        f.get("focus", "").strip(),
+        f.get("short", "").strip(),
+        f.get("intro", "").strip(),
+        f.get("journey", "").strip(),
+    )
+    flash("Profil anak disimpan.", "success")
+    return redirect(url_for("admin_child", slug=slug))
+
+
+@app.route("/admin/anak/<slug>/item/tambah", methods=["POST"])
+def admin_item_add(slug):
+    guard = _require_admin()
+    if guard:
+        return guard
+    section = request.form.get("section", "").strip()
+    # Semua field selain 'section' jadi isi konten (dict).
+    content = {k: v.strip() for k, v in request.form.items() if k != "section" and v.strip()}
+    if section and content:
+        db.add_child_item(slug, section, content)
+        flash("Item ditambahkan.", "success")
+    else:
+        flash("Mohon isi minimal satu kolom.", "error")
+    return redirect(url_for("admin_child", slug=slug))
+
+
+@app.route("/admin/item/<int:item_id>/hapus", methods=["POST"])
+def admin_item_delete(item_id):
+    guard = _require_admin()
+    if guard:
+        return guard
+    item = db.get_child_item(item_id)
+    db.delete_child_item(item_id)
+    flash("Item dihapus.", "success")
+    # Kembali ke halaman anak terkait bila diketahui.
+    back_slug = request.form.get("slug", "")
+    if back_slug:
+        return redirect(url_for("admin_child", slug=back_slug))
+    return redirect(url_for("admin_home"))
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html", active=""), 403
 
 
 @app.errorhandler(404)

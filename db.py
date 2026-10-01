@@ -12,6 +12,7 @@ Desain:
 - init_db() membuat tabel bila belum ada, dan mengisi kelas awal (seed).
 """
 import os
+import json
 
 import psycopg
 
@@ -78,6 +79,37 @@ def init_db():
                 amount       INTEGER NOT NULL,
                 status       TEXT NOT NULL DEFAULT 'pending',
                 created_at   TIMESTAMPTZ DEFAULT now()
+            );
+            """
+        )
+        # Generasi Berdampak: profil anak.
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS children (
+                id          SERIAL PRIMARY KEY,
+                slug        TEXT UNIQUE NOT NULL,
+                name        TEXT NOT NULL,
+                status      TEXT NOT NULL DEFAULT 'active',
+                focus       TEXT DEFAULT '',
+                short       TEXT DEFAULT '',
+                intro       TEXT DEFAULT '',
+                journey     TEXT DEFAULT '',
+                sort_order  INTEGER DEFAULT 0,
+                created_at  TIMESTAMPTZ DEFAULT now()
+            );
+            """
+        )
+        # Sub-konten anak (project/leadership/achievement/learning/reflection/impact).
+        # Fleksibel: tiap item disimpan sebagai JSON di kolom 'content'.
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS child_items (
+                id          SERIAL PRIMARY KEY,
+                child_id    INTEGER NOT NULL REFERENCES children(id) ON DELETE CASCADE,
+                section     TEXT NOT NULL,
+                content     JSONB NOT NULL DEFAULT '{}',
+                sort_order  INTEGER DEFAULT 0,
+                created_at  TIMESTAMPTZ DEFAULT now()
             );
             """
         )
@@ -251,3 +283,135 @@ def my_courses(email):
         )
         rows = cur.fetchall()
     return [{"slug": r[0], "title": r[1], "status": r[2]} for r in rows]
+
+
+# ==================================================================
+# GENERASI BERDAMPAK — profil anak & sub-konten
+# ==================================================================
+# Urutan section saat ditampilkan di halaman profil & dashboard.
+CHILD_SECTIONS = [
+    "projects", "leadership", "achievements", "learning", "reflections", "impact",
+]
+
+
+def list_children():
+    """Daftar semua anak (untuk landing & dashboard)."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug, name, status, focus, short FROM children ORDER BY sort_order, id;"
+        )
+        rows = cur.fetchall()
+    return [
+        {"slug": r[0], "name": r[1], "status": r[2], "focus": r[3], "short": r[4]}
+        for r in rows
+    ]
+
+
+def get_child(slug):
+    """Ambil profil 1 anak + semua sub-kontennya, dikelompokkan per section."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT id, slug, name, status, focus, short, intro, journey FROM children WHERE slug = %s;",
+            (slug,),
+        )
+        r = cur.fetchone()
+        if not r:
+            return None
+        child = {
+            "id": r[0], "slug": r[1], "name": r[2], "status": r[3],
+            "focus": r[4], "short": r[5], "intro": r[6], "journey": r[7],
+        }
+        cur.execute(
+            "SELECT id, section, content FROM child_items WHERE child_id = %s ORDER BY sort_order, id;",
+            (child["id"],),
+        )
+        items = cur.fetchall()
+    # Kelompokkan per section.
+    for sec in CHILD_SECTIONS:
+        child[sec] = []
+    for item_id, section, content in items:
+        data = dict(content) if content else {}
+        data["_id"] = item_id  # untuk edit/hapus di dashboard
+        child.setdefault(section, []).append(data)
+    return child
+
+
+def child_exists(slug):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT 1 FROM children WHERE slug = %s;", (slug,))
+        return cur.fetchone() is not None
+
+
+def upsert_child(slug, name, status, focus, short, intro, journey, sort_order=0):
+    """Buat/perbarui profil anak (berdasarkan slug)."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO children (slug, name, status, focus, short, intro, journey, sort_order)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (slug) DO UPDATE SET
+                name=EXCLUDED.name, status=EXCLUDED.status, focus=EXCLUDED.focus,
+                short=EXCLUDED.short, intro=EXCLUDED.intro, journey=EXCLUDED.journey,
+                sort_order=EXCLUDED.sort_order;
+            """,
+            (slug, name, status, focus, short, intro, journey, sort_order),
+        )
+        conn.commit()
+
+
+def add_child_item(slug, section, content):
+    """Tambah 1 item (project/reflection/dll) ke anak. content = dict."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT id FROM children WHERE slug = %s;", (slug,))
+        c = cur.fetchone()
+        if not c:
+            return False
+        cur.execute(
+            "INSERT INTO child_items (child_id, section, content) VALUES (%s, %s, %s);",
+            (c[0], section, json.dumps(content)),
+        )
+        conn.commit()
+        return True
+
+
+def update_child_item(item_id, content):
+    """Perbarui 1 item berdasarkan id."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE child_items SET content = %s WHERE id = %s;",
+            (json.dumps(content), item_id),
+        )
+        conn.commit()
+
+
+def delete_child_item(item_id):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM child_items WHERE id = %s;", (item_id,))
+        conn.commit()
+
+
+def get_child_item(item_id):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT id, child_id, section, content FROM child_items WHERE id = %s;", (item_id,))
+        r = cur.fetchone()
+    if not r:
+        return None
+    return {"id": r[0], "child_id": r[1], "section": r[2], "content": dict(r[3]) if r[3] else {}}
+
+
+def seed_children(children_data):
+    """Isi tabel children dari data awal (data.CHILDREN) HANYA bila tabel kosong.
+    Aman dipanggil berulang: tidak menimpa data yang sudah diedit lewat dashboard."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM children;")
+        if cur.fetchone()[0] > 0:
+            return  # sudah ada data, jangan timpa
+    for idx, ch in enumerate(children_data):
+        upsert_child(
+            ch["slug"], ch["name"], ch.get("status", "active"),
+            ch.get("focus", ""), ch.get("short", ""), ch.get("intro", ""),
+            ch.get("journey", ""), sort_order=idx,
+        )
+        for sec in CHILD_SECTIONS:
+            for item in ch.get(sec, []):
+                add_child_item(ch["slug"], sec, item)
