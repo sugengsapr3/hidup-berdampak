@@ -39,9 +39,21 @@ ADMIN_EMAILS = [
 ]
 
 
-def is_admin():
+def current_email():
     u = session.get("user")
-    return bool(u and u.get("email", "").lower() in ADMIN_EMAILS)
+    return (u.get("email", "") if u else "").lower()
+
+
+def is_admin():
+    return bool(current_email()) and current_email() in ADMIN_EMAILS
+
+
+def can_edit_child(child):
+    """True bila user boleh mengedit anak ini: admin, atau pemilik (owner_email)."""
+    if is_admin():
+        return True
+    owner = (child.get("owner_email") or "").lower() if child else ""
+    return bool(current_email()) and current_email() == owner
 
 # Konfigurasi cookie session agar andal saat alur OAuth (kembali dari Google).
 # SameSite=Lax + Secure diperlukan supaya cookie 'state' OAuth tetap terbaca
@@ -568,9 +580,16 @@ def _require_admin():
     return None
 
 
+def _require_login():
+    """Kembalikan None bila sudah login; selain itu redirect ke login."""
+    if not session.get("user"):
+        return redirect(url_for("login"))
+    return None
+
+
 @app.route("/admin")
 def admin_home():
-    guard = _require_admin()
+    guard = _require_login()
     if guard:
         return guard
     # Tahan banting: bila tabel belum dibuat (belum pernah /admin/init),
@@ -583,6 +602,18 @@ def admin_home():
         except Exception as e:
             app.logger.error("admin_home list_children gagal: %s", repr(e))
             children = []
+
+    # Anak (non-admin): langsung ke halaman edit miliknya sendiri.
+    if not is_admin():
+        try:
+            own = db.get_child_slug_by_owner(current_email()) if db.db_enabled() else None
+        except Exception as e:
+            app.logger.error("admin_home owner lookup gagal: %s", repr(e))
+            own = None
+        if own:
+            return redirect(url_for("admin_child", slug=own))
+        abort(403)  # bukan admin & bukan pemilik anak mana pun
+
     return render_template("admin/home.html", children=children, active="")
 
 
@@ -595,26 +626,41 @@ def admin_init():
     try:
         db.init_db()
         db.seed_children(data.CHILDREN)
-        flash("Database siap & data anak dimigrasi (jika tabel masih kosong).", "success")
+        # Set/perbarui email pemilik tiap anak (idempoten, tak menimpa konten).
+        db.set_child_owners(data.CHILDREN)
+        flash("Database siap, data anak dimigrasi, email pemilik diperbarui.", "success")
     except Exception as e:
         app.logger.error("admin_init gagal: %s", repr(e))
         flash(f"Gagal inisialisasi: {e}", "error")
     return redirect(url_for("admin_home"))
 
 
-@app.route("/admin/anak/<slug>")
-def admin_child(slug):
-    guard = _require_admin()
-    if guard:
-        return guard
+def _load_editable_child(slug):
+    """Ambil anak & pastikan user boleh mengeditnya.
+
+    Kembalikan (child, None) bila boleh; (None, response) bila harus
+    redirect/abort (belum login, DB belum siap, tidak ada, atau 403).
+    """
+    if not session.get("user"):
+        return None, redirect(url_for("login"))
     try:
         child = db.get_child(slug)
     except Exception as e:
-        app.logger.error("admin_child get_child gagal: %s", repr(e))
-        flash("Database belum siap. Klik 'Inisialisasi Database' dulu.", "error")
-        return redirect(url_for("admin_home"))
+        app.logger.error("get_child gagal: %s", repr(e))
+        flash("Database belum siap. Hubungi admin.", "error")
+        return None, redirect(url_for("admin_home"))
     if not child:
-        abort(404)
+        return None, abort(404)
+    if not can_edit_child(child):
+        return None, abort(403)
+    return child, None
+
+
+@app.route("/admin/anak/<slug>")
+def admin_child(slug):
+    child, resp = _load_editable_child(slug)
+    if resp:
+        return resp
     return render_template(
         "admin/child.html", child=child, sections=db.CHILD_SECTIONS, active=""
     )
@@ -622,28 +668,34 @@ def admin_child(slug):
 
 @app.route("/admin/anak/<slug>/profil", methods=["POST"])
 def admin_child_profile(slug):
-    guard = _require_admin()
-    if guard:
-        return guard
+    child, resp = _load_editable_child(slug)
+    if resp:
+        return resp
     f = request.form
+    # Status (aktif/coming_soon) hanya boleh diubah admin. Untuk anak,
+    # pertahankan status yang sudah ada.
+    if is_admin():
+        status = f.get("status", "active").strip()
+    else:
+        status = child.get("status", "active")
     db.upsert_child(
         slug,
         f.get("name", "").strip(),
-        f.get("status", "active").strip(),
+        status,
         f.get("focus", "").strip(),
         f.get("short", "").strip(),
         f.get("intro", "").strip(),
         f.get("journey", "").strip(),
     )
-    flash("Profil anak disimpan.", "success")
+    flash("Profil disimpan.", "success")
     return redirect(url_for("admin_child", slug=slug))
 
 
 @app.route("/admin/anak/<slug>/item/tambah", methods=["POST"])
 def admin_item_add(slug):
-    guard = _require_admin()
-    if guard:
-        return guard
+    child, resp = _load_editable_child(slug)
+    if resp:
+        return resp
     section = request.form.get("section", "").strip()
     # Semua field selain 'section' jadi isi konten (dict).
     content = {k: v.strip() for k, v in request.form.items() if k != "section" and v.strip()}
@@ -657,17 +709,22 @@ def admin_item_add(slug):
 
 @app.route("/admin/item/<int:item_id>/hapus", methods=["POST"])
 def admin_item_delete(item_id):
-    guard = _require_admin()
-    if guard:
-        return guard
+    if not session.get("user"):
+        return redirect(url_for("login"))
     item = db.get_child_item(item_id)
+    if not item:
+        abort(404)
+    # Pastikan user boleh mengedit anak pemilik item ini.
+    back_slug = request.form.get("slug", "")
+    child, resp = _load_editable_child(back_slug) if back_slug else (None, abort(403))
+    if resp:
+        return resp
+    # Keamanan: item harus benar milik anak tersebut.
+    if item.get("child_id") != child.get("id"):
+        abort(403)
     db.delete_child_item(item_id)
     flash("Item dihapus.", "success")
-    # Kembali ke halaman anak terkait bila diketahui.
-    back_slug = request.form.get("slug", "")
-    if back_slug:
-        return redirect(url_for("admin_child", slug=back_slug))
-    return redirect(url_for("admin_home"))
+    return redirect(url_for("admin_child", slug=back_slug))
 
 
 @app.errorhandler(403)

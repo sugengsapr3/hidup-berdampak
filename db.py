@@ -113,6 +113,11 @@ def init_db():
             );
             """
         )
+        # Migrasi: kolom email pemilik (anak yang boleh mengedit profilnya sendiri).
+        # Aman dipanggil berulang (IF NOT EXISTS).
+        cur.execute(
+            "ALTER TABLE children ADD COLUMN IF NOT EXISTS owner_email TEXT DEFAULT '';"
+        )
         conn.commit()
     _seed_courses()
 
@@ -298,20 +303,34 @@ def list_children():
     """Daftar semua anak (untuk landing & dashboard)."""
     with _conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT slug, name, status, focus, short FROM children ORDER BY sort_order, id;"
+            "SELECT slug, name, status, focus, short, owner_email FROM children ORDER BY sort_order, id;"
         )
         rows = cur.fetchall()
     return [
-        {"slug": r[0], "name": r[1], "status": r[2], "focus": r[3], "short": r[4]}
+        {"slug": r[0], "name": r[1], "status": r[2], "focus": r[3],
+         "short": r[4], "owner_email": r[5] or ""}
         for r in rows
     ]
+
+
+def get_child_slug_by_owner(email):
+    """Kembalikan slug anak yang dimiliki email ini (atau None)."""
+    if not email:
+        return None
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug FROM children WHERE lower(owner_email) = lower(%s) LIMIT 1;",
+            (email,),
+        )
+        r = cur.fetchone()
+    return r[0] if r else None
 
 
 def get_child(slug):
     """Ambil profil 1 anak + semua sub-kontennya, dikelompokkan per section."""
     with _conn() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT id, slug, name, status, focus, short, intro, journey FROM children WHERE slug = %s;",
+            "SELECT id, slug, name, status, focus, short, intro, journey, owner_email FROM children WHERE slug = %s;",
             (slug,),
         )
         r = cur.fetchone()
@@ -320,6 +339,7 @@ def get_child(slug):
         child = {
             "id": r[0], "slug": r[1], "name": r[2], "status": r[3],
             "focus": r[4], "short": r[5], "intro": r[6], "journey": r[7],
+            "owner_email": r[8] or "",
         }
         cur.execute(
             "SELECT id, section, content FROM child_items WHERE child_id = %s ORDER BY sort_order, id;",
@@ -342,19 +362,27 @@ def child_exists(slug):
         return cur.fetchone() is not None
 
 
-def upsert_child(slug, name, status, focus, short, intro, journey, sort_order=0):
-    """Buat/perbarui profil anak (berdasarkan slug)."""
+def upsert_child(slug, name, status, focus, short, intro, journey, sort_order=0,
+                 owner_email=None):
+    """Buat/perbarui profil anak (berdasarkan slug).
+
+    owner_email=None berarti JANGAN ubah email pemilik (dipakai saat anak
+    menyimpan profilnya sendiri — form tidak mengirim owner_email). Kalau
+    string diberikan, nilainya di-set.
+    """
     with _conn() as conn, conn.cursor() as cur:
         cur.execute(
             """
-            INSERT INTO children (slug, name, status, focus, short, intro, journey, sort_order)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO children (slug, name, status, focus, short, intro, journey, sort_order, owner_email)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (slug) DO UPDATE SET
                 name=EXCLUDED.name, status=EXCLUDED.status, focus=EXCLUDED.focus,
                 short=EXCLUDED.short, intro=EXCLUDED.intro, journey=EXCLUDED.journey,
-                sort_order=EXCLUDED.sort_order;
+                sort_order=EXCLUDED.sort_order,
+                owner_email=COALESCE(%s, children.owner_email);
             """,
-            (slug, name, status, focus, short, intro, journey, sort_order),
+            (slug, name, status, focus, short, intro, journey, sort_order,
+             owner_email or "", owner_email),
         )
         conn.commit()
 
@@ -411,7 +439,26 @@ def seed_children(children_data):
             ch["slug"], ch["name"], ch.get("status", "active"),
             ch.get("focus", ""), ch.get("short", ""), ch.get("intro", ""),
             ch.get("journey", ""), sort_order=idx,
+            owner_email=ch.get("owner_email", ""),
         )
         for sec in CHILD_SECTIONS:
             for item in ch.get(sec, []):
                 add_child_item(ch["slug"], sec, item)
+
+
+def set_child_owners(children_data):
+    """Set/perbarui owner_email tiap anak berdasarkan slug.
+
+    Dipakai saat migrasi: tabel sudah terisi tapi kolom owner_email masih
+    kosong. Idempoten & hanya menyentuh kolom owner_email (tidak mengubah
+    profil/konten yang sudah diedit)."""
+    with _conn() as conn, conn.cursor() as cur:
+        for ch in children_data:
+            email = ch.get("owner_email", "")
+            if not email:
+                continue
+            cur.execute(
+                "UPDATE children SET owner_email = %s WHERE slug = %s;",
+                (email, ch["slug"]),
+            )
+        conn.commit()

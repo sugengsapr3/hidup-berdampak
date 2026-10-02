@@ -323,6 +323,7 @@ AUTH_PROVIDERS = [
 CHILDREN = [
     {
         "slug": "dzaky",
+        "owner_email": "dzaky.albarra101@gmail.com",
         "name": "Dzaky Albarra",
         "status": "active",  # "active" | "coming_soon"
         "focus": "Business, Communication & Global Perspective",
@@ -387,6 +388,7 @@ CHILDREN = [
     },
     {
         "slug": "hadziq",
+        "owner_email": "hdizhwar@gmail.com",
         "name": "Hadziq Dizhwar",
         "status": "active",
         "focus": "Science, Health & Leadership",
@@ -426,6 +428,7 @@ CHILDREN = [
     },
     {
         "slug": "fiori",
+        "owner_email": "fiorighanialbina@gmail.com",
         "name": "Fiori Ghania Albina",
         "status": "coming_soon",
         "focus": "Curiosity, Science & Creativity",
@@ -444,6 +447,7 @@ CHILDREN = [
     },
     {
         "slug": "hazel",
+        "owner_email": "hazel.dinara@gmail.com",
         "name": "Hazel Aghnia Dinara",
         "status": "coming_soon",
         "focus": "Learning, Exploration & Creativity",

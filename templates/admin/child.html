@@ -44,7 +44,11 @@
 
 {% block content %}
 <section class="container" style="padding: 48px 0; max-width: 820px;">
+  {% if is_admin %}
   <a href="{{ url_for('admin_home') }}" style="color:#888; text-decoration:none; font-size:.9rem;">&larr; Semua anak</a>
+  {% else %}
+  <p style="color:#888; font-size:.9rem; margin:0;">Halaman edit profil kamu</p>
+  {% endif %}
   <h1 style="font-size: 1.9rem; margin: 10px 0 24px;">{{ child.name }}</h1>
 
   <!-- ========== PROFIL ========== -->
@@ -56,6 +60,7 @@
         <input name="name" value="{{ child.name }}" required
                style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
       </label>
+      {% if is_admin %}
       <label style="display:grid; gap:5px;">
         <span style="font-size:.85rem; color:#555;">Status</span>
         <select name="status" style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
@@ -63,6 +68,10 @@
           <option value="coming_soon" {{ 'selected' if child.status == 'coming_soon' else '' }}>Segera hadir</option>
         </select>
       </label>
+      <p style="font-size:.8rem; color:#999; margin:-6px 0 0;">
+        Pemilik akun: {{ child.owner_email or 'belum diatur' }}
+      </p>
+      {% endif %}
       <label style="display:grid; gap:5px;">
         <span style="font-size:.85rem; color:#555;">Fokus (mis. Business, Communication &amp; Global Perspective)</span>
         <input name="focus" value="{{ child.focus or '' }}"
