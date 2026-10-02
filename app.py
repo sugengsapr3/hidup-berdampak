@@ -573,7 +573,16 @@ def admin_home():
     guard = _require_admin()
     if guard:
         return guard
-    children = db.list_children() if db.db_enabled() else []
+    # Tahan banting: bila tabel belum dibuat (belum pernah /admin/init),
+    # query akan gagal. Jangan 500 — tampilkan state kosong agar tombol
+    # "Inisialisasi Database" tetap bisa diklik.
+    children = []
+    if db.db_enabled():
+        try:
+            children = db.list_children()
+        except Exception as e:
+            app.logger.error("admin_home list_children gagal: %s", repr(e))
+            children = []
     return render_template("admin/home.html", children=children, active="")
 
 
@@ -598,7 +607,12 @@ def admin_child(slug):
     guard = _require_admin()
     if guard:
         return guard
-    child = db.get_child(slug)
+    try:
+        child = db.get_child(slug)
+    except Exception as e:
+        app.logger.error("admin_child get_child gagal: %s", repr(e))
+        flash("Database belum siap. Klik 'Inisialisasi Database' dulu.", "error")
+        return redirect(url_for("admin_home"))
     if not child:
         abort(404)
     return render_template(
