@@ -614,7 +614,18 @@ def admin_home():
             return redirect(url_for("admin_child", slug=own))
         abort(403)  # bukan admin & bukan pemilik anak mana pun
 
-    return render_template("admin/home.html", children=children, active="")
+    # Admin: tampilkan juga daftar kelas untuk dikelola.
+    courses = []
+    if db.db_enabled():
+        try:
+            courses = db.list_courses()
+        except Exception as e:
+            app.logger.error("admin_home list_courses gagal: %s", repr(e))
+            courses = []
+
+    return render_template(
+        "admin/home.html", children=children, courses=courses, active=""
+    )
 
 
 @app.route("/admin/init")
@@ -725,6 +736,51 @@ def admin_item_delete(item_id):
     db.delete_child_item(item_id)
     flash("Item dihapus.", "success")
     return redirect(url_for("admin_child", slug=back_slug))
+
+
+@app.route("/admin/kelas", methods=["POST"])
+def admin_course_add():
+    """Tambah/perbarui kelas (hanya admin)."""
+    guard = _require_admin()
+    if guard:
+        return guard
+    f = request.form
+    slug = f.get("slug", "").strip().lower()
+    title = f.get("title", "").strip()
+    description = f.get("description", "").strip()
+    price_raw = f.get("price", "").strip().replace(".", "").replace(",", "")
+    if not slug or not title:
+        flash("Slug dan judul kelas wajib diisi.", "error")
+        return redirect(url_for("admin_home"))
+    try:
+        price = int(price_raw or "0")
+        if price < 0:
+            raise ValueError
+    except ValueError:
+        flash("Harga harus berupa angka (contoh: 149000).", "error")
+        return redirect(url_for("admin_home"))
+    try:
+        db.upsert_course(slug, title, description, price)
+        flash(f"Kelas '{title}' disimpan.", "success")
+    except Exception as e:
+        app.logger.error("admin_course_add gagal: %s", repr(e))
+        flash(f"Gagal menyimpan kelas: {e}", "error")
+    return redirect(url_for("admin_home"))
+
+
+@app.route("/admin/kelas/<slug>/hapus", methods=["POST"])
+def admin_course_delete(slug):
+    """Hapus kelas (hanya admin)."""
+    guard = _require_admin()
+    if guard:
+        return guard
+    try:
+        db.delete_course(slug)
+        flash("Kelas dihapus.", "success")
+    except Exception as e:
+        app.logger.error("admin_course_delete gagal: %s", repr(e))
+        flash(f"Gagal menghapus kelas: {e}", "error")
+    return redirect(url_for("admin_home"))
 
 
 @app.errorhandler(403)

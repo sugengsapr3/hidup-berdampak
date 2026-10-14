@@ -194,6 +194,28 @@ def get_course(slug):
     return {"slug": r[0], "title": r[1], "description": r[2], "price": r[3]}
 
 
+def upsert_course(slug, title, description, price):
+    """Buat/perbarui kelas berdasarkan slug. Dipakai panel admin kelas."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO courses (slug, title, description, price)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (slug) DO UPDATE SET
+                title=EXCLUDED.title, description=EXCLUDED.description, price=EXCLUDED.price;
+            """,
+            (slug, title, description, price),
+        )
+        conn.commit()
+
+
+def delete_course(slug):
+    """Hapus kelas berdasarkan slug (enrollment & order terkait tetap tersimpan)."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM courses WHERE slug = %s;", (slug,))
+        conn.commit()
+
+
 # ------------------------------------------------------------------ Enrollments
 def enroll(email, course_slug, status="paid"):
     """Beri user akses ke kelas (status 'paid' setelah pembayaran)."""
