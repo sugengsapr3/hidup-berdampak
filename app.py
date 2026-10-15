@@ -682,6 +682,9 @@ def admin_init():
         db.set_child_owners(data.CHILDREN)
         # Seed listing rumah awal (hanya bila tabel properties masih kosong).
         db.seed_properties(data.PROPERTIES)
+        # Selaraskan foto rumah seed dengan sumber terbaru (/static) — aman,
+        # hanya menyentuh kolom photos.
+        db.refresh_property_photos(data.PROPERTIES)
         flash("Database siap: data anak, email pemilik, & rumah dimigrasi.", "success")
     except Exception as e:
         app.logger.error("admin_init gagal: %s", repr(e))

@@ -307,6 +307,24 @@ def seed_properties(properties_data):
         )
 
 
+def refresh_property_photos(properties_data):
+    """Perbarui HANYA kolom photos untuk properti yang slug-nya cocok.
+
+    Dipakai saat sumber foto berpindah (mis. dari hosting pihak ketiga ke
+    /static). Hanya menyentuh foto, tidak mengubah teks/harga yang mungkin
+    sudah diedit lewat admin. Lewati properti tanpa foto di data awal."""
+    with _conn() as conn, conn.cursor() as cur:
+        for p in properties_data:
+            photos = p.get("photos", [])
+            if not photos:
+                continue
+            cur.execute(
+                "UPDATE properties SET photos = %s WHERE slug = %s;",
+                (json.dumps(photos), p["slug"]),
+            )
+        conn.commit()
+
+
 # ------------------------------------------------------------------ Enrollments
 def enroll(email, course_slug, status="paid"):
     """Beri user akses ke kelas (status 'paid' setelah pembayaran)."""
