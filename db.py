@@ -118,6 +118,24 @@ def init_db():
         cur.execute(
             "ALTER TABLE children ADD COLUMN IF NOT EXISTS owner_email TEXT DEFAULT '';"
         )
+        # Listing properti/rumah yang dijual.
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS properties (
+                id          SERIAL PRIMARY KEY,
+                slug        TEXT UNIQUE NOT NULL,
+                title       TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                price       BIGINT NOT NULL DEFAULT 0,
+                address     TEXT DEFAULT '',
+                maps_url    TEXT DEFAULT '',
+                photos      JSONB NOT NULL DEFAULT '[]',
+                status      TEXT NOT NULL DEFAULT 'available',
+                sort_order  INTEGER DEFAULT 0,
+                created_at  TIMESTAMPTZ DEFAULT now()
+            );
+            """
+        )
         conn.commit()
     _seed_courses()
 
@@ -213,6 +231,64 @@ def delete_course(slug):
     """Hapus kelas berdasarkan slug (enrollment & order terkait tetap tersimpan)."""
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("DELETE FROM courses WHERE slug = %s;", (slug,))
+        conn.commit()
+
+
+# ------------------------------------------------------------------ Properties
+def _row_to_property(r):
+    return {
+        "slug": r[0], "title": r[1], "description": r[2], "price": r[3],
+        "address": r[4], "maps_url": r[5],
+        "photos": list(r[6]) if r[6] else [],
+        "status": r[7],
+    }
+
+
+def list_properties():
+    """Daftar semua rumah/properti (untuk halaman publik & admin)."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug, title, description, price, address, maps_url, photos, status "
+            "FROM properties ORDER BY sort_order, id;"
+        )
+        rows = cur.fetchall()
+    return [_row_to_property(r) for r in rows]
+
+
+def get_property(slug):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT slug, title, description, price, address, maps_url, photos, status "
+            "FROM properties WHERE slug = %s;",
+            (slug,),
+        )
+        r = cur.fetchone()
+    return _row_to_property(r) if r else None
+
+
+def upsert_property(slug, title, description, price, address, maps_url, photos, status):
+    """Buat/perbarui properti berdasarkan slug. photos = list URL."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            """
+            INSERT INTO properties
+                (slug, title, description, price, address, maps_url, photos, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (slug) DO UPDATE SET
+                title=EXCLUDED.title, description=EXCLUDED.description,
+                price=EXCLUDED.price, address=EXCLUDED.address,
+                maps_url=EXCLUDED.maps_url, photos=EXCLUDED.photos,
+                status=EXCLUDED.status;
+            """,
+            (slug, title, description, price, address, maps_url,
+             json.dumps(photos or []), status),
+        )
+        conn.commit()
+
+
+def delete_property(slug):
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM properties WHERE slug = %s;", (slug,))
         conn.commit()
 
 

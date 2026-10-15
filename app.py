@@ -9,6 +9,7 @@ Menjalankan:
 Lalu buka http://127.0.0.1:5000
 """
 import os
+import re
 import secrets
 from datetime import datetime
 
@@ -37,6 +38,11 @@ ADMIN_EMAILS = [
     for e in os.environ.get("ADMIN_EMAILS", "sugengsapr3@gmail.com").split(",")
     if e.strip()
 ]
+
+
+# Nomor WhatsApp untuk tombol "Hubungi" (listing rumah). Bisa di-override
+# lewat env WHATSAPP_NUMBER. Format: 62xxxxxxxxxx (tanpa + atau spasi).
+WHATSAPP_NUMBER = (os.environ.get("WHATSAPP_NUMBER") or "628119435424").strip()
 
 
 def current_email():
@@ -102,6 +108,7 @@ def inject_globals():
         "current_year": datetime.now().year,
         "current_user": session.get("user"),
         "is_admin": is_admin(),
+        "whatsapp_number": WHATSAPP_NUMBER,
     }
 
 
@@ -568,6 +575,33 @@ def join():
     return render_template("join.html", active="join")
 
 
+# ---------------------------------------------------------------- Rumah / Properti
+@app.route("/rumah")
+def properties():
+    items = []
+    if db.db_enabled():
+        try:
+            items = db.list_properties()
+        except Exception as e:
+            app.logger.error("properties list gagal: %s", repr(e))
+            items = []
+    return render_template("properties.html", properties=items, active="properties")
+
+
+@app.route("/rumah/<slug>")
+def property_detail(slug):
+    prop = None
+    if db.db_enabled():
+        try:
+            prop = db.get_property(slug)
+        except Exception as e:
+            app.logger.error("property_detail gagal: %s", repr(e))
+            prop = None
+    if not prop:
+        abort(404)
+    return render_template("property_detail.html", prop=prop, active="properties")
+
+
 # ================================================================
 # ADMIN — Dashboard Generasi Berdampak (hanya untuk admin)
 # ================================================================
@@ -614,17 +648,24 @@ def admin_home():
             return redirect(url_for("admin_child", slug=own))
         abort(403)  # bukan admin & bukan pemilik anak mana pun
 
-    # Admin: tampilkan juga daftar kelas untuk dikelola.
+    # Admin: tampilkan juga daftar kelas & rumah untuk dikelola.
     courses = []
+    properties_list = []
     if db.db_enabled():
         try:
             courses = db.list_courses()
         except Exception as e:
             app.logger.error("admin_home list_courses gagal: %s", repr(e))
             courses = []
+        try:
+            properties_list = db.list_properties()
+        except Exception as e:
+            app.logger.error("admin_home list_properties gagal: %s", repr(e))
+            properties_list = []
 
     return render_template(
-        "admin/home.html", children=children, courses=courses, active=""
+        "admin/home.html", children=children, courses=courses,
+        properties=properties_list, active=""
     )
 
 
@@ -780,6 +821,61 @@ def admin_course_delete(slug):
     except Exception as e:
         app.logger.error("admin_course_delete gagal: %s", repr(e))
         flash(f"Gagal menghapus kelas: {e}", "error")
+    return redirect(url_for("admin_home"))
+
+
+@app.route("/admin/rumah", methods=["POST"])
+def admin_property_add():
+    """Tambah/perbarui rumah (hanya admin)."""
+    guard = _require_admin()
+    if guard:
+        return guard
+    f = request.form
+    slug = f.get("slug", "").strip().lower()
+    title = f.get("title", "").strip()
+    if not slug or not title:
+        flash("Slug dan judul rumah wajib diisi.", "error")
+        return redirect(url_for("admin_home"))
+    price_raw = f.get("price", "").strip().replace(".", "").replace(",", "")
+    try:
+        price = int(price_raw or "0")
+        if price < 0:
+            raise ValueError
+    except ValueError:
+        flash("Harga harus berupa angka (contoh: 850000000).", "error")
+        return redirect(url_for("admin_home"))
+    # Foto: satu URL per baris (atau dipisah koma).
+    raw_photos = f.get("photos", "")
+    photos = [p.strip() for p in re.split(r"[\n,]+", raw_photos) if p.strip()]
+    try:
+        db.upsert_property(
+            slug, title,
+            f.get("description", "").strip(),
+            price,
+            f.get("address", "").strip(),
+            f.get("maps_url", "").strip(),
+            photos,
+            f.get("status", "available").strip(),
+        )
+        flash(f"Rumah '{title}' disimpan.", "success")
+    except Exception as e:
+        app.logger.error("admin_property_add gagal: %s", repr(e))
+        flash(f"Gagal menyimpan rumah: {e}", "error")
+    return redirect(url_for("admin_home"))
+
+
+@app.route("/admin/rumah/<slug>/hapus", methods=["POST"])
+def admin_property_delete(slug):
+    """Hapus rumah (hanya admin)."""
+    guard = _require_admin()
+    if guard:
+        return guard
+    try:
+        db.delete_property(slug)
+        flash("Rumah dihapus.", "success")
+    except Exception as e:
+        app.logger.error("admin_property_delete gagal: %s", repr(e))
+        flash(f"Gagal menghapus rumah: {e}", "error")
     return redirect(url_for("admin_home"))
 
 

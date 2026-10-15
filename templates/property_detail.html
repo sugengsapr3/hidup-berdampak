@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ prop.title }} | Rumah Dijual{% endblock %}
+{% block description %}{{ prop.description[:150] }}{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:40px;">
+  <div class="container" style="max-width:900px;">
+    <a href="{{ url_for('properties') }}" style="color:#9aa0a6; text-decoration:none; font-size:.9rem;">&larr; Semua rumah</a>
+
+    <div style="margin:16px 0 10px;">
+      {% if prop.status == 'sold' %}
+      <span class="badge badge-soon">Terjual</span>
+      {% else %}
+      <span class="badge badge-available">Tersedia</span>
+      {% endif %}
+    </div>
+    <h1 style="margin:0 0 6px;">{{ prop.title }}</h1>
+    {% if prop.price %}
+    <div style="font-size:1.5rem; font-weight:800; color:#e8c37a; margin-bottom:4px;">
+      Rp{{ '{:,}'.format(prop.price).replace(',', '.') }}
+    </div>
+    {% endif %}
+    {% if prop.address %}
+    <p style="color:#9aa0a6; margin:0 0 20px;">📍 {{ prop.address }}</p>
+    {% endif %}
+
+    <!-- Galeri foto -->
+    {% if prop.photos %}
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:12px; margin-bottom:28px;">
+      {% for photo in prop.photos %}
+      <a href="{{ photo }}" target="_blank" rel="noopener"
+         style="display:block; aspect-ratio:4/3; border-radius:12px; overflow:hidden; background:#1a1d22;">
+        <img src="{{ photo }}" alt="{{ prop.title }} foto {{ loop.index }}" referrerpolicy="no-referrer"
+             style="width:100%; height:100%; object-fit:cover; display:block;">
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="aspect-ratio:16/9; background:#1a1d22; border-radius:12px; display:flex;
+                align-items:center; justify-content:center; font-size:3rem; margin-bottom:28px;">🏠</div>
+    {% endif %}
+
+    <!-- Keterangan -->
+    {% if prop.description %}
+    <h2 style="font-size:1.2rem; margin:0 0 10px;">Keterangan</h2>
+    <p style="color:#c7ccd1; line-height:1.7; white-space:pre-line; margin:0 0 28px;">{{ prop.description }}</p>
+    {% endif %}
+
+    <!-- Aksi: WhatsApp + Maps -->
+    <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
+      <a href="https://wa.me/{{ whatsapp_number }}?text={{ ('Halo, saya tertarik dengan rumah: ' ~ prop.title ~ ' (' ~ request.url ~ '). Boleh info lebih lanjut?') | urlencode }}"
+         target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#06351c;
+                font-weight:700; padding:13px 24px; border-radius:999px; text-decoration:none;">
+        💬 Hubungi via WhatsApp
+      </a>
+      {% if prop.maps_url %}
+      <a href="{{ prop.maps_url }}" target="_blank" rel="noopener"
+         style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.08);
+                color:#fff; font-weight:600; padding:13px 24px; border-radius:999px; text-decoration:none;
+                border:1px solid rgba(255,255,255,.14);">
+        📍 Lihat Lokasi di Google Maps
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

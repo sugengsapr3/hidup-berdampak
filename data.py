@@ -548,6 +548,7 @@ NAV = [
     {"type": "link", "endpoint": "courses", "label": "Kelas"},
     {"type": "dropdown", "endpoint": "business", "label": "Untuk Bisnis", "menu": "business"},
     {"type": "link", "endpoint": "books", "label": "Buku"},
+    {"type": "link", "endpoint": "properties", "label": "Rumah"},
     {"type": "dropdown", "endpoint": "resources", "label": "Sumber Daya", "menu": "resources"},
     {"type": "link", "endpoint": "about", "label": "Tentang"},
 ]

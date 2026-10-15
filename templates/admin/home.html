@@ -118,5 +118,105 @@
       </p>
     </form>
   </details>
+
+  <!-- ========== KELOLA RUMAH ========== -->
+  <h2 style="font-size: 1.5rem; margin: 48px 0 10px;">Kelola Rumah</h2>
+  <p style="color:#666; margin:0 0 20px;">
+    Tambah, perbarui, atau hapus listing rumah. Langsung tampil di halaman Rumah.
+  </p>
+
+  {% if properties %}
+  <div style="display:grid; gap:12px; margin-bottom:24px;">
+    {% for p in properties %}
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px;
+                border:1px solid #e7e5df; border-radius:14px; padding:14px 18px; background:#fff;">
+      <div style="display:flex; align-items:center; gap:14px; min-width:0;">
+        <div style="width:56px; height:56px; border-radius:10px; overflow:hidden; background:#eee; flex:none;">
+          {% if p.photos and p.photos[0] %}
+          <img src="{{ p.photos[0] }}" alt="" referrerpolicy="no-referrer"
+               style="width:100%; height:100%; object-fit:cover; display:block;">
+          {% endif %}
+        </div>
+        <div style="min-width:0;">
+          <div style="font-weight:700; color:#0D0F12;">{{ p.title }}</div>
+          <div style="color:#888; font-size:.85rem; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            <code>{{ p.slug }}</code>
+            {% if p.price %} &middot; Rp{{ '{:,}'.format(p.price).replace(',', '.') }}{% endif %}
+            {% if p.status == 'sold' %} &middot; Terjual{% endif %}
+          </div>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('admin_property_delete', slug=p.slug) }}"
+            onsubmit="return confirm('Hapus rumah {{ p.title }}?');">
+        <button type="submit"
+                style="background:none; border:none; color:#b00; cursor:pointer; font-size:.85rem;">Hapus</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:#aaa; margin:0 0 20px;">Belum ada rumah.</p>
+  {% endif %}
+
+  <details>
+    <summary style="cursor:pointer; display:inline-block; background:#fff; color:#0D0F12;
+                    font-weight:700; padding:11px 22px; border-radius:999px;
+                    border:1px solid #e7e5df; list-style:none;">+ Tambah / Perbarui Rumah</summary>
+    <form method="post" action="{{ url_for('admin_property_add') }}"
+          style="display:grid; gap:14px; margin-top:16px; border:1px solid #e7e5df;
+                 border-radius:14px; padding:22px; background:#fff;">
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Slug (URL, huruf kecil tanpa spasi — mis. <code>rumah-cibubur</code>)</span>
+        <input name="slug" required placeholder="rumah-cibubur"
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Judul</span>
+        <input name="title" required placeholder="Rumah 2 Lantai Cibubur"
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Keterangan (boleh beberapa baris)</span>
+        <textarea name="description" rows="4"
+                  style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;"></textarea>
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Harga (angka saja, mis. 850000000)</span>
+        <input name="price" placeholder="850000000" inputmode="numeric"
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Alamat (teks)</span>
+        <input name="address" placeholder="Cibubur, Jakarta Timur"
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Link Google Maps (salin dari tombol Share di Maps)</span>
+        <input name="maps_url" placeholder="https://maps.app.goo.gl/..."
+               style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">URL Foto — satu link per baris (foto pertama jadi sampul)</span>
+        <textarea name="photos" rows="3" placeholder="https://.../foto1.jpg&#10;https://.../foto2.jpg"
+                  style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;"></textarea>
+      </label>
+      <label style="display:grid; gap:5px;">
+        <span style="font-size:.85rem; color:#555;">Status</span>
+        <select name="status" style="padding:10px 12px; border:1px solid #ddd; border-radius:9px;">
+          <option value="available">Tersedia</option>
+          <option value="sold">Terjual</option>
+        </select>
+      </label>
+      <div>
+        <button type="submit"
+                style="background:#0D0F12; color:#fff; padding:11px 22px; border:none; border-radius:999px; cursor:pointer;">
+          Simpan Rumah
+        </button>
+      </div>
+      <p style="font-size:.8rem; color:#999; margin:0;">
+        Catatan: kalau slug sudah ada, rumah akan diperbarui (bukan dobel).
+      </p>
+    </form>
+  </details>
 </section>
 {% endblock %}
