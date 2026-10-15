@@ -680,7 +680,9 @@ def admin_init():
         db.seed_children(data.CHILDREN)
         # Set/perbarui email pemilik tiap anak (idempoten, tak menimpa konten).
         db.set_child_owners(data.CHILDREN)
-        flash("Database siap, data anak dimigrasi, email pemilik diperbarui.", "success")
+        # Seed listing rumah awal (hanya bila tabel properties masih kosong).
+        db.seed_properties(data.PROPERTIES)
+        flash("Database siap: data anak, email pemilik, & rumah dimigrasi.", "success")
     except Exception as e:
         app.logger.error("admin_init gagal: %s", repr(e))
         flash(f"Gagal inisialisasi: {e}", "error")

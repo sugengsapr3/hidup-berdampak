@@ -292,6 +292,21 @@ def delete_property(slug):
         conn.commit()
 
 
+def seed_properties(properties_data):
+    """Isi tabel properties dari data awal HANYA bila tabel masih kosong.
+    Aman dipanggil berulang: tidak menimpa listing yang sudah diedit via admin."""
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT COUNT(*) FROM properties;")
+        if cur.fetchone()[0] > 0:
+            return
+    for idx, p in enumerate(properties_data):
+        upsert_property(
+            p["slug"], p["title"], p.get("description", ""),
+            p.get("price", 0), p.get("address", ""), p.get("maps_url", ""),
+            p.get("photos", []), p.get("status", "available"),
+        )
+
+
 # ------------------------------------------------------------------ Enrollments
 def enroll(email, course_slug, status="paid"):
     """Beri user akses ke kelas (status 'paid' setelah pembayaran)."""

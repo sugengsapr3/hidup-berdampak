@@ -468,6 +468,114 @@ CHILDREN = [
 
 
 # =====================================================================
+# PROPERTI / RUMAH DIJUAL (data awal; selanjutnya dikelola lewat /admin)
+# Di-seed ke tabel 'properties' saat /admin/init bila tabel masih kosong.
+# =====================================================================
+PROPERTIES = [
+    {
+        "slug": "asana-residence-cikeas-bhimala",
+        "title": "Rumah 2 Lantai Siap Huni – Asana Residence Cikeas (Type Bhimala)",
+        "price": 1345000000,
+        "address": "Asana Residence Blok E26, Cikeas, Kabupaten Bogor",
+        "maps_url": "https://maps.app.goo.gl/Q4vmQmnFhWikHaLS6",
+        "status": "available",
+        "photos": [
+            "https://i.postimg.cc/T1vV8P4G/Gambar-Rumah-1.jpg",
+            "https://i.postimg.cc/90Hd3fn2/Gambar-Rumah-2.jpg",
+            "https://i.postimg.cc/2yNQp5KR/Gambar-Rumah-3.jpg",
+            "https://i.postimg.cc/3NQXMwcM/Gambar-Rumah-4.jpg",
+            "https://i.postimg.cc/1tqGYFJy/Gambar-Rumah-5.jpg",
+            "https://i.postimg.cc/3RvXbGnY/Gambar-Rumah-6.jpg",
+            "https://i.postimg.cc/hjdL3mpB/Gambar-Rumah-7.jpg",
+            "https://i.postimg.cc/9M7dN9J2/Gambar-Rumah-8.jpg",
+            "https://i.postimg.cc/PxwWFD2G/Gambar-Rumah-9.jpg",
+            "https://i.postimg.cc/FRLynSGw/Gambar-Rumah-10.jpg",
+            "https://i.postimg.cc/LX1t0PvW/Gambar-Rumah-11.jpg",
+            "https://i.postimg.cc/vBVrSnXj/Gambar-Rumah-12.jpg",
+        ],  # foto pertama = sampul; tambah/ubah lewat /admin kapan saja
+        "description": (
+            "🔥 HOT DEAL – DIJUAL CEPAT 🔥\n"
+            "🏡 RUMAH 2 LANTAI SIAP HUNI\n"
+            "ASANA RESIDENCE CIKEAS – TYPE BHIMALA\n\n"
+            "⭐ SHM • Siap Huni • Cash/KPR • Bebas Banjir • Hadap Utara ⭐\n\n"
+            "📢 DIJUAL KARENA PINDAH DOMISILI\n"
+            "Kesempatan memiliki rumah di salah satu kawasan hunian favorit di Cikeas. "
+            "Rumah dirawat dengan baik, siap ditempati, dan tidak memerlukan renovasi besar. "
+            "Cocok untuk keluarga yang menginginkan lingkungan nyaman, aman, dengan akses "
+            "mudah ke berbagai fasilitas.\n\n"
+            "✨ KEUNGGULAN\n"
+            "✅ Siap huni, tinggal bawa koper\n"
+            "✅ Sertifikat Hak Milik (SHM)\n"
+            "✅ Bisa dibeli Cash maupun KPR\n"
+            "✅ Legalitas lengkap, siap dibantu hingga proses akad\n"
+            "✅ Bebas banjir\n"
+            "✅ Hadap Utara — lebih sejuk, tidak terkena matahari sore langsung\n"
+            "✅ Kanopi untuk 2 mobil\n"
+            "✅ Toren air sudah terpasang\n"
+            "✅ Row jalan ±7–8 meter, dua mobil dapat berpapasan dengan nyaman\n"
+            "✅ Dekat Clubhouse, Swimming Pool, Gym, Playground, dan Taman\n\n"
+            "📐 SPESIFIKASI\n"
+            "🏡 Luas Tanah: 84 m²\n"
+            "🏡 Luas Bangunan: 69 m²\n"
+            "🛏️ 3 Kamar Tidur\n"
+            "🚿 2 Kamar Mandi\n"
+            "⚡ Listrik 2.200 Watt\n"
+            "💧 Air Jet Pump\n"
+            "📄 Sertifikat Hak Milik (SHM)\n\n"
+            "🏘️ FASILITAS PREMIUM\n"
+            "✔️ One Gate System\n"
+            "✔️ Security 24 Jam\n"
+            "✔️ Swimming Pool\n"
+            "✔️ Gym Center\n"
+            "✔️ Clubhouse\n"
+            "✔️ Playground\n"
+            "✔️ Taman Hijau\n"
+            "✔️ Lingkungan bersih, aman, dan nyaman\n\n"
+            "📍 LOKASI STRATEGIS\n"
+            "🚉 ±15 menit ke Stasiun LRT Cibubur\n"
+            "🛣️ ±10 menit ke Tol JORR Cimanggis–Cibitung\n"
+            "🛣️ ±15 menit ke Tol Cibubur\n"
+            "🛣️ ±10 menit ke Tol Cimanggis\n"
+            "🚗 Dekat Jalan Raya Transyogi\n"
+            "🏫 Dekat sekolah\n"
+            "🏥 Dekat rumah sakit\n"
+            "🛍️ Dekat pusat perbelanjaan\n"
+            "🕌 Dekat tempat ibadah\n"
+            "☕ Dekat pusat kuliner\n\n"
+            "💰 HARGA SPESIAL\n"
+            "Rp1.345.000.000 (nego untuk pembeli serius)\n\n"
+            "💎 VALUE YANG ANDA DAPATKAN\n"
+            "Rumah siap huni • SHM • Bebas banjir • Hadap utara • Kanopi 2 mobil • "
+            "Toren air terpasang • Dekat clubhouse • Fasilitas premium • Lokasi strategis.\n"
+            "Dibandingkan rumah sejenis di kawasan Asana Residence, harga ini sangat "
+            "kompetitif untuk kondisi rumah yang sudah siap ditempati.\n\n"
+            "🤝 PEMBELIAN MUDAH & AMAN\n"
+            "✅ Bisa Cash\n"
+            "✅ Bisa KPR (sesuai persetujuan bank)\n"
+            "✅ Legalitas lengkap\n"
+            "✅ Siap dibantu hingga proses akad\n"
+            "✅ PBB tertib\n"
+            "✅ Tidak dalam sengketa\n"
+            "✅ Serah terima setelah transaksi selesai\n\n"
+            "❤️ COCOK UNTUK\n"
+            "👨‍👩‍👧‍👦 Keluarga muda\n"
+            "🏡 Rumah pertama\n"
+            "💼 Investasi jangka panjang\n"
+            "💰 Disewakan kembali\n\n"
+            "📞 JADWALKAN SURVEI SEKARANG\n"
+            "Dijual karena pemilik pindah domisili — siap menjadi milik pemilik baru "
+            "tanpa perlu renovasi besar.\n"
+            "Hubungi untuk: informasi lengkap, video house tour, jadwal survei, dan "
+            "simulasi KPR.\n\n"
+            "Rumah yang nyaman bukan hanya soal bangunannya, tetapi juga lingkungan dan "
+            "kualitas hidup yang ditawarkan. Datang, lihat langsung, dan rasakan sendiri "
+            "kenyamanannya. Siapa cepat, dia dapat!"
+        ),
+    },
+]
+
+
+# =====================================================================
 # MATERI KELAS (modul yang tampil setelah user punya akses)
 # Di-keyed berdasarkan slug kelas. Tiap modul: judul, video (YouTube embed
 # opsional), dan catatan/isi teks. Ganti "video" dengan ID video YouTube kamu.
