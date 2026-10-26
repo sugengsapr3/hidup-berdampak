@@ -12,6 +12,36 @@
   </div>
 </section>
 
+<!-- LEARNING HUB TERINTEGRASI -->
+{% if child.slug in ['dzaky', 'hadziq', 'fiori', 'hazel'] %}
+<section class="section" id="learning-hub">
+  <div class="container reading">
+    <div class="gb-card" style="padding:28px;">
+      <span class="kicker">GENERASI BERDAMPAK</span>
+      <h2>Learning Hub {{ child.name }}</h2>
+      <p>
+        Materi belajar, latihan soal, tryout CBT,
+        dan perkembangan akademik.
+      </p>
+
+      <div class="page-actions">
+        <a class="btn btn-primary"
+           href="{{ url_for('learninghub_child', slug=child.slug) }}">
+          Buka Learning Hub &rarr;
+        </a>
+
+        {% if child.slug == 'hadziq' %}
+        <a class="btn btn-outline"
+           href="{{ url_for('learninghub_hadziq_cbt') }}">
+          Mulai CBT Trensains &rarr;
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if child.status == 'coming_soon' %}
 <section class="section">
   <div class="container reading">
