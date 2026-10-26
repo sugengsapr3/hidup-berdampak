@@ -294,6 +294,94 @@ def parent_learning_dashboard():
     return response
 
 
+# ==========================================
+# API HASIL CBT HADZIQ - LEARNING HUB
+# ==========================================
+@app.route("/api/learninghub/hadziq/results", methods=["POST"])
+def save_hadziq_cbt_result():
+    
+    if not is_admin():
+        return {"error": "Akses tidak diizinkan."}, 403
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "Format data harus JSON."}, 400
+
+
+    answers = data.get("answers")
+
+    if not isinstance(answers, dict):
+        return {"error": "Jawaban CBT tidak valid."}, 400
+
+    if len(answers) > 50:
+        return {"error": "Jumlah jawaban melebihi 50 soal."}, 400
+
+    for nomor, jawaban in answers.items():
+        if not str(nomor).isdigit() or not 0 <= int(nomor) < 50:
+            return {"error": "Nomor soal tidak valid."}, 400
+
+        if jawaban not in ("A", "B", "C", "D", "E"):
+            return {"error": "Pilihan jawaban tidak valid."}, 400
+
+  
+    # Kunci jawaban 50 soal CBT Hadziq
+    answer_keys = (
+        "C C D D D C C C C D B E C D C D C D C C "
+        "B C B D B D B D "
+        "A B C D B B D "
+        "C C A B C "
+        "B C D A B "
+        "C B D B C"
+    ).split()
+
+    # Hitung nilai berdasarkan jawaban peserta
+    correct = sum(
+        1
+        for i, key in enumerate(answer_keys)
+        if answers.get(str(i)) == key
+    )
+
+    total_questions = len(answer_keys)
+    score = round(correct * 100 / total_questions, 2)
+
+    # Simpan hasil CBT Hadziq ke database Neon
+    if not db.db_enabled():
+        return {"error": "Database belum aktif."}, 503
+
+    try:
+        with db._conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO learning_results
+                    (child_slug, quiz_title, subject,
+                     score, correct_count, total_questions)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    "hadziq",
+                    "Tryout CBT Trensains 1",
+                    "Matematika, IPA, Bahasa Arab, Akhlak",
+                    score,
+                    correct,
+                    total_questions
+                ))
+            conn.commit()
+    except Exception:
+        app.logger.exception("Gagal menyimpan hasil CBT Hadziq")
+        return {"error": "Gagal menyimpan nilai."}, 500
+
+    return {
+        "status": "calculated",
+        "child_slug": "hadziq",
+        "score": score,
+        "correct_count": correct,
+        "total_questions": total_questions
+    }, 200
+
+
+
+
+
 
 # ---------------------------------------------------------------- Untuk Bisnis
 @app.route("/untuk-bisnis")
