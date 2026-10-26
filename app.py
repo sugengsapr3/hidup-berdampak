@@ -207,10 +207,92 @@ def learninghub_hadziq_cbt():
     return render_template("LeaningHub/hadziq_cbt.html")
 
 
-# Dashboard orang tua:
-# Jangan dipublikasikan tanpa autentikasi.
-# Route dashboard akan ditambahkan setelah kontrol
-# akses orang tua diverifikasi.
+
+# =====================================================
+# PARENT LEARNING DASHBOARD
+# =====================================================
+
+@app.route("/generasi-berdampak/learninghub/dashboard")
+def parent_learning_dashboard():
+    # Hanya admin yang boleh melihat hasil belajar anak
+    if not is_admin():
+        abort(403)
+
+    children = [
+        {"slug": "dzaky", "name": "Dzaky Albarra", "grade": "SMA Kelas 10"},
+        {"slug": "hadziq", "name": "Hadziq Dizhwar", "grade": "SMP Kelas 9"},
+        {"slug": "fiori", "name": "Fiori Ghania Albina", "grade": "SD Kelas 5"},
+        {"slug": "hazel", "name": "Hazel Aghnia Dinara", "grade": "PAUD"},
+    ]
+
+    stats = {
+        c["slug"]: {"count": 0, "avg": None, "best": None}
+        for c in children
+    }
+
+    attempts = []
+    database_message = ""
+
+    if not db.db_enabled():
+        database_message = "Database belum diaktifkan."
+    else:
+        try:
+            with db._conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT child_slug, COUNT(*),
+                           ROUND(AVG(score), 1), MAX(score)
+                    FROM learning_results
+                    GROUP BY child_slug
+                """)
+
+                for slug, count, avg, best in cur.fetchall():
+                    if slug in stats:
+                        stats[slug] = {
+                            "count": count,
+                            "avg": avg,
+                            "best": best
+                        }
+
+                cur.execute("""
+                    SELECT child_slug, quiz_title, subject,
+                           score, correct_count,
+                           total_questions, submitted_at
+                    FROM learning_results
+                    ORDER BY submitted_at DESC
+                    LIMIT 100
+                """)
+
+                columns = [
+                    "child_slug", "quiz_title", "subject",
+                    "score", "correct_count",
+                    "total_questions", "submitted_at"
+                ]
+
+                attempts = [
+                    dict(zip(columns, row))
+                    for row in cur.fetchall()
+                ]
+
+        except Exception:
+            app.logger.exception("Learning Dashboard DB error")
+            database_message = (
+                "Tabel hasil ujian belum tersedia "
+                "atau database tidak dapat dibaca."
+            )
+
+    response = make_response(render_template(
+        "LeaningHub/dashboard.html",
+        children=children,
+        stats=stats,
+        attempts=attempts,
+        database_message=database_message
+    ))
+
+    response.headers["Cache-Control"] = "no-store, private"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    return response
+
 
 
 # ---------------------------------------------------------------- Untuk Bisnis
