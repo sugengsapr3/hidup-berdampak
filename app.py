@@ -300,8 +300,21 @@ def parent_learning_dashboard():
 @app.route("/api/learninghub/hadziq/results", methods=["POST"])
 def save_hadziq_cbt_result():
     
-    if not is_admin():
-        return {"error": "Akses tidak diizinkan."}, 403
+
+    # Akses Admin atau PIN peserta Hadziq
+    import hmac
+
+    pin_tersimpan = os.environ.get("HADZIQ_CBT_PIN", "")
+    pin_peserta = request.headers.get("X-CBT-PIN", "")
+
+    pin_valid = (
+        bool(pin_tersimpan)
+        and hmac.compare_digest(pin_peserta, pin_tersimpan)
+    )
+
+    if not is_admin() and not pin_valid:
+        return {"error": "PIN peserta tidak valid."}, 403
+
 
     data = request.get_json(silent=True)
 
