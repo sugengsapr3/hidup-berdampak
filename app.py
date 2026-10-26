@@ -178,6 +178,40 @@ def child_profile(slug):
         abort(404)
     return render_template("child_profile.html", child=child, active="learn")
 
+# =====================================================
+# LEARNING HUB - GENERASI BERDAMPAK
+# =====================================================
+
+@app.route("/generasi-berdampak/learninghub")
+def learninghub_home():
+    return render_template("LeaningHub/home.html")
+
+
+@app.route("/generasi-berdampak/<slug>/learninghub")
+def learninghub_child(slug):
+    templates = {
+        "dzaky": "LeaningHub/dzaky.html",
+        "hadziq": "LeaningHub/hadziq.html",
+        "fiori": "LeaningHub/fiori.html",
+        "hazel": "LeaningHub/hazel.html",
+    }
+
+    if slug not in templates:
+        abort(404)
+
+    return render_template(templates[slug])
+
+
+@app.route("/generasi-berdampak/hadziq/learninghub/cbt")
+def learninghub_hadziq_cbt():
+    return render_template("LeaningHub/hadziq_cbt.html")
+
+
+# Dashboard orang tua:
+# Jangan dipublikasikan tanpa autentikasi.
+# Route dashboard akan ditambahkan setelah kontrol
+# akses orang tua diverifikasi.
+
 
 # ---------------------------------------------------------------- Untuk Bisnis
 @app.route("/untuk-bisnis")
