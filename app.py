@@ -361,23 +361,34 @@ def save_hadziq_cbt_result():
     # Simpan hasil CBT Hadziq ke database Neon
     if not db.db_enabled():
         return {"error": "Database belum aktif."}, 503
+        
+    # Validasi ID unik pengerjaan CBT
+    attempt_id_raw = data.get("attempt_id")
 
+    try:
+        attempt_id = uuid.UUID(str(attempt_id_raw))
+    except (ValueError, TypeError, AttributeError):
+        return {"error": "ID pengerjaan ujian tidak valid."}, 400
     try:
         with db._conn() as conn:
             with conn.cursor() as cur:
-                cur.execute("""
-                    INSERT INTO learning_results
-                    (child_slug, quiz_title, subject,
-                     score, correct_count, total_questions)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (
-                    "hadziq",
-                    "Tryout CBT Trensains 1",
-                    "Matematika, IPA, Bahasa Arab, Akhlak",
-                    score,
-                    correct,
-                    total_questions
-                ))
+
+            cur.execute("""
+                INSERT INTO learning_results
+                (attempt_id, child_slug, quiz_title, subject,
+                 score, correct_count, total_questions)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (attempt_id) DO NOTHING
+            """, (
+                attempt_id,
+                "hadziq",
+                "Tryout CBT Trensains 1",
+                "Matematika, IPA, Bahasa Arab, Akhlak",
+                score,
+                correct,
+                total_questions
+            ))
+            
             conn.commit()
     except Exception:
         app.logger.exception("Gagal menyimpan hasil CBT Hadziq")
