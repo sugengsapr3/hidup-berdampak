@@ -16,7 +16,8 @@ function render(){const q=QUESTIONS[idx];$('cat').textContent=q.cat;$('num').tex
 function go(i){idx=i;state.current=idx;save();render()}function tick(){if(!state||state.finished)return;const ms=Math.max(0,state.end-Date.now());const sec=Math.ceil(ms/1000);$('timer').textContent=String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');if(ms<=0){clearInterval(timerId);finish(true)}}function finish(auto=false){if(!auto){const empty=50-Object.keys(state.answers).length;if(!confirm('Selesaikan ujian sekarang? '+empty+' soal belum dijawab.'))return}
 state.finished=true;save();clearInterval(timerId);results();fetch('/api/learninghub/hadziq/results',{method:'POST',
 headers:{'Content-Type':'application/json','X-CBT-PIN':document.getElementById('pin').value.trim()}
-,body:JSON.stringify({answers:state.answers})}).then(async r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(d=>console.log('Nilai CBT tersimpan:',d)).catch(e=>console.error('Gagal mengirim nilai CBT:',e))
+,body:JSON.stringify({answers:state.answers})}).then(async r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(d=>{console.log('Nilai CBT tersimpan:',d);alert('✅ Nilai berhasil tersimpan di Parent Learning Dashboard!')}).catch(e=>{console.error('Gagal mengirim nilai CBT:',e);alert('⚠️ Nilai belum berhasil dikirim. Hubungi orang tua untuk bantuan.')})
+
 }function resultData(){
  const categories={};let correct=0;
  QUESTIONS.forEach((q,i)=>{let c=categories[q.cat]||(categories[q.cat]={correct:0,total:0});c.total++;if(state.answers[i]===q.key){correct++;c.correct++}});
