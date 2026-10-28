@@ -3,6 +3,7 @@ import hmac
 import re
 import secrets
 import uuid
+import json
 
 from flask import Blueprint, abort, current_app, make_response, redirect, render_template_string, request, session, url_for
 
@@ -22,9 +23,11 @@ def _table():
                 child_slug VARCHAR(30) NOT NULL,
                 html_content TEXT NOT NULL,
                 published BOOLEAN NOT NULL DEFAULT FALSE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                answer_keys JSONB
             )
         """)
+        cur.execute("ALTER TABLE cbt_html_packages ADD COLUMN IF NOT EXISTS answer_keys JSONB")
         conn.commit()
 
 def _admin():
