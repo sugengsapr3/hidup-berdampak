@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} — HIDUP BERDAMPAK</title>
+<style>
+body{font-family:system-ui;background:#0d1420;color:#f5f8ff;margin:0}
+header{padding:12px 20px;background:#17243d;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+header small{color:#bfcee6} iframe{display:block;width:100%;height:calc(100vh - 58px);border:0;background:white}
+#notice{display:none;position:fixed;bottom:15px;left:15px;right:15px;margin:auto;max-width:600px;border-radius:10px;padding:14px 18px;background:#183961;color:white;box-shadow:0 8px 24px #0005}
+</style></head>
+<body>
+<header><strong>{{ title }}</strong><small>{{ child }}{% if not integrated %} · HTML lama: hasil belum terhubung dashboard{% endif %}</small></header>
+<iframe id="cbt-frame" title="CBT" sandbox="allow-scripts" referrerpolicy="no-referrer" src="{{ url_for('cbt_library.content',exam_id=exam_id) }}"></iframe>
+<div id="notice" role="status" aria-live="polite"></div>
+<script>
+const frame=document.getElementById('cbt-frame');
+const notice=document.getElementById('notice');
+const token={{ token|tojson }};
+const api={{ url_for('cbt_library.result',exam_id=exam_id)|tojson }};
+let inFlight=false;
+function status(message){notice.style.display='block';notice.textContent=message;}
+window.addEventListener('message',async function(event){
+ if(event.source!==frame.contentWindow||!event.data||event.data.type!=='hb-cbt-submit-v1'||inFlight)return;
+ const data=event.data;
+ if(!Array.isArray(data.answers)||data.answers.length>200)return;
+ inFlight=true;status('Menyimpan nilai ke Parent Learning Dashboard...');
+ try{
+  const response=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,attempt_id:data.attempt_id,answers:data.answers})});
+  const result=await response.json();
+  if(!response.ok)throw new Error(result.error||'Pengiriman gagal');
+  status('Nilai '+result.score+'/100 berhasil tercatat di Parent Learning Dashboard.');
+  frame.contentWindow.postMessage({type:'hb-cbt-result-v1',score:result.score,correct_count:result.correct_count,total_questions:result.total_questions},'*');
+ }catch(error){status('Nilai belum tersimpan: '+error.message+'. Jangan hapus progres ujian.');}
+ finally{inFlight=false;}
+});
+</script></body></html>
