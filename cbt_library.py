@@ -14,6 +14,21 @@ bp = Blueprint("cbt_library", __name__, url_prefix="/generasi-berdampak/learning
 CHILDREN = {"dzaky": "Dzaky", "hadziq": "Hadziq", "fiori": "Fiori", "hazel": "Hazel"}
 MAX_HTML_BYTES = 350_000
 
+def _manifest(html):
+    match = re.search(r'<script\\b[^>]*\\bid=[\\"\\\']hb-cbt-manifest[\\"\\\'][^>]*>(.*?)</script>', html, re.I | re.S)
+    if not match:
+        return None
+    try:
+        value = json.loads(match.group(1))
+        keys = value.get("answer_keys")
+        if not isinstance(keys, list) or not (1 <= len(keys) <= 200):
+            return None
+        if any(key not in ("A", "B", "C", "D", "E") for key in keys):
+            return None
+        return {"answer_keys": keys, "subject": str(value.get("subject", "CBT"))[:100]}
+    except (ValueError, TypeError, AttributeError):
+        return None
+
 def _table():
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("""
@@ -107,8 +122,8 @@ def manager():
                         error = "File tidak tampak seperti dokumen HTML lengkap."
                     else:
                         with _conn() as conn, conn.cursor() as cur:
-                            cur.execute("INSERT INTO cbt_html_packages (id,title,child_slug,html_content) VALUES (%s,%s,%s,%s)",
-                                        (uuid.uuid4(), title, slug, html))
+                            cur.execute("INSERT INTO cbt_html_packages (id,title,child_slug,html_content,answer_keys) VALUES (%s,%s,%s,%s,%s)",
+                                        (uuid.uuid4(), title, slug, html, json.dumps(_manifest(html)) if _manifest(html) else None))
                             conn.commit()
                         return redirect(url_for("cbt_library.manager"))
     response = make_response(render_template_string(MANAGER, csrf=_token(), children=CHILDREN, items=_list_items(), error=error))
