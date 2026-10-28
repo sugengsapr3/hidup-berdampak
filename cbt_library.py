@@ -5,9 +5,10 @@ import secrets
 import uuid
 import json
 
-from flask import Blueprint, abort, current_app, make_response, redirect, render_template_string, request, session, url_for
+from flask import Blueprint, abort, current_app, make_response, redirect, render_template_string, render_template, request, session, url_for
 
 from db import _conn, db_enabled
+from cbt_result_handler import signer, save_result
 
 bp = Blueprint("cbt_library", __name__, url_prefix="/generasi-berdampak/learninghub")
 
@@ -144,6 +145,35 @@ def toggle(exam_id):
 
 @bp.get("/cbt/<uuid:exam_id>")
 def view(exam_id):
+    if not db_enabled():
+        abort(503)
+    _table()
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute("SELECT title, child_slug, published, answer_keys IS NOT NULL FROM cbt_html_packages WHERE id=%s", (exam_id,))
+        exam = cur.fetchone()
+    if not exam or (not exam[2] and not _admin()):
+        abort(404)
+    resp = make_response(render_template(
+        "LeaningHub/cbt_shell.html",
+        title=exam[0], child=CHILDREN.get(exam[1], exam[1]),
+        exam_id=exam_id, integrated=exam[3],
+        token=signer().dumps({"exam": str(exam_id)}),
+    ))
+    resp.headers["Cache-Control"] = "private, no-store"
+    resp.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return resp
+
+
+@bp.post("/cbt/<uuid:exam_id>/result")
+def result(exam_id):
+    if not db_enabled():
+        return {"error": "Database tidak tersedia"}, 503
+    _table()
+    return save_result(exam_id, _admin())
+
+
+@bp.get("/cbt/<uuid:exam_id>/content")
+def content(exam_id):
     if not db_enabled():
         abort(503)
     _table()
