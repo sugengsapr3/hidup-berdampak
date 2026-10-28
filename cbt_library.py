@@ -78,20 +78,20 @@ MANAGER = """
 <h2>Daftar CBT ({{items|length}})</h2>
 {% if not items %}<p>Belum ada CBT baru yang diunggah.</p>{% endif %}
 {% for item in items %}
-<article><strong>{{item.title}}</strong> — {{children.get(item.child_slug,item.child_slug)}} <small>({{"Aktif" if item.published else "Draft"}})</small>
+<article><strong>{{item.title}}</strong> — {{children.get(item.child_slug,item.child_slug)}} <small>({{"Aktif" if item.published else "Draft"}} · {{"Nilai terintegrasi" if item.integrated else "Belum integrasi nilai"}})</small>
 <p><a href="{{url_for('cbt_library.view',exam_id=item.id)}}" target="_blank" rel="noopener">Pratinjau CBT</a>{% if item.published %} · <a href="{{url_for('cbt_library.view',exam_id=item.id)}}">Link siswa</a>{% endif %}</p>
 <form method="post" action="{{url_for('cbt_library.toggle',exam_id=item.id)}}" style="padding:0;border:0;background:none;margin:0">
 <input type="hidden" name="csrf" value="{{csrf}}"><button type="submit">{{"Nonaktifkan" if item.published else "Publish CBT"}}</button></form>
 </article>{% endfor %}
-<p><small>File HTML ditampilkan terisolasi. Integrasi nilai otomatis untuk HTML generik belum tersedia; CBT Hadziq lama tetap menggunakan integrasi nilainya sendiri.</small></p>
+<p><small>File HTML ditampilkan terisolasi. Nilai otomatis hanya untuk HTML dengan manifest standar integrasi. HTML lama tetap dapat dijalankan.</small></p>
 </main></html>
 """
 
 def _list_items():
     with _conn() as conn, conn.cursor() as cur:
-        cur.execute("SELECT id, title, child_slug, published FROM cbt_html_packages ORDER BY created_at DESC")
+        cur.execute("SELECT id, title, child_slug, published, answer_keys IS NOT NULL FROM cbt_html_packages ORDER BY created_at DESC")
         rows = cur.fetchall()
-    return [dict(id=str(r[0]), title=r[1], child_slug=r[2], published=r[3]) for r in rows]
+    return [dict(id=str(r[0]), title=r[1], child_slug=r[2], published=r[3], integrated=r[4]) for r in rows]
 
 @bp.route("/cbt-manager", methods=["GET", "POST"])
 def manager():
