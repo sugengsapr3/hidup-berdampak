@@ -400,45 +400,7 @@ def save_hadziq_cbt_result():
         "score": score,
         "correct_count": correct,
         "total_questions": total_questions
-    }, 200
-
-
-@app.route("/api/learninghub/hadziq/check-attempt")
-def check_hadziq_attempt():
-    # Hanya Admin yang boleh memeriksa hasil ujian
-    if not is_admin():
-        abort(403)
-
-    if not db.db_enabled():
-        return {"error": "Database belum aktif."}, 503
-
-    try:
-        with db._conn() as conn:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    SELECT id, attempt_id, score, submitted_at
-                    FROM public.learning_results
-                    WHERE child_slug = %s
-                    ORDER BY submitted_at DESC
-                    LIMIT 5
-                """, ("hadziq",))
-                rows = cur.fetchall()
-
-        return {
-            "results": [
-                {
-                    "id": row[0],
-                    "attempt_id": str(row[1]) if row[1] else None,
-                    "score": float(row[2]),
-                    "submitted_at": row[3].isoformat()
-                }
-                for row in rows
-            ]
-        }, 200
-
-    except Exception:
-        app.logger.exception("Gagal memeriksa attempt CBT Hadziq")
-        return {"error": "Gagal membaca hasil ujian."}, 500
+    }, 200 
 # ---------------------------------------------------------------- Untuk Bisnis
 @app.route("/untuk-bisnis")
 def business():
