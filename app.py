@@ -28,6 +28,10 @@ import payments
 import emails
 
 app = Flask(__name__)
+
+# CBT HTML library is isolated in its own Blueprint.
+from cbt_library import bp as cbt_library_bp
+app.register_blueprint(cbt_library_bp)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
