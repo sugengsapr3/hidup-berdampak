@@ -331,7 +331,7 @@ def save_hadziq_cbt_result():
         return {"error": "Jumlah jawaban melebihi 50 soal."}, 400
 
     for nomor, jawaban in answers.items():
-        if not str(nomor).isdigit() or not 0 <= int(nomor) < 50:
+        if str(nomor) not in {str(i) for i in range(50)}:
             return {"error": "Nomor soal tidak valid."}, 400
 
         if jawaban not in ("A", "B", "C", "D", "E"):
