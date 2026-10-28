@@ -16,11 +16,13 @@ CHILDREN = {"dzaky": "Dzaky", "hadziq": "Hadziq", "fiori": "Fiori", "hazel": "Ha
 MAX_HTML_BYTES = 350_000
 
 def _manifest(html):
-    match = re.search(r'<script\\b[^>]*\\bid=[\\"\\\']hb-cbt-manifest[\\"\\\'][^>]*>(.*?)</script>', html, re.I | re.S)
-    if not match:
+    # Manifest is an exact marker emitted by the standard ChatGPT CBT template.
+    marker = '<script id="hb-cbt-manifest" type="application/json">'
+    if marker not in html or '</script>' not in html.split(marker, 1)[1]:
         return None
+    raw = html.split(marker, 1)[1].split('</script>', 1)[0]
     try:
-        value = json.loads(match.group(1))
+        value = json.loads(raw)
         keys = value.get("answer_keys")
         if not isinstance(keys, list) or not (1 <= len(keys) <= 200):
             return None
