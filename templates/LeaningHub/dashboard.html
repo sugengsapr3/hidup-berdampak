@@ -1,1 +1,41 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Dashboard Orang Tua | Generasi Berdampak</title><style>:root{font-family:system-ui,Segoe UI,Arial;background:#0d121c;color:#f6f8fb}*{box-sizing:border-box}body{margin:0}a{color:#ffd166;text-decoration:none}.wrap{max-width:1080px;margin:auto;padding:35px 20px}header{border-bottom:1px solid #354055;padding:16px 24px;background:#101722}header a{font-weight:750}h1{font-size:clamp(28px,4vw,43px);margin:14px 0}p{color:#b9c4d3;line-height:1.6}.eyebrow{color:#ffcd58;text-transform:uppercase;letter-spacing:2px;font-size:12px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin:24px 0}.card{background:#171f2c;border:1px solid #313d50;border-radius:17px;padding:22px;min-height:160px}.tag{display:inline-block;color:#9db2d2;border:1px solid #45556d;border-radius:30px;padding:4px 9px;font-size:12px}.btn{display:inline-block;background:#ffc34f;color:#1a1f2c;border-radius:9px;padding:12px 16px;font-weight:800;margin-top:12px}.btn-alt{background:#263349;color:#fff}.quiet{font-size:13px;color:#a8b5c6}.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.stat{font-size:32px;color:#fff;font-weight:800}table{border-collapse:collapse;width:100%}th,td{padding:13px;border-bottom:1px solid #344154;text-align:left}th{color:#a7b4c7;font-size:13px}code{color:#ffd166;overflow-wrap:anywhere}iframe{width:100%;height:82vh;min-height:610px;border:0;border-radius:12px;background:#fff}@media(max-width:580px){.wrap{padding:22px 13px}.card{padding:16px}iframe{height:86vh;min-height:600px}}</style></head><body><header><a href="/generasi-berdampak">HIDUP. BERDAMPAK</a> &nbsp; / &nbsp; <a href="/generasi-berdampak/learninghub">Learning Hub</a></header><main class="wrap"><div class="eyebrow">Parent Learning Dashboard · Rancangan tahap 1</div><h1>Dashboard Pembelajaran</h1><p>Dashboard belum tersambung dengan database hasil ujian. Nilai tidak akan ditampilkan seolah sudah terekam.</p><div class="cards"><article class="card"><span class="tag">SMA Kelas 10</span><h2>Dzaky Albarra</h2><div class="quiet">0 hasil tersinkron · belum ada data online</div><a class="btn btn-alt" href="/generasi-berdampak/dzaky/learninghub">Lihat modul</a></article><article class="card"><span class="tag">SMP Kelas 9</span><h2>Hadziq Dizhwar</h2><div class="quiet">0 hasil tersinkron · belum ada data online</div><a class="btn btn-alt" href="/generasi-berdampak/hadziq/learninghub">Lihat modul</a></article><article class="card"><span class="tag">SD Kelas 5</span><h2>Fiori Ghania Albina</h2><div class="quiet">0 hasil tersinkron · belum ada data online</div><a class="btn btn-alt" href="/generasi-berdampak/fiori/learninghub">Lihat modul</a></article><article class="card"><span class="tag">PAUD</span><h2>Hazel Aghnia Dinara</h2><div class="quiet">0 hasil tersinkron · belum ada data online</div><a class="btn btn-alt" href="/generasi-berdampak/hazel/learninghub">Lihat modul</a></article></div><div class="card"><h2>Tahap selanjutnya</h2><p>Aktifkan akses orang tua dan database untuk mencatat tiap percobaan CBT (nama/ID peserta, waktu, skor, materi, jawaban). Endpoint penyimpanan harus memvalidasi identitas pengguna sebelum menerima data.</p></div></main></body></html>
+{% extends 'base.html' %}
+{% block title %}Parent Learning Dashboard | Hidup Berdampak{% endblock %}
+{% block content %}
+<style>
+.pld{max-width:1120px;margin:0 auto;padding:42px 20px 80px;color:#f4f6fa}.pld .muted{color:#a9b8c9}.pld .eyebrow{letter-spacing:.17em;font-size:12px;font-weight:800;color:#ffc34f;text-transform:uppercase}.pld h1{font-size:clamp(28px,4vw,42px);margin:10px 0 6px}.pld .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:15px;margin:24px 0}.pld .card{padding:22px;background:#171f2b;border:1px solid #354155;border-radius:16px}.pld .name{font-size:20px;font-weight:750;margin:6px 0}.pld .metric{font-size:27px;font-weight:800}.pld .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}.pld .stats span{font-size:12px;color:#b4c0cf}.pld .table-wrap{overflow:auto}.pld table{border-collapse:collapse;width:100%;min-width:690px}.pld th,.pld td{padding:13px 12px;border-bottom:1px solid #354155;text-align:left}.pld th{font-size:13px;color:#a9b8c9}.pld .pill{display:inline-block;border:1px solid #43546d;border-radius:50px;padding:5px 10px;color:#b9c9df;font-size:12px}.pld a{color:#ffc34f}.pld .notice{padding:14px 17px;border:1px solid #826331;background:#292516;border-radius:12px;margin-top:22px}.pld .empty{color:#a8b8ca;padding:24px 0}.pld .section-title{margin-top:36px}
+</style>
+<div class="pld">
+  <div class="eyebrow">Generasi Berdampak · Khusus Orang Tua</div>
+  <h1>Parent Learning Dashboard</h1>
+  <p class="muted">Pantau perkembangan belajar Dzaky, Hadziq, Fiori, dan Hazel dari hasil quiz yang sudah tersimpan di database.</p>
+  {% if database_message %}<div class="notice" role="status">{{ database_message }}</div>{% endif %}
+  <section class="cards" aria-label="Ringkasan hasil per anak">
+  {% for child in children %}
+    {% set s = stats[child.slug] %}
+    <article class="card">
+      <span class="pill">{{ child.grade }}</span>
+      <div class="name">{{ child.name }}</div>
+      <div class="stats">
+        <div><div class="metric">{{ s.count }}</div><span>Quiz selesai</span></div>
+        <div><div class="metric">{{ s.avg if s.avg is not none else '—' }}</div><span>Rata-rata</span></div>
+        <div><div class="metric">{{ s.best if s.best is not none else '—' }}</div><span>Terbaik</span></div>
+      </div>
+      <p><a href="{{ url_for('learninghub_child',slug=child.slug) }}">Buka Learning Hub →</a></p>
+    </article>
+  {% endfor %}
+  </section>
+  <section aria-label="Riwayat ujian">
+    <h2 class="section-title">100 Hasil Ujian Terbaru</h2>
+    {% if attempts %}
+    <div class="card table-wrap"><table><thead><tr><th>Tanggal</th><th>Anak</th><th>Quiz</th><th>Bidang</th><th>Nilai</th><th>Benar</th></tr></thead><tbody>
+    {% for r in attempts %}
+    <tr><td>{{ r.submitted_at.strftime('%d %b %Y %H:%M') if r.submitted_at else '—' }}</td><td>{{ r.child_slug|capitalize }}</td><td>{{ r.quiz_title }}</td><td>{{ r.subject or 'Campuran' }}</td><td><strong>{{ r.score }}/100</strong></td><td>{{ r.correct_count }}/{{ r.total_questions }}</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+    {% else %}
+    <div class="card empty">Belum ada hasil ujian online. Nilai CBT yang sebelumnya hanya tersimpan di browser tidak otomatis masuk ke sini.</div>
+    {% endif %}
+  </section>
+  <p class="muted" style="font-size:12px;margin-top:26px">Privat • Hanya untuk akun admin yang sudah login. Tahap 2A: tampilan dan database; pengiriman nilai CBT otomatis akan ditambahkan pada tahap 2B.</p>
+</div>
+{% endblock %}

@@ -207,12 +207,200 @@ def learninghub_hadziq_cbt():
     return render_template("LeaningHub/hadziq_cbt.html")
 
 
-# Dashboard orang tua:
-# Jangan dipublikasikan tanpa autentikasi.
-# Route dashboard akan ditambahkan setelah kontrol
-# akses orang tua diverifikasi.
+
+# =====================================================
+# PARENT LEARNING DASHBOARD
+# =====================================================
+
+@app.route("/generasi-berdampak/learninghub/dashboard")
+def parent_learning_dashboard():
+    # Hanya admin yang boleh melihat hasil belajar anak
+    if not is_admin():
+        abort(403)
+
+    children = [
+        {"slug": "dzaky", "name": "Dzaky Albarra", "grade": "SMA Kelas 10"},
+        {"slug": "hadziq", "name": "Hadziq Dizhwar", "grade": "SMP Kelas 9"},
+        {"slug": "fiori", "name": "Fiori Ghania Albina", "grade": "SD Kelas 5"},
+        {"slug": "hazel", "name": "Hazel Aghnia Dinara", "grade": "PAUD"},
+    ]
+
+    stats = {
+        c["slug"]: {"count": 0, "avg": None, "best": None}
+        for c in children
+    }
+
+    attempts = []
+    database_message = ""
+
+    if not db.db_enabled():
+        database_message = "Database belum diaktifkan."
+    else:
+        try:
+            with db._conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT child_slug, COUNT(*),
+                           ROUND(AVG(score), 1), MAX(score)
+                    FROM learning_results
+                    GROUP BY child_slug
+                """)
+
+                for slug, count, avg, best in cur.fetchall():
+                    if slug in stats:
+                        stats[slug] = {
+                            "count": count,
+                            "avg": avg,
+                            "best": best
+                        }
+
+                cur.execute("""
+                    SELECT child_slug, quiz_title, subject,
+                           score, correct_count,
+                           total_questions, submitted_at
+                    FROM learning_results
+                    ORDER BY submitted_at DESC
+                    LIMIT 100
+                """)
+
+                columns = [
+                    "child_slug", "quiz_title", "subject",
+                    "score", "correct_count",
+                    "total_questions", "submitted_at"
+                ]
+
+                attempts = [
+                    dict(zip(columns, row))
+                    for row in cur.fetchall()
+                ]
+
+        except Exception:
+            app.logger.exception("Learning Dashboard DB error")
+            database_message = (
+                "Tabel hasil ujian belum tersedia "
+                "atau database tidak dapat dibaca."
+            )
+
+    response = make_response(render_template(
+        "LeaningHub/dashboard.html",
+        children=children,
+        stats=stats,
+        attempts=attempts,
+        database_message=database_message
+    ))
+
+    response.headers["Cache-Control"] = "no-store, private"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+
+    return response
 
 
+# ==========================================
+# API HASIL CBT HADZIQ - LEARNING HUB
+# ==========================================
+@app.route("/api/learninghub/hadziq/results", methods=["POST"])
+def save_hadziq_cbt_result():
+    
+
+    # Akses Admin atau PIN peserta Hadziq
+    import hmac
+
+    pin_tersimpan = os.environ.get("HADZIQ_CBT_PIN", "")
+    pin_peserta = request.headers.get("X-CBT-PIN", "")
+
+    pin_valid = (
+        bool(pin_tersimpan)
+        and hmac.compare_digest(pin_peserta, pin_tersimpan)
+    )
+
+    if not is_admin() and not pin_valid:
+        return {"error": "PIN peserta tidak valid."}, 403
+
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return {"error": "Format data harus JSON."}, 400
+
+
+    answers = data.get("answers")
+
+    if not isinstance(answers, dict):
+        return {"error": "Jawaban CBT tidak valid."}, 400
+
+    if len(answers) > 50:
+        return {"error": "Jumlah jawaban melebihi 50 soal."}, 400
+
+    for nomor, jawaban in answers.items():
+        if str(nomor) not in {str(i) for i in range(50)}:
+            return {"error": "Nomor soal tidak valid."}, 400
+
+        if jawaban not in ("A", "B", "C", "D", "E"):
+            return {"error": "Pilihan jawaban tidak valid."}, 400
+
+  
+    # Kunci jawaban 50 soal CBT Hadziq
+    answer_keys = (
+        "C C D D D C C C C D B E C D C D C D C C "
+        "B C B D B D B D "
+        "A B C D B B D "
+        "C C A B C "
+        "B C D A B "
+        "C B D B C"
+    ).split()
+
+    # Hitung nilai berdasarkan jawaban peserta
+    correct = sum(
+        1
+        for i, key in enumerate(answer_keys)
+        if answers.get(str(i)) == key
+    )
+
+    total_questions = len(answer_keys)
+    score = round(correct * 100 / total_questions, 2)
+
+    # Simpan hasil CBT Hadziq ke database Neon
+    if not db.db_enabled():
+        return {"error": "Database belum aktif."}, 503
+        
+    # Validasi ID unik pengerjaan CBT
+    attempt_id_raw = data.get("attempt_id")
+
+    try:
+        attempt_id = uuid.UUID(str(attempt_id_raw))
+    except (ValueError, TypeError, AttributeError):
+        return {"error": "ID pengerjaan ujian tidak valid."}, 400
+    try:
+        with db._conn() as conn:
+            with conn.cursor() as cur:
+    
+                    cur.execute("""
+                        INSERT INTO learning_results
+                        (attempt_id, child_slug, quiz_title, subject,
+                         score, correct_count, total_questions)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (attempt_id) DO NOTHING
+                    """, (
+                        attempt_id,
+                        "hadziq",
+                        "Tryout CBT Trensains 1",
+                        "Matematika, IPA, Bahasa Arab, Akhlak",
+                        score,
+                        correct,
+                        total_questions
+                    ))
+  
+            conn.commit()
+    except Exception:
+        app.logger.exception("Gagal menyimpan hasil CBT Hadziq")
+        return {"error": "Gagal menyimpan nilai."}, 500
+
+    return {
+        "status": "calculated",
+        "child_slug": "hadziq",
+        "score": score,
+        "correct_count": correct,
+        "total_questions": total_questions
+    }, 200 
 # ---------------------------------------------------------------- Untuk Bisnis
 @app.route("/untuk-bisnis")
 def business():
