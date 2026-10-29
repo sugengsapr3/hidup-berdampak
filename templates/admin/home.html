@@ -11,6 +11,22 @@
     dan langsung tampil di situs tanpa perlu deploy ulang.
   </p>
 
+  <!-- Menu Admin untuk Learning Hub CBT. Tidak tampil untuk pengunjung umum. -->
+  <div style="border:1px solid #4b5b6f;border-radius:14px;padding:22px;margin:22px 0 32px;background:#172233;color:#f6f8ff;">
+    <h2 style="font-size:1.35rem;margin:0 0 8px;color:#fff;">Learning Hub — CBT Anak</h2>
+    <p style="font-size:.93rem;color:#c3cfdf;margin:0 0 18px;">Upload soal HTML untuk Dzaky, Hadziq, Fiori, dan Hazel, serta pantau nilai mereka.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <a href="{{ url_for('cbt_library.manager') }}"
+         style="display:inline-block;background:#f3bc51;color:#15191f;font-weight:750;padding:12px 17px;border-radius:10px;text-decoration:none;">
+        Upload / Kelola CBT HTML &rarr;
+      </a>
+      <a href="{{ url_for('parent_learning_dashboard') }}"
+         style="display:inline-block;border:1px solid #a7bad4;color:#f5f8ff;font-weight:650;padding:12px 17px;border-radius:10px;text-decoration:none;">
+        Lihat Nilai Anak &rarr;
+      </a>
+    </div>
+  </div>
+
   {% if not children %}
   <div style="border: 1px dashed #d0cfc9; border-radius: 14px; padding: 28px; text-align: center; background: #faf9f6;">
     <p style="margin: 0 0 16px; color: #666;">
