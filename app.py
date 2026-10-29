@@ -212,6 +212,38 @@ def learninghub_hadziq_cbt():
 
 
 
+# Token CSRF khusus tindakan hapus hasil CBT dari dashboard Admin.
+def _learning_delete_csrf_token():
+    token = session.get("learning_delete_csrf")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["learning_delete_csrf"] = token
+    return token
+
+
+@app.route("/generasi-berdampak/learninghub/dashboard/results/<int:result_id>/delete", methods=["POST"])
+def delete_learning_test_result(result_id):
+    # Hapus satu hasil ujian terpilih saja. Tidak ada bulk delete.
+    if not is_admin():
+        abort(403)
+    import hmac
+    submitted_token = request.form.get("csrf_token", "")
+    if not hmac.compare_digest(submitted_token, _learning_delete_csrf_token()):
+        abort(400)
+    if not db.db_enabled():
+        abort(503)
+    try:
+        with db._conn() as conn, conn.cursor() as cur:
+            cur.execute("DELETE FROM learning_results WHERE id = %s RETURNING id", (result_id,))
+            removed = cur.fetchone()
+            conn.commit()
+        flash("Hasil ujian terpilih berhasil dihapus." if removed else "Hasil ujian tidak ditemukan.", "success" if removed else "warning")
+    except Exception:
+        app.logger.exception("Gagal menghapus hasil ujian dari dashboard")
+        flash("Gagal menghapus hasil ujian. Coba lagi.", "error")
+    return redirect(url_for("parent_learning_dashboard"), code=303)
+
+
 # =====================================================
 # PARENT LEARNING DASHBOARD
 # =====================================================
@@ -258,7 +290,7 @@ def parent_learning_dashboard():
                         }
 
                 cur.execute("""
-                    SELECT child_slug, quiz_title, subject,
+                    SELECT id, child_slug, quiz_title, subject,
                            score, correct_count,
                            total_questions, submitted_at
                     FROM learning_results
@@ -267,7 +299,7 @@ def parent_learning_dashboard():
                 """)
 
                 columns = [
-                    "child_slug", "quiz_title", "subject",
+                    "id", "child_slug", "quiz_title", "subject",
                     "score", "correct_count",
                     "total_questions", "submitted_at"
                 ]
@@ -289,6 +321,7 @@ def parent_learning_dashboard():
         children=children,
         stats=stats,
         attempts=attempts,
+        delete_csrf_token=_learning_delete_csrf_token(),
         database_message=database_message
     ))
 
