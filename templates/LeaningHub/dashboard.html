@@ -27,15 +27,20 @@
   <section aria-label="Riwayat ujian">
     <h2 class="section-title">100 Hasil Ujian Terbaru</h2>
     {% if attempts %}
-    <div class="card table-wrap"><table><thead><tr><th>Tanggal</th><th>Anak</th><th>Quiz</th><th>Bidang</th><th>Nilai</th><th>Benar</th></tr></thead><tbody>
+    <div class="card table-wrap"><table><thead><tr><th>Tanggal</th><th>Anak</th><th>Quiz</th><th>Bidang</th><th>Nilai</th><th>Benar</th><th>Tindakan Admin</th></tr></thead><tbody>
     {% for r in attempts %}
-    <tr><td>{{ r.submitted_at.strftime('%d %b %Y %H:%M') if r.submitted_at else '—' }}</td><td>{{ r.child_slug|capitalize }}</td><td>{{ r.quiz_title }}</td><td>{{ r.subject or 'Campuran' }}</td><td><strong>{{ r.score }}/100</strong></td><td>{{ r.correct_count }}/{{ r.total_questions }}</td></tr>
+    <tr><td>{{ r.submitted_at.strftime('%d %b %Y %H:%M') if r.submitted_at else '—' }}</td><td>{{ r.child_slug|capitalize }}</td><td>{{ r.quiz_title }}</td><td>{{ r.subject or 'Campuran' }}</td><td><strong>{{ r.score }}/100</strong></td><td>{{ r.correct_count }}/{{ r.total_questions }}</td><td>
+      <form method="post" action="{{ url_for('delete_learning_test_result',result_id=r.id) }}" onsubmit="return confirm('Hapus hasil ujian ini secara permanen? Pastikan ini hasil UJI COBA, bukan nilai asli anak.');">
+        <input type="hidden" name="csrf_token" value="{{ delete_csrf_token }}">
+        <button type="submit" style="border:1px solid #b65e65;color:#ffd4d6;background:transparent;border-radius:8px;padding:7px 10px;cursor:pointer">Hapus Hasil Uji Coba</button>
+      </form>
+    </td></tr>
     {% endfor %}
     </tbody></table></div>
     {% else %}
     <div class="card empty">Belum ada hasil ujian online. Nilai CBT yang sebelumnya hanya tersimpan di browser tidak otomatis masuk ke sini.</div>
     {% endif %}
   </section>
-  <p class="muted" style="font-size:12px;margin-top:26px">Privat • Hanya untuk akun admin yang sudah login. Tahap 2A: tampilan dan database; pengiriman nilai CBT otomatis akan ditambahkan pada tahap 2B.</p>
+  <p class="muted" style="font-size:12px;margin-top:26px">Privat • Hanya untuk akun admin yang sudah login. Hasil CBT otomatis tercatat di database. Penghapusan bersifat permanen, gunakan hanya untuk hasil uji coba.</p>
 </div>
 {% endblock %}
