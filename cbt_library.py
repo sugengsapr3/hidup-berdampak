@@ -189,7 +189,7 @@ def content(exam_id):
     resp = make_response(record[0])
     resp.headers["Content-Type"] = "text/html; charset=utf-8"
     resp.headers["Content-Security-Policy"] = (
-        "sandbox allow-scripts; default-src 'none'; script-src 'unsafe-inline'; "
+        "sandbox allow-scripts allow-modals; default-src 'none'; script-src 'unsafe-inline'; "
         "style-src 'unsafe-inline'; img-src data: https:; font-src data:; "
         "connect-src 'none'; form-action 'none'; base-uri 'none'"
     )
