@@ -10,7 +10,7 @@ header small{color:#bfcee6} iframe{display:block;width:100%;height:calc(100vh - 
 </style></head>
 <body>
 <header><strong>{{ title }}</strong><small>{{ child }}{% if not integrated %} · HTML lama: hasil belum terhubung dashboard{% endif %}</small></header>
-<iframe id="cbt-frame" title="CBT" sandbox="allow-scripts" referrerpolicy="no-referrer" src="{{ url_for('cbt_library.content',exam_id=exam_id) }}"></iframe>
+<iframe id="cbt-frame" title="CBT" sandbox="allow-scripts allow-modals" referrerpolicy="no-referrer" src="{{ url_for('cbt_library.content',exam_id=exam_id) }}"></iframe>
 <div id="notice" role="status" aria-live="polite"></div>
 <script>
 const frame=document.getElementById('cbt-frame');
