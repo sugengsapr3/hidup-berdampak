@@ -298,6 +298,8 @@ def parent_learning_dashboard():
         database_message = "Database belum diaktifkan."
     else:
         try:
+            from question_generator import _schema as ensure_question_bank_schema
+            ensure_question_bank_schema()
             with db._conn() as conn, conn.cursor() as cur:
                 cur.execute("""
                     SELECT child_slug, COUNT(*),
@@ -395,7 +397,7 @@ def parent_learning_dashboard():
         stats=stats,
         attempts=attempts,
         level_analysis=level_analysis,
-        remedial_csrf_token=__import__("question_generator")._token(),
+        remedial_csrf_token=__import__("question_generator", fromlist=["_token"])._token(),
         delete_csrf_token=_learning_delete_csrf_token(),
         database_message=database_message
     ))
