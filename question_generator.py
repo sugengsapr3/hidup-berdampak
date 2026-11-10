@@ -183,7 +183,7 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 <input type="hidden" name="csrf" value="{{csrf}}"><button type="submit" {% if reviewed != 30 %}disabled{% endif %}>Publish 30 Soal ke Learning Hub</button>
 <p>Publikasi hanya aktif jika seluruh 30 soal sudah disetujui.</p></form>{% endif %}
 {% for item in q %}
-<article><div class="pill">No. {{loop.index}} · {{item.level}} · {% if item.reviewed %}<span class="ok">Direview</span>{% else %}<span class="warn">Perlu review</span>{% endif %}</div>
+<article id="soal-{{loop.index}}" style="scroll-margin-top:18px"><div class="pill">No. {{loop.index}} · {{item.level}} · {% if item.reviewed %}<span class="ok">Direview</span>{% else %}<span class="warn">Perlu review</span>{% endif %}</div>
 <form method="post" action="{{url_for('question_generator.review',draft_id=draft.id,number=loop.index0)}}">
 <input type="hidden" name="csrf" value="{{csrf}}">
 <label>Pertanyaan<textarea name="question" rows="3" required {% if draft.published_exam_id %}disabled{% endif %}>{{item.question}}</textarea></label>
@@ -295,10 +295,16 @@ def review(draft_id,number):
         except ValueError as e: return str(e),422
         updated["reviewed"]=True
         questions[number]=updated
+        # Continue to the next question needing review. If none remains,
+        # stay at the question just approved instead of jumping to the top.
+        remaining = [i for i, q in enumerate(questions) if not q.get("reviewed")]
+        next_number = next((i for i in remaining if i > number),
+                           remaining[0] if remaining else number)
         cur.execute("UPDATE question_bank_drafts SET questions=%s WHERE id=%s",
                     (json.dumps(questions,ensure_ascii=False),draft_id))
         conn.commit()
-    return redirect(url_for("question_generator.detail",draft_id=draft_id))
+    return redirect(url_for("question_generator.detail",draft_id=draft_id,
+                            _anchor=f"soal-{next_number+1}"), code=303)
 
 def _html(questions):
     # The exam runs in the existing sandbox. PostMessage sends only answers, not score.
