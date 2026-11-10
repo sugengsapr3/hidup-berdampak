@@ -391,7 +391,8 @@ def publish(draft_id):
             return "Urutan tingkat kesulitan tidak sesuai.",422
         exam_id=uuid.uuid4()
         manifest={"answer_keys":[q["answer"] for q in questions],"subject":"Matematika - SPLDV",
-                  "question_subjects":["Matematika"]*30}
+                  "question_subjects":["Matematika"]*30,
+                  "question_levels":[q["level"] for q in questions]}
         cur.execute("""INSERT INTO cbt_html_packages
              (id,title,child_slug,html_content,published,answer_keys)
              VALUES(%s,%s,%s,%s,TRUE,%s)""",
