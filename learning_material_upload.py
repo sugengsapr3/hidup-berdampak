@@ -44,7 +44,9 @@ def extract_material(file_storage):
                 for row in table.rows:
                     chunks.append(" | ".join(c.text for c in row.cells))
             text = "\n".join(chunks)
-    except (UnicodeDecodeError, OSError, KeyError, RuntimeError) as exc:
+    except ValueError:
+        raise
+    except Exception as exc:
         raise ValueError("Gagal membaca file materi. Periksa apakah file rusak.") from exc
     text = "\n".join(line.strip() for line in text.splitlines() if line.strip()).strip()
     if len(text) < 100:
