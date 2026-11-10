@@ -37,17 +37,22 @@ def _schema():
           questions JSONB NOT NULL DEFAULT '[]'::jsonb,
           published_exam_id UUID,
           created_at TIMESTAMPTZ NOT NULL DEFAULT NOW())""")
+        cur.execute("ALTER TABLE question_bank_drafts ADD COLUMN IF NOT EXISTS remedial_source_result_id INTEGER")
+        cur.execute("""CREATE UNIQUE INDEX IF NOT EXISTS question_bank_remedial_result_once
+            ON question_bank_drafts(remedial_source_result_id)
+            WHERE remedial_source_result_id IS NOT NULL""")
         conn.commit()
 
 def _get(draft_id):
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("""SELECT id,child_slug,title,subject,chapter,source_material,
-          questions,published_exam_id FROM question_bank_drafts WHERE id=%s""", (draft_id,))
+          questions,published_exam_id,remedial_source_result_id
+          FROM question_bank_drafts WHERE id=%s""", (draft_id,))
         r = cur.fetchone()
     if not r:
         abort(404)
     return dict(zip(("id","child_slug","title","subject","chapter",
-                     "source_material","questions","published_exam_id"),r))
+                     "source_material","questions","published_exam_id","remedial_source_result_id"),r))
 
 def _valid(q, level):
     if not isinstance(q,dict):
@@ -66,10 +71,10 @@ def _valid(q, level):
     return dict(question=stem,options=opts,answer=answer,explanation=explanation,
                 level=level,reviewed=False)
 
-def _local(level, start):
+def _local(level, start, count=10):
     """Exact arithmetic examples for the SPLDV pilot. No AI API required."""
     out=[]
-    for j in range(10):
+    for j in range(count):
         i=start+j+1
         x=2+(i*3)%9
         y=1+(i*5)%7
@@ -166,7 +171,7 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 <title>Review Bank Soal</title>"""+STYLE+"""
 <main><p><a href="{{url_for('question_generator.home')}}">← Bank Soal</a> · <a href="/generasi-berdampak/learninghub/dashboard">Parent Dashboard</a></p>
 <h1>{{draft.title}}</h1>
-<p>{{draft.subject}} / {{draft.chapter}}</p>
+<p>{{draft.subject}} / {{draft.chapter}}{% if draft.remedial_source_result_id %} · Remedial dari hasil ujian #{{draft.remedial_source_result_id}}{% endif %}</p>
 <article aria-label="Progres review admin" style="margin-bottom:18px">
 <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
 <strong>Progres Review Admin</strong><span class="pill">{{reviewed}}/{{q|length}} disetujui · {{q|length}}/30 dibuat</span></div>
@@ -177,7 +182,7 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 <a href="{{url_for('question_generator.preview',draft_id=draft.id)}}" style="border:1px solid #576b85;border-radius:8px;padding:10px 14px">Pratinjau Soal &amp; Kunci</a>
 </div></article>
 {% if draft.published_exam_id %}<article><span class="ok">Sudah dipublikasikan</span> · <a href="{{url_for('cbt_library.view',exam_id=draft.published_exam_id)}}" target="_blank">Buka CBT siswa</a></article>{% endif %}
-{% if not draft.published_exam_id and q|length < 30 %}
+{% if not draft.published_exam_id and q|length < 30 and not draft.remedial_source_result_id %}
 <form method="post" class="panel" action="{{url_for('question_generator.generate',draft_id=draft.id)}}">
 <input type="hidden" name="csrf" value="{{csrf}}"><p>Generate batch berikutnya: <strong>10 soal {{nextlevel}}</strong>.</p>
 <div class="grid"><button name="method" value="local" type="submit">Generate Lokal (tanpa API)</button><button name="method" value="ai" type="submit">Generate AI (API)</button></div>
@@ -190,7 +195,7 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 {% endif %}
 {% if not draft.published_exam_id and q|length == 30 %}
 <form method="post" class="panel" action="{{url_for('question_generator.publish',draft_id=draft.id)}}" onsubmit="return confirm('Terbitkan 30 soal yang sudah direview ke Learning Hub?')">
-<input type="hidden" name="csrf" value="{{csrf}}"><button type="submit" {% if reviewed != 30 %}disabled{% endif %}>Publish 30 Soal ke Learning Hub</button>
+<input type="hidden" name="csrf" value="{{csrf}}"><button type="submit" {% if reviewed != 30 %}disabled{% endif %}>Publish 30 Soal Remedial / Tryout ke Learning Hub</button>
 <p>Publikasi hanya aktif jika seluruh 30 soal sudah disetujui.</p></form>{% endif %}
 {% for item in q %}
 <article id="soal-{{loop.index}}" style="scroll-margin-top:18px"><div class="pill">No. {{loop.index}} · {{item.level}} · {% if item.reviewed %}<span class="ok">Direview</span>{% else %}<span class="warn">Perlu review</span>{% endif %}</div>
@@ -338,15 +343,21 @@ def review(draft_id,number):
     return redirect(url_for("question_generator.detail",draft_id=draft_id,
                             _anchor=f"soal-{next_number+1}"), code=303)
 
-def _html(questions):
+def _html(questions, title="CBT SPLDV · 30 Soal"):
     # The exam runs in the existing sandbox. PostMessage sends only answers, not score.
     items=[{k:q[k] for k in ("question","options","answer","explanation","level")} for q in questions]
     payload=json.dumps(items,ensure_ascii=False).replace("<","\\u003c").replace(">","\\u003e").replace("&","\\u0026")
-    page=StringTemplate.replace("@@DATA@@",payload)
+    from html import escape
+    from collections import Counter
+    counts = Counter(q["level"] for q in questions)
+    summary = " · ".join(f"{counts[level]} {level}" for level in LEVELS if counts[level])
+    page = (StringTemplate.replace("@@DATA@@",payload)
+            .replace("@@TITLE@@",escape(title))
+            .replace("@@SUMMARY@@",escape(summary)))
     return page
 
 StringTemplate=r"""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>CBT SPLDV Bertahap</title>
+<title>@@TITLE@@</title>
 <style>
 *{box-sizing:border-box}body{font:16px system-ui;background:#eff4fa;color:#142235;margin:0}
 header{background:#123356;color:white;padding:24px}main{max-width:860px;margin:20px auto;padding:0 14px}
@@ -355,7 +366,7 @@ button{border:0;border-radius:9px;padding:12px 18px;cursor:pointer;background:#f
 button:disabled{opacity:.4;cursor:not-allowed}.opts label{display:block;padding:12px;border:1px solid #d1dbe6;border-radius:8px;margin:9px 0}
 nav{display:flex;gap:12px;justify-content:space-between}.muted{color:#567}.hidden{display:none}
 </style>
-<header><h2>CBT SPLDV · 30 Soal Bertahap</h2><small>Matematika · 10 Mudah · 10 Sedang · 10 Sulit</small></header>
+<header><h2>@@TITLE@@</h2><small>Matematika · @@SUMMARY@@</small></header>
 <main><div class="card" id="intro"><h3>Persiapan Ujian</h3><p>30 soal, waktu 60 menit. Kunci dan pembahasan hanya muncul setelah selesai.</p><button onclick="start()">Mulai Ujian</button></div>
 <div id="exam" class="card hidden"><p id="progress"></p><p id="timer" class="muted"></p><h3 id="question"></h3><div class="opts" id="options"></div><nav><button onclick="move(-1)">Sebelumnya</button><button onclick="move(1)">Berikutnya</button><button onclick="finish()">Selesai</button></nav></div>
 <div id="results" class="card hidden"></div></main>
@@ -375,6 +386,67 @@ questions.forEach((q,i)=>{html+='<p><strong>No. '+(i+1)+' ['+q.level+']</strong>
 window.parent.postMessage({type:'hb-cbt-submit-v1',attempt_id:attempt,answers:answers},'*')}
 </script></html>"""
 
+@bp.post("/remedial/<int:result_id>")
+def generate_remedial(result_id):
+    """Admin-triggered automatic remedial draft from trusted server scores.
+
+    Drafts never become published without item-by-item manual review.
+    One source result creates at most one remedial draft.
+    """
+    _guard()
+    _schema()
+    from cbt_difficulty import ensure_table
+    from psycopg.errors import UniqueViolation
+
+    with _conn() as conn, conn.cursor() as cur:
+        ensure_table(cur)
+        cur.execute("""
+            SELECT r.child_slug,r.quiz_title,r.subject,
+                   d.difficulty,d.correct_count,d.total_questions
+            FROM learning_results r JOIN cbt_difficulty_scores d
+              ON d.result_id=r.id
+            WHERE r.id=%s
+            ORDER BY CASE d.difficulty
+              WHEN 'Mudah' THEN 1 WHEN 'Sedang' THEN 2 ELSE 3 END
+        """,(result_id,))
+        rows=cur.fetchall()
+        if not rows or rows[0][0] != "hadziq" or rows[0][2] != "Matematika - SPLDV":
+            abort(404)
+        failing=[level for _,_,_,level,correct,total in rows
+                 if total>0 and correct*100 < 75*total]
+        if not failing:
+            return "Semua level mencapai target 75%; tidak perlu remedial.",409
+        cur.execute("SELECT id FROM question_bank_drafts WHERE remedial_source_result_id=%s",
+                    (result_id,))
+        existing=cur.fetchone()
+        if existing:
+            return redirect(url_for("question_generator.detail",draft_id=existing[0]),code=303)
+        # Allocate all 30 questions only to levels below the passing threshold.
+        counts={level:30//len(failing)+(1 if i<30%len(failing) else 0)
+                for i,level in enumerate(failing)}
+        questions=[]
+        for level in LEVELS:
+            if level in counts:
+                # Offset away from original 1..30; vary numbers per result.
+                # Review remains mandatory because templated problems can repeat.
+                start=100+result_id*37+len(questions)
+                questions.extend(_local(level,start,count=counts[level]))
+        if len(questions)!=30 or any(q.get("reviewed") for q in questions):
+            abort(500)
+        title=f"Remedial SPLDV Hadziq · Hasil #{result_id} · 30 Soal"
+        draft_id=uuid.uuid4()
+        cur.execute("""
+            INSERT INTO question_bank_drafts
+            (id,child_slug,title,subject,chapter,source_material,questions,
+             remedial_source_result_id)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        """,(draft_id,"hadziq",title,"Matematika",TOPIC,
+             "Remedial otomatis dari skor per level yang belum mencapai 75%.",
+             json.dumps(questions,ensure_ascii=False),result_id))
+        conn.commit()
+    return redirect(url_for("question_generator.detail",draft_id=draft_id),code=303)
+
+
 @bp.post("/<uuid:draft_id>/publish")
 def publish(draft_id):
     _guard(); _schema(); ensure_cbt_table()
@@ -387,8 +459,11 @@ def publish(draft_id):
         if existing_id: return redirect(url_for("question_generator.detail",draft_id=draft_id))
         if len(questions)!=30 or any(not q.get("reviewed") for q in questions):
             return "Seluruh 30 soal wajib direview sebelum publikasi.",409
-        if [q["level"] for q in questions] != (["Mudah"]*10+["Sedang"]*10+["Sulit"]*10):
-            return "Urutan tingkat kesulitan tidak sesuai.",422
+        if not all(q.get("level") in LEVELS for q in questions):
+            return "Level soal tidak valid.",422
+        # All draft questions retain their originally approved answer keys.
+        if any(q.get("answer") not in ("A","B","C","D") for q in questions):
+            return "Kunci jawaban tidak valid.",422
         exam_id=uuid.uuid4()
         manifest={"answer_keys":[q["answer"] for q in questions],"subject":"Matematika - SPLDV",
                   "question_subjects":["Matematika"]*30,
@@ -396,7 +471,7 @@ def publish(draft_id):
         cur.execute("""INSERT INTO cbt_html_packages
              (id,title,child_slug,html_content,published,answer_keys)
              VALUES(%s,%s,%s,%s,TRUE,%s)""",
-             (exam_id,title,slug,_html(questions),json.dumps(manifest)))
+             (exam_id,title,slug,_html(questions,title),json.dumps(manifest)))
         cur.execute("UPDATE question_bank_drafts SET published_exam_id=%s WHERE id=%s",(exam_id,draft_id))
         conn.commit()
     return redirect(url_for("question_generator.detail",draft_id=draft_id))
