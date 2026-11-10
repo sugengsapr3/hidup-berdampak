@@ -77,24 +77,20 @@ DETAIL = """<!doctype html><html lang="id"><meta charset="utf-8"><meta name="vie
 <div class="panel">
 <h2>Hasil identifikasi materi</h2>
 <p>Sumber usulan: <strong>{{'AI' if item.detection_method == 'ai' else 'Deteksi judul teks'}}</strong>.
-{% if not item.confirmed %}Periksa dan edit sebelum konfirmasi.{% else %}<span class="good">Sudah dikonfirmasi Admin</span>{% endif %}</p>
+{% if not item.confirmed %}Periksa dan edit sebelum konfirmasi.{% else %}<span class="good">Sudah dikonfirmasi Admin; BAB tetap bisa diedit.</span>{% endif %}</p>
 {% if item.candidates|length > 1 %}
 <p class="warn">Beberapa kandidat BAB ditemukan. Jika file berisi banyak BAB, simpan satu BAB per materi agar soal tetap relevan.</p>
 <div>{% for candidate in item.candidates %}<p style="margin:7px 0">• {{candidate}}</p>{% endfor %}</div>
 {% endif %}
-{% if not item.confirmed %}
 <form method="post" action="{{url_for('material_catalog.confirm',material_id=item.id)}}">
 <input name="csrf" type="hidden" value="{{csrf}}">
-<label>Nama BAB (wajib dikonfirmasi)<input name="chapter" required minlength="3" maxlength="150"
+<label>Nama BAB — dapat diedit kapan pun oleh Admin<input name="chapter" required minlength="3" maxlength="150"
 value="{{item.chapter}}" placeholder="Contoh: Persamaan Linear Dua Variabel"></label>
-<label>Subbab (opsional)<textarea name="subchapters" rows="3" maxlength="500" placeholder="Contoh: Eliminasi, Substitusi, Soal Cerita">{{item.subchapters}}</textarea></label>
-<button type="submit">Konfirmasi &amp; Simpan BAB →</button>
+<label>Subbab (opsional, juga dapat diedit)<textarea name="subchapters" rows="3" maxlength="500" placeholder="Contoh: Eliminasi, Substitusi, Soal Cerita">{{item.subchapters}}</textarea></label>
+<p><small>Nama BAB di atas adalah usulan dari isi PDF, DOCX, TXT, atau teks yang ditempel. Admin boleh memperbaikinya sebelum maupun sesudah konfirmasi; perubahan ini tidak mengubah materi sumber.</small></p>
+<button type="submit">{{'Simpan Perubahan BAB' if item.confirmed else 'Konfirmasi &amp; Simpan BAB'}} →</button>
 </form>
-{% else %}
-<p><strong>BAB:</strong> {{item.chapter}}</p>
-{% if item.subchapters %}<p><strong>Subbab:</strong> {{item.subchapters}}</p>{% endif %}
-<p class="good">Materi ini sudah masuk katalog. Generate soal dilakukan pada tahap berikutnya dan tetap melalui review Admin.</p>
-{% endif %}
+{% if item.confirmed %}<p class="good">Materi sudah masuk katalog. Anda dapat mengedit BAB dan subbab tanpa mengunggah ulang file.</p>{% endif %}
 <details><summary>Lihat teks hasil ekstraksi ({{item.content|length}} karakter)</summary><pre>{{item.content}}</pre></details>
 </div>
 </main></html>"""
@@ -253,10 +249,10 @@ def confirm(material_id):
     with _conn() as conn, conn.cursor() as cur:
         cur.execute("""UPDATE learning_material_catalog
                        SET chapter=%s,subchapters=%s,confirmed=TRUE
-                       WHERE id=%s AND confirmed=FALSE RETURNING id""",
+                       WHERE id=%s RETURNING id""",
                     (chapter,subchapters,material_id))
         result=cur.fetchone()
         if result is None:
-            return "Materi tidak ditemukan atau telah dikonfirmasi.",409
+            return "Materi tidak ditemukan.",404
         conn.commit()
     return redirect(url_for("material_catalog.detail",material_id=material_id),code=303)
