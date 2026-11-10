@@ -9,6 +9,7 @@ from flask import Blueprint, abort, current_app, make_response, redirect, render
 
 from db import _conn, db_enabled
 from cbt_result_handler import signer, save_result
+from cbt_legacy_bridge import upgrade as upgrade_legacy_cbt
 
 bp = Blueprint("cbt_library", __name__, url_prefix="/generasi-berdampak/learninghub")
 
@@ -84,6 +85,10 @@ MANAGER = """
 <p><a href="{{url_for('cbt_library.view',exam_id=item.id)}}" target="_blank" rel="noopener">Pratinjau CBT</a>{% if item.published %} · <a href="{{url_for('cbt_library.view',exam_id=item.id)}}">Link siswa</a>{% endif %}</p>
 <form method="post" action="{{url_for('cbt_library.toggle',exam_id=item.id)}}" style="padding:0;border:0;background:none;margin:0">
 <input type="hidden" name="csrf" value="{{csrf}}"><button type="submit">{{"Nonaktifkan" if item.published else "Publish CBT"}}</button></form>
+{% if not item.integrated %}
+<form method="post" action="{{url_for('cbt_library.integrate',exam_id=item.id)}}" style="padding:0;border:0;background:none;margin:8px 0 0">
+<input type="hidden" name="csrf" value="{{csrf}}"><button type="submit">Integrasikan Nilai</button>
+</form>{% endif %}
 </article>{% endfor %}
 <p><small>File HTML ditampilkan terisolasi. Nilai otomatis hanya untuk HTML dengan manifest standar integrasi. HTML lama tetap dapat dijalankan.</small></p>
 </main></html>
@@ -144,6 +149,45 @@ def toggle(exam_id):
         cur.execute("UPDATE cbt_html_packages SET published=NOT published WHERE id=%s", (exam_id,))
         conn.commit()
     return redirect(url_for("cbt_library.manager"))
+
+@bp.post("/cbt-manager/<uuid:exam_id>/integrate")
+def integrate(exam_id):
+    """Opt-in migration of verified Hadziq HTML CBT packages."""
+    if not _admin():
+        abort(403)
+    if not _verify_token():
+        abort(400)
+    if not db_enabled():
+        abort(503)
+    _table()
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT child_slug, html_content, answer_keys FROM cbt_html_packages WHERE id=%s FOR UPDATE",
+            (exam_id,),
+        )
+        record = cur.fetchone()
+        if record is None:
+            abort(404)
+        child_slug, html, existing_keys = record
+        if child_slug != "hadziq":
+            return "Integrasi otomatis ini khusus CBT Hadziq.", 400
+        if existing_keys is not None:
+            return redirect(url_for("cbt_library.manager"))
+        converted = upgrade_legacy_cbt(html)
+        if converted is None:
+            return (
+                "File tidak cocok dengan 3 paket CBT Ibad Arrahman terverifikasi. "
+                "Tidak ada data yang diubah; gunakan HTML versi integrasi yang sesuai.",
+                422,
+            )
+        patched_html, manifest = converted
+        cur.execute(
+            "UPDATE cbt_html_packages SET html_content=%s,answer_keys=%s WHERE id=%s",
+            (patched_html, json.dumps(manifest), exam_id),
+        )
+        conn.commit()
+    return redirect(url_for("cbt_library.manager"))
+
 
 @bp.get("/cbt/<uuid:exam_id>")
 def view(exam_id):
