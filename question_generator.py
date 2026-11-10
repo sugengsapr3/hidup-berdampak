@@ -165,7 +165,17 @@ HOME="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewpor
 DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
 <title>Review Bank Soal</title>"""+STYLE+"""
 <main><p><a href="{{url_for('question_generator.home')}}">← Bank Soal</a> · <a href="/generasi-berdampak/learninghub/dashboard">Parent Dashboard</a></p>
-<h1>{{draft.title}}</h1><p>{{draft.subject}} / {{draft.chapter}} · {{q|length}}/30 soal · <span class="pill">{{reviewed}} disetujui</span></p>
+<h1>{{draft.title}}</h1>
+<p>{{draft.subject}} / {{draft.chapter}}</p>
+<article aria-label="Progres review admin" style="margin-bottom:18px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+<strong>Progres Review Admin</strong><span class="pill">{{reviewed}}/{{q|length}} disetujui · {{q|length}}/30 dibuat</span></div>
+<div role="progressbar" aria-valuemin="0" aria-valuemax="{{q|length if q|length else 30}}" aria-valuenow="{{reviewed}}" style="height:11px;border-radius:99px;overflow:hidden;background:#0c1725;margin:15px 0">
+<div style="height:100%;width:{{((reviewed / (q|length or 30))*100)|round(1)}}%;background:#88ddbe"></div></div>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+{% if first_pending %}<a style="background:#ffc44f;color:#152132;font-weight:800;padding:10px 14px;border-radius:8px" href="#soal-{{first_pending}}">Lanjut Review · Soal {{first_pending}} ↓</a>{% endif %}
+<a href="{{url_for('question_generator.preview',draft_id=draft.id)}}" style="border:1px solid #576b85;border-radius:8px;padding:10px 14px">Pratinjau Soal &amp; Kunci</a>
+</div></article>
 {% if draft.published_exam_id %}<article><span class="ok">Sudah dipublikasikan</span> · <a href="{{url_for('cbt_library.view',exam_id=draft.published_exam_id)}}" target="_blank">Buka CBT siswa</a></article>{% endif %}
 {% if not draft.published_exam_id and q|length < 30 %}
 <form method="post" class="panel" action="{{url_for('question_generator.generate',draft_id=draft.id)}}">
@@ -228,7 +238,29 @@ def detail(draft_id):
     q=d["questions"]
     reviewed=sum(bool(x.get("reviewed")) for x in q)
     return render_template_string(DETAIL,draft=d,q=q,reviewed=reviewed,
+        first_pending=next((i+1 for i, item in enumerate(q) if not item.get("reviewed")), None),
         nextlevel=LEVELS[len(q)//10] if len(q)<30 else None,csrf=_token())
+
+PREVIEW="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Pratinjau Bank Soal SPLDV</title>"""+STYLE+"""
+<main><p><a href="{{url_for('question_generator.detail',draft_id=d.id)}}">← Kembali ke Review</a></p>
+<h1>Pratinjau: {{d.title}}</h1>
+<p>Hanya Admin · {{q|length}}/30 soal · {{approved}} disetujui · Belum dipublikasikan jika masih Draft</p>
+{% for item in q %}<article>
+<p><strong>{{loop.index}}. [{{item.level}}]</strong> {{item.question}}</p>
+{% for key in ['A','B','C','D'] %}<p style="margin:7px 0">{{key}}. {{item.options[key]}}</p>{% endfor %}
+<p class="ok"><strong>Kunci: {{item.answer}}</strong></p>
+<p>Pembahasan: {{item.explanation}}</p>
+<small>{{'Sudah direview' if item.reviewed else 'Belum direview'}}</small>
+</article>{% endfor %}</main></html>"""
+
+@bp.get("/<uuid:draft_id>/preview")
+def preview(draft_id):
+    _guard(); _schema()
+    d=_get(draft_id)
+    q=d["questions"]
+    return render_template_string(PREVIEW,d=d,q=q,approved=sum(bool(i.get("reviewed")) for i in q))
+
 
 @bp.post("/<uuid:draft_id>/generate")
 def generate(draft_id):
