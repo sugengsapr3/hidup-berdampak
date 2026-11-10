@@ -9,6 +9,11 @@
   <h1>Parent Learning Dashboard</h1>
   <p class="muted">Pantau perkembangan belajar Dzaky, Hadziq, Fiori, dan Hazel dari hasil quiz yang sudah tersimpan di database.</p>
   {% if database_message %}<div class="notice" role="status">{{ database_message }}</div>{% endif %}
+  <section class="card" aria-label="Manajemen bank soal" style="margin-top:22px">
+    <h2 style="margin:0 0 8px;font-size:20px">AI Question Generator &amp; Bank Soal</h2>
+    <p class="muted" style="margin:0 0 14px">Buat bank soal per bab, generate soal SPLDV bertahap, review, lalu publish ke CBT Learning Hub.</p>
+    <a href="{{ url_for('question_generator.home') }}" style="display:inline-block;background:#ffc34f;color:#172236;padding:11px 16px;border-radius:9px;font-weight:800">Buka Question Generator →</a>
+  </section>
   <section class="cards" aria-label="Ringkasan hasil per anak">
   {% for child in children %}
     {% set s = stats[child.slug] %}
