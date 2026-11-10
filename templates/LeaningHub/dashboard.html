@@ -47,7 +47,23 @@
         </article>
       {% endfor %}
       </div>
-      <p class="muted" style="font-size:12px;margin-top:14px">Prioritas latihan ditandai bila hasil suatu level di bawah 70%. Ini patokan belajar internal, bukan passing grade sekolah. Analisis diambil dari pengerjaan SPLDV terbaru yang memiliki data per level.</p>
+      <p class="muted" style="font-size:12px;margin-top:14px">Target penguasaan latihan: <strong>75% per level</strong>. Level di bawah target memerlukan remedial. Ini standar internal Learning Hub, bukan passing grade resmi sekolah. Analisis menggunakan pengerjaan SPLDV terbaru yang memiliki data per level.</p>
+      {% if level_analysis.needs_remedial %}
+        <div style="border:1px solid #84673c;border-radius:12px;background:#2b2519;padding:16px;margin-top:16px">
+          <strong style="display:block;margin-bottom:8px;color:#ffda92">Remedial CBT Otomatis · Target 75%</strong>
+          <p class="muted" style="margin:0 0 12px;font-size:13px">Sistem akan menyiapkan 30 soal latihan baru yang difokuskan pada level di bawah 75%. Semuanya tetap Draft sampai Admin memeriksa dan menyetujui setiap soal.</p>
+          {% if level_analysis.remedial_draft_id %}
+            <a href="{{ url_for('question_generator.detail',draft_id=level_analysis.remedial_draft_id) }}" style="display:inline-block;padding:11px 15px;border-radius:9px;background:#ffc34f;color:#132035;font-weight:800">Lanjut Review Draft Remedial →</a>
+          {% else %}
+            <form method="post" action="{{ url_for('question_generator.generate_remedial',result_id=level_analysis.result_id) }}" onsubmit="return confirm('Buat 30 soal remedial sebagai Draft untuk review Admin?')">
+              <input type="hidden" name="csrf" value="{{ remedial_csrf_token }}">
+              <button type="submit" style="padding:11px 15px;border:0;border-radius:9px;background:#ffc34f;color:#132035;font-weight:800;cursor:pointer">Generate 30 Soal Remedial →</button>
+            </form>
+          {% endif %}
+        </div>
+      {% else %}
+        <p style="color:#9de8cd;font-weight:700;margin-top:15px">Seluruh level sudah memenuhi target 75%.</p>
+      {% endif %}
     {% else %}
       <p class="muted">Belum ada hasil per level yang dapat dianalisis. Kerjakan ulang CBT SPLDV setelah pembaruan ini; nilai lama tetap tersimpan tanpa dibuatkan rincian yang tidak tersedia.</p>
     {% endif %}
