@@ -172,11 +172,12 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 <input type="hidden" name="csrf" value="{{csrf}}"><p>Generate batch berikutnya: <strong>10 soal {{nextlevel}}</strong>.</p>
 <div class="grid"><button name="method" value="local" type="submit">Generate Lokal (tanpa API)</button><button name="method" value="ai" type="submit">Generate AI (API)</button></div>
 <small>AI dapat membuat kesalahan matematika. Semua soal harus diperiksa sebelum terbit.</small>
-{% if q|length == 0 %}<form method="post" action="{{url_for('question_generator.generate_all',draft_id=draft.id)}}" onsubmit="return confirm('Generate 30 soal lokal (10 mudah, 10 sedang, 10 sulit) sekaligus?')">
+</form>
+{% if q|length == 0 %}<form method="post" class="panel" action="{{url_for('question_generator.generate_all',draft_id=draft.id)}}" onsubmit="return confirm('Generate 30 soal lokal (10 mudah, 10 sedang, 10 sulit) sekaligus?')">
 <input type="hidden" name="csrf" value="{{csrf}}">
-<button type="submit" style="margin-top:12px;background:#88ddbe">Generate 30 Soal Lokal Sekaligus</button>
+<button type="submit" style="background:#88ddbe">Generate 30 Soal Lokal Sekaligus</button>
 </form>{% endif %}
-</form>{% endif %}
+{% endif %}
 {% if not draft.published_exam_id and q|length == 30 %}
 <form method="post" class="panel" action="{{url_for('question_generator.publish',draft_id=draft.id)}}" onsubmit="return confirm('Terbitkan 30 soal yang sudah direview ke Learning Hub?')">
 <input type="hidden" name="csrf" value="{{csrf}}"><button type="submit" {% if reviewed != 30 %}disabled{% endif %}>Publish 30 Soal ke Learning Hub</button>
