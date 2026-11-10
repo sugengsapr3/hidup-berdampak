@@ -10,29 +10,26 @@ from flask import Blueprint, request, abort, redirect, session, url_for, render_
 from db import _conn, db_enabled
 from cbt_library import _admin, _table as ensure_cbt_table
 from learning_material_upload import extract_material, MAX_EXTRACT_CHARS
+from learning_subjects import CHILDREN, SUBJECTS, allowed
 
 bp = Blueprint("question_generator", __name__, url_prefix="/generasi-berdampak/learninghub/question-generator")
 LEVELS = ("Mudah", "Sedang", "Sulit")
 TOPIC = "Sistem Persamaan Linear Dua Variabel (SPLDV)"
-CHILDREN = {"hadziq": ("Hadziq Dizhwar", "SMP Kelas 9"),
-            "dzaky": ("Dzaky Albarra", "SMA Kelas 10"),
-            "fiori": ("Fiori Ghania Albina", "SD Kelas 5"),
-            "hazel": ("Hazel Aghnia Dinara", "PAUD")}
 
 def _local_supported(child, subject, chapter):
     return (child == "hadziq" and subject == "Matematika" and
             chapter.strip().casefold() in (TOPIC.casefold(), "spldv"))
 
 def _catalog_materials():
-    """Read-only list of confirmed Mathematics sources, without touching legacy drafts."""
+    """Read-only list of confirmed catalog sources, without touching existing drafts."""
     from material_catalog import _schema as ensure_catalog
     ensure_catalog()
     with _conn() as conn, conn.cursor() as cur:
-        cur.execute("""SELECT id, child_slug, chapter, filename
+        cur.execute("""SELECT id, child_slug, subject, chapter, filename
                     FROM learning_material_catalog
-                    WHERE confirmed = TRUE AND subject = 'Matematika'
+                    WHERE confirmed = TRUE
                     ORDER BY created_at DESC LIMIT 200""")
-        return [dict(zip(("id","child_slug","chapter","filename"),r))
+        return [dict(zip(("id","child_slug","subject","chapter","filename"),r))
                 for r in cur.fetchall()]
 
 
@@ -185,12 +182,16 @@ HOME="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewpor
 <div class="grid"><label>Untuk anak<select name="child_slug" id="child-select">
 {% for slug, info in children.items() %}<option value="{{slug}}">{{info[0]}} · {{info[1]}}</option>{% endfor %}
 </select></label>
-<label>Mata pelajaran<input name="subject" value="Matematika" readonly></label></div>
+<label>Mata pelajaran<select id="subject-select" name="subject" required>
+{% for slug, options in subjects.items() %}{% for subject in options %}
+<option value="{{subject}}" data-child="{{slug}}">{{subject}}</option>
+{% endfor %}{% endfor %}
+</select></label></div>
 <label>Ambil BAB dari Katalog Materi (opsional)
 <select id="catalog-select" name="catalog_material_id">
 <option value="">— Tulis BAB secara manual / unggah materi baru —</option>
 {% for material in catalog %}
-<option value="{{material.id}}" data-child="{{material.child_slug}}" data-chapter="{{material.chapter}}">{{children[material.child_slug][0]}} · {{material.chapter}} · {{material.filename or 'Teks Admin'}}</option>
+<option value="{{material.id}}" data-child="{{material.child_slug}}" data-subject="{{material.subject}}" data-chapter="{{material.chapter}}">{{children[material.child_slug][0]}} · {{material.subject}} · {{material.chapter}} · {{material.filename or 'Teks Admin'}}</option>
 {% endfor %}
 </select></label>
 <label>BAB (dapat diedit Admin)<input id="chapter-input" name="chapter" maxlength="150" required
@@ -205,19 +206,33 @@ value="{{default_chapter}}" placeholder="Contoh: Pecahan, SPLDV, Eksponen"></lab
 <script>
 const child=document.getElementById('child-select');
 const source=document.getElementById('catalog-select');
+const subject=document.getElementById('subject-select');
 const chapter=document.getElementById('chapter-input');
+function filterSubjects(){
+  for(const option of subject.options){
+    option.disabled=option.dataset.child!==child.value;
+    option.hidden=option.disabled;
+  }
+  if(subject.selectedOptions[0]?.disabled) subject.value='';
+  if(!subject.value){
+    const first=Array.from(subject.options).find(o=>!o.disabled);
+    if(first) first.selected=true;
+  }
+}
 function filterSources(){
   for(const option of source.options){
     if(!option.value) continue;
-    option.hidden=option.dataset.child!==child.value;
-    option.disabled=option.hidden;
+    option.disabled=option.dataset.child!==child.value || option.dataset.subject!==subject.value;
+    option.hidden=option.disabled;
   }
-  if(source.selectedOptions[0] && source.selectedOptions[0].disabled) source.value='';
+  if(source.selectedOptions[0]?.disabled) source.value='';
 }
-child.addEventListener('change',filterSources);
+child.addEventListener('change',()=>{filterSubjects();filterSources();});
+subject.addEventListener('change',filterSources);
 source.addEventListener('change',()=>{
   if(source.value) chapter.value=source.selectedOptions[0].dataset.chapter;
 });
+filterSubjects();
 filterSources();
 </script>
 <h2>Bank soal tersimpan</h2>
@@ -289,19 +304,20 @@ def home():
         drafts=[dict(zip(("id","title","subject","chapter","count","published","child_slug"),r))
                 for r in cur.fetchall()]
     return render_template_string(HOME,csrf=_token(),drafts=drafts,children=CHILDREN,
-                                  catalog=_catalog_materials(),default_chapter=TOPIC)
+                                  catalog=_catalog_materials(),subjects=SUBJECTS,default_chapter=TOPIC)
 
 @bp.post("/create")
 def create():
     _guard(); _schema()
     child=request.form.get("child_slug","hadziq")
     title=request.form.get("title","").strip()
+    subject=request.form.get("subject","").strip()
     chapter=" ".join(request.form.get("chapter","").split())
     catalog_id=request.form.get("catalog_material_id","").strip()
     material=request.form.get("material","").strip()
     uploaded=request.files.get("material_file")
     name=""
-    if child not in CHILDREN or not 5<=len(title)<=150 or not 3<=len(chapter)<=150:
+    if not allowed(child,subject) or not 5<=len(title)<=150 or not 3<=len(chapter)<=150:
         abort(400)
     try:
         if uploaded and uploaded.filename:
@@ -320,7 +336,7 @@ def create():
         with _conn() as conn, conn.cursor() as cur:
             cur.execute("""SELECT content, filename FROM learning_material_catalog
                             WHERE id=%s AND child_slug=%s AND confirmed=TRUE
-                            AND subject='Matematika'""", (selected_id,child))
+                            AND subject=%s""", (selected_id,child,subject))
             catalog_row=cur.fetchone()
         if catalog_row is None:
             return "Materi katalog tidak tersedia untuk anak yang dipilih.",422
@@ -332,7 +348,7 @@ def create():
         cur.execute("""INSERT INTO question_bank_drafts
               (id,child_slug,title,subject,chapter,source_material,material_filename)
               VALUES (%s,%s,%s,%s,%s,%s,%s)""",
-              (draft_id,child,title,"Matematika",chapter,material,name))
+              (draft_id,child,title,subject,chapter,material,name))
         conn.commit()
     return redirect(url_for("question_generator.detail",draft_id=draft_id))
 
@@ -377,7 +393,7 @@ def detail(draft_id):
         nextlevel=LEVELS[len(q)//10] if len(q)<30 else None,csrf=_token())
 
 PREVIEW="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Pratinjau Bank Soal SPLDV</title>"""+STYLE+"""
+<title>Pratinjau Bank Soal</title>"""+STYLE+"""
 <main><p><a href="{{url_for('question_generator.detail',draft_id=d.id)}}">← Kembali ke Review</a></p>
 <h1>Pratinjau: {{d.title}}</h1>
 <p>Hanya Admin · {{q|length}}/30 soal · {{approved}} disetujui · Belum dipublikasikan jika masih Draft</p>
