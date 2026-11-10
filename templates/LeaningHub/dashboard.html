@@ -3,6 +3,7 @@
 {% block content %}
 <style>
 .pld{max-width:1120px;margin:0 auto;padding:42px 20px 80px;color:#f4f6fa}.pld .muted{color:#a9b8c9}.pld .eyebrow{letter-spacing:.17em;font-size:12px;font-weight:800;color:#ffc34f;text-transform:uppercase}.pld h1{font-size:clamp(28px,4vw,42px);margin:10px 0 6px}.pld .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:15px;margin:24px 0}.pld .card{padding:22px;background:#171f2b;border:1px solid #354155;border-radius:16px}.pld .name{font-size:20px;font-weight:750;margin:6px 0}.pld .metric{font-size:27px;font-weight:800}.pld .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:20px}.pld .stats span{font-size:12px;color:#b4c0cf}.pld .table-wrap{overflow:auto}.pld table{border-collapse:collapse;width:100%;min-width:690px}.pld th,.pld td{padding:13px 12px;border-bottom:1px solid #354155;text-align:left}.pld th{font-size:13px;color:#a9b8c9}.pld .pill{display:inline-block;border:1px solid #43546d;border-radius:50px;padding:5px 10px;color:#b9c9df;font-size:12px}.pld a{color:#ffc34f}.pld .notice{padding:14px 17px;border:1px solid #826331;background:#292516;border-radius:12px;margin-top:22px}.pld .empty{color:#a8b8ca;padding:24px 0}.pld .section-title{margin-top:36px}
+.pld .level-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}.pld .level-box{border:1px solid #35465d;border-radius:12px;padding:18px;background:#121e2d;min-width:0}.pld .level-title{display:flex;justify-content:space-between;gap:8px;align-items:center}.pld .level-title strong{font-size:18px}.pld .level-track{height:10px;background:#344253;border-radius:99px;overflow:hidden;margin:13px 0}.pld .level-fill{height:100%;background:#8ccdb6;border-radius:inherit}.pld .level-box.needs .level-fill{background:#efbd69}.pld .remedial{color:#c4d2e2;line-height:1.6;font-size:13px;margin:13px 0 0}@media(max-width:720px){.pld .level-grid{grid-template-columns:1fr}}
 </style>
 <div class="pld">
   <div class="eyebrow">Generasi Berdampak · Khusus Orang Tua</div>
@@ -28,6 +29,28 @@
       <p><a href="{{ url_for('learninghub_child',slug=child.slug) }}">Buka Learning Hub →</a></p>
     </article>
   {% endfor %}
+  </section>
+  <section class="card" aria-labelledby="level-analysis-heading" style="margin:24px 0">
+    <div class="eyebrow">Evaluasi Hadziq · SPLDV</div>
+    <h2 id="level-analysis-heading" style="font-size:22px;margin:8px 0 6px">Analisis per Tingkat Kesulitan</h2>
+    {% if level_analysis %}
+      <p class="muted" style="margin:0">{{ level_analysis.title }} · {{ level_analysis.date.strftime('%d %b %Y %H:%M') if level_analysis.date else '—' }}</p>
+      <div class="level-grid">
+      {% for item in level_analysis.levels %}
+        <article class="level-box {{ 'needs' if item.needs_practice else '' }}">
+          <div class="level-title"><strong>{{ item.level }}</strong><span class="pill">{{ item.correct }}/{{ item.total }} benar</span></div>
+          <div class="level-track" role="progressbar" aria-label="Nilai level {{ item.level }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.percent }}">
+            <div class="level-fill" style="width:{{ item.percent }}%"></div>
+          </div>
+          <strong>{{ item.percent }}%</strong>
+          <p class="remedial">{{ item.remedial }}</p>
+        </article>
+      {% endfor %}
+      </div>
+      <p class="muted" style="font-size:12px;margin-top:14px">Prioritas latihan ditandai bila hasil suatu level di bawah 70%. Ini patokan belajar internal, bukan passing grade sekolah. Analisis diambil dari pengerjaan SPLDV terbaru yang memiliki data per level.</p>
+    {% else %}
+      <p class="muted">Belum ada hasil per level yang dapat dianalisis. Kerjakan ulang CBT SPLDV setelah pembaruan ini; nilai lama tetap tersimpan tanpa dibuatkan rincian yang tidak tersedia.</p>
+    {% endif %}
   </section>
   <section aria-label="Riwayat ujian">
     <h2 class="section-title">100 Hasil Ujian Terbaru</h2>
