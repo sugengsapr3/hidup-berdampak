@@ -4,6 +4,7 @@ Older attempts lack answer-level data and are deliberately not backfilled.
 """
 LEVELS = ("Mudah", "Sedang", "Sulit")
 TOPIC = "Matematika - SPLDV"
+PASSING_GRADE = 75
 
 def levels_for_manifest(manifest):
     if not isinstance(manifest, dict):
@@ -61,7 +62,7 @@ def insert_scores(cur, result_id, manifest, answers):
 def recommendation(level, percent):
     """Instructional guidance, not a claim about a formal passing grade."""
     if level == "Mudah":
-        if percent < 70:
+        if percent < PASSING_GRADE:
             return "Ulangi konsep variabel, pasangan solusi, dan eliminasi sederhana; kerjakan 10 latihan dasar."
         return "Pertahankan akurasi persamaan dan pemeriksaan substitusi."
     if level == "Sedang":
