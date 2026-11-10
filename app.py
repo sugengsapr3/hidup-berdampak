@@ -203,7 +203,27 @@ def learninghub_child(slug):
     if slug not in templates:
         abort(404)
 
-    return render_template(templates[slug])
+    cbt_exams = []
+    if slug == "hadziq" and db.db_enabled():
+        try:
+            # A newly uploaded HTML CBT becomes visible as soon as it is published.
+            # Keep the legacy Trensains card available even if the query fails.
+            from cbt_library import _table
+            _table()
+            with db._conn() as conn, conn.cursor() as cur:
+                cur.execute("""
+                    SELECT id, title, answer_keys IS NOT NULL
+                    FROM cbt_html_packages
+                    WHERE child_slug = %s AND published = TRUE
+                    ORDER BY created_at DESC
+                """, (slug,))
+                cbt_exams = [
+                    {"id": str(row[0]), "title": row[1], "integrated": row[2]}
+                    for row in cur.fetchall()
+                ]
+        except Exception:
+            app.logger.exception("Gagal memuat daftar CBT Learning Hub untuk %s", slug)
+    return render_template(templates[slug], cbt_exams=cbt_exams)
 
 
 @app.route("/generasi-berdampak/hadziq/learninghub/cbt")
