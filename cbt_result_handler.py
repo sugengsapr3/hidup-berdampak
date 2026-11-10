@@ -4,6 +4,7 @@ import uuid
 from flask import current_app, request
 from itsdangerous import URLSafeTimedSerializer, BadSignature
 from db import _conn
+from cbt_difficulty import insert_scores
 
 
 def signer():
@@ -48,11 +49,16 @@ def save_result(exam_id, is_admin):
             """INSERT INTO learning_results
                (attempt_id,child_slug,quiz_title,subject,score,correct_count,total_questions)
                VALUES (%s,%s,%s,%s,%s,%s,%s)
-               ON CONFLICT (attempt_id) DO NOTHING""",
+               ON CONFLICT (attempt_id) DO NOTHING
+               RETURNING id""",
             (attempt_id, child, title, manifest.get("subject", "CBT"),
              score, correct, len(keys)),
         )
-        inserted = cur.rowcount == 1
+        inserted_row = cur.fetchone()
+        inserted = inserted_row is not None
+        if inserted:
+            # Never trust scores or difficulty assignments submitted by a browser.
+            insert_scores(cur, inserted_row[0], manifest, answers)
         conn.commit()
     return {"status": "saved" if inserted else "already_received",
             "score": score, "correct_count": correct,
