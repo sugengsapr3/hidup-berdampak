@@ -66,9 +66,9 @@ def recommendation(level, percent):
             return "Ulangi konsep variabel, pasangan solusi, dan eliminasi sederhana; kerjakan 10 latihan dasar."
         return "Pertahankan akurasi persamaan dan pemeriksaan substitusi."
     if level == "Sedang":
-        if percent < 70:
+        if percent < PASSING_GRADE:
             return "Latih eliminasi-substitusi dan operasi bilangan; kerjakan 10 latihan bertahap."
         return "Lanjutkan latihan kombinasi eliminasi dan substitusi."
-    if percent < 70:
+    if percent < PASSING_GRADE:
         return "Berlatih mengubah soal cerita menjadi dua persamaan, lalu periksa satuan dan hasil."
     return "Coba soal cerita SPLDV dengan konteks baru dan batas waktu."
