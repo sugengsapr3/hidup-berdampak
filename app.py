@@ -339,7 +339,7 @@ def parent_learning_dashboard():
                 from cbt_difficulty import ensure_table, recommendation
                 ensure_table(cur)
                 cur.execute("""
-                    SELECT r.quiz_title, r.submitted_at,
+                    SELECT r.id, r.quiz_title, r.submitted_at,
                            d.difficulty, d.correct_count, d.total_questions
                     FROM learning_results r
                     JOIN cbt_difficulty_scores d ON d.result_id = r.id
@@ -358,19 +358,29 @@ def parent_learning_dashboard():
                 breakdown = cur.fetchall()
                 if breakdown:
                     levels = []
-                    for _, _, difficulty, correct_count, total_questions in breakdown:
+                    from cbt_difficulty import PASSING_GRADE
+                    for _, _, _, difficulty, correct_count, total_questions in breakdown:
                         percent = round(correct_count * 100 / total_questions, 1)
                         levels.append({
                             "level": difficulty, "correct": correct_count,
                             "total": total_questions, "percent": percent,
                             "remedial": recommendation(difficulty, percent),
-                            "needs_practice": percent < 70,
+                            "needs_practice": percent < PASSING_GRADE,
                         })
                     level_analysis = {
-                        "title": breakdown[0][0],
-                        "date": breakdown[0][1],
+                        "result_id": breakdown[0][0],
+                        "title": breakdown[0][1],
+                        "date": breakdown[0][2],
+                        "passing_grade": PASSING_GRADE,
                         "levels": levels,
+                        "needs_remedial": any(l["needs_practice"] for l in levels),
                     }
+                    cur.execute(
+                        "SELECT id FROM question_bank_drafts WHERE remedial_source_result_id=%s",
+                        (breakdown[0][0],),
+                    )
+                    found_draft = cur.fetchone()
+                    level_analysis["remedial_draft_id"] = found_draft[0] if found_draft else None
 
         except Exception:
             app.logger.exception("Learning Dashboard DB error")
@@ -385,6 +395,7 @@ def parent_learning_dashboard():
         stats=stats,
         attempts=attempts,
         level_analysis=level_analysis,
+        remedial_csrf_token=__import__("question_generator")._token(),
         delete_csrf_token=_learning_delete_csrf_token(),
         database_message=database_message
     ))
