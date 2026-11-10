@@ -1,1 +1,78 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Hadziq Dizhwar Learning Hub | Generasi Berdampak</title><style>:root{font-family:system-ui,Segoe UI,Arial;background:#0d121c;color:#f6f8fb}*{box-sizing:border-box}body{margin:0}a{color:#ffd166;text-decoration:none}.wrap{max-width:1080px;margin:auto;padding:35px 20px}header{border-bottom:1px solid #354055;padding:16px 24px;background:#101722}header a{font-weight:750}h1{font-size:clamp(28px,4vw,43px);margin:14px 0}p{color:#b9c4d3;line-height:1.6}.eyebrow{color:#ffcd58;text-transform:uppercase;letter-spacing:2px;font-size:12px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin:24px 0}.card{background:#171f2c;border:1px solid #313d50;border-radius:17px;padding:22px;min-height:160px}.tag{display:inline-block;color:#9db2d2;border:1px solid #45556d;border-radius:30px;padding:4px 9px;font-size:12px}.btn{display:inline-block;background:#ffc34f;color:#1a1f2c;border-radius:9px;padding:12px 16px;font-weight:800;margin-top:12px}.btn-alt{background:#263349;color:#fff}.quiet{font-size:13px;color:#a8b5c6}.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.stat{font-size:32px;color:#fff;font-weight:800}table{border-collapse:collapse;width:100%}th,td{padding:13px;border-bottom:1px solid #344154;text-align:left}th{color:#a7b4c7;font-size:13px}code{color:#ffd166;overflow-wrap:anywhere}iframe{width:100%;height:82vh;min-height:610px;border:0;border-radius:12px;background:#fff}@media(max-width:580px){.wrap{padding:22px 13px}.card{padding:16px}iframe{height:86vh;min-height:600px}}</style></head><body><header><a href="/generasi-berdampak">HIDUP. BERDAMPAK</a> &nbsp; / &nbsp; <a href="/generasi-berdampak/learninghub">Learning Hub</a></header><main class="wrap"><div class="eyebrow">SMP Kelas 9 · Learning Hub</div><h1>Hadziq Dizhwar</h1><p>Trensains, Matematika, IPA</p><div class="cards"><article class="card"><span class="tag">Tryout 1 · 50 soal</span><h2>CBT Trensains Muhammadiyah Sragen</h2><p>75 menit · Matematika, IPA, Bahasa Arab, Akhlak Islam · Nilai dan pembahasan otomatis · Kirim WhatsApp.</p><a class="btn" href="/generasi-berdampak/hadziq/learninghub/cbt">Mulai CBT →</a></article>{% for exam in cbt_exams %}<article class="card"><span class="tag">CBT Aktif · {{ "Nilai terintegrasi" if exam.integrated else "Nilai lokal (belum integrasi)" }}</span><h2>{{ exam.title }}</h2><p>Simulasi ujian online. Klik tombol di bawah untuk memulai latihan.</p><a class="btn" href="{{ url_for('cbt_library.view', exam_id=exam.id) }}">Mulai CBT →</a></article>{% endfor %}</div></main></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learning Hub Hadziq Dizhwar | Hidup Berdampak</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:#0d121c;color:#f6f8fb}
+*{box-sizing:border-box}
+body{margin:0;min-width:320px}
+a{color:inherit;text-decoration:none}
+header{border-bottom:1px solid #28374c;background:#101722}
+.nav{max-width:1200px;margin:auto;padding:17px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;color:#b6c5da}
+.nav a:first-child{font-weight:800;letter-spacing:.035em;color:#ffcd66}
+.nav a:hover{text-decoration:underline}
+.wrap{max-width:1200px;margin:auto;padding:42px 24px 72px}
+.eyebrow{color:#f9bf55;letter-spacing:.16em;font-size:11px;text-transform:uppercase;font-weight:800}
+.intro{display:flex;gap:24px;align-items:end;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid #28384d;padding-bottom:28px;margin-bottom:26px}
+h1{font-size:clamp(30px,4.5vw,47px);letter-spacing:-.045em;line-height:1.15;margin:11px 0 9px}
+.lead{color:#afbed2;line-height:1.6;margin:0;font-size:14px}
+.count{display:inline-flex;align-items:center;gap:8px;color:#ffda94;border:1px solid #4f432e;background:#28251c;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700}
+.section-title{font-size:16px;letter-spacing:-.01em;margin:0 0 16px;color:#e8eef9}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.card{min-width:0;display:flex;flex-direction:column;min-height:275px;padding:22px;background:linear-gradient(160deg,#1b2638 0%,#151e2c 100%);border:1px solid #344359;border-radius:18px;box-shadow:0 8px 26px #00000014;transition:border-color .2s,transform .2s,box-shadow .2s}
+.card:hover{border-color:#667b97;transform:translateY(-2px);box-shadow:0 12px 30px #0003}
+.card-top{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.tag{max-width:100%;font-size:11px;font-weight:700;line-height:1.35;border:1px solid #4a5c74;border-radius:999px;padding:6px 10px;color:#b9cce6;overflow-wrap:anywhere}
+.tag.ready{color:#aeead8;background:#113c35;border-color:#26665a}
+.tag.local{color:#efc995;background:#3a2d20;border-color:#665039}
+.card h2{font-size:clamp(17px,1.7vw,20px);line-height:1.35;letter-spacing:-.02em;margin:0 0 12px;overflow-wrap:anywhere;word-break:normal;hyphens:auto}
+.card p{font-size:13px;line-height:1.65;color:#adbed3;margin:0 0 21px;overflow-wrap:anywhere}
+.card-footer{margin-top:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;gap:8px;padding:11px 16px;background:#ffc34f;color:#152031;border-radius:10px;font-weight:800;font-size:13px;transition:background .2s}
+.btn:hover{background:#ffda80}
+.btn:focus-visible,a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.note{color:#93a6bd;font-size:12px;line-height:1.6;margin:20px 0 0}
+@media(max-width:960px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding-top:30px}}
+@media(max-width:600px){.wrap{padding:26px 16px 52px}.nav{padding:14px 16px}.intro{gap:14px;padding-bottom:21px}.cards{grid-template-columns:minmax(0,1fr);gap:13px}.card{padding:19px;min-height:230px}.card h2{font-size:19px}.btn{width:100%}}
+@media(prefers-reduced-motion:reduce){.card,.btn{transition:none}.card:hover{transform:none}}
+</style>
+</head>
+<body>
+<header><nav class="nav" aria-label="Navigasi"><a href="/generasi-berdampak">HIDUP. BERDAMPAK</a><span aria-hidden="true">/</span><a href="/generasi-berdampak/learninghub">Learning Hub</a><span aria-hidden="true">/</span><span>Hadziq</span></nav></header>
+<main class="wrap">
+  <div class="intro">
+    <div>
+      <div class="eyebrow">SMP Kelas 9 · Learning Hub</div>
+      <h1>Hadziq Dizhwar</h1>
+      <p class="lead">Persiapan seleksi sekolah · Tryout CBT, latihan, dan evaluasi hasil belajar.</p>
+    </div>
+    <div class="count">📘 {{ 1 + (cbt_exams|length) }} paket CBT tersedia</div>
+  </div>
+  <section aria-labelledby="cbt-heading">
+    <h2 class="section-title" id="cbt-heading">Daftar Tryout</h2>
+    <div class="cards">
+      <article class="card">
+        <div class="card-top"><span class="tag">Trensains · 50 soal</span></div>
+        <h2>CBT Trensains Muhammadiyah Sragen</h2>
+        <p>75 menit · Matematika, IPA, Bahasa Arab, dan Akhlak Islam. Nilai serta pembahasan otomatis.</p>
+        <div class="card-footer"><a class="btn" href="/generasi-berdampak/hadziq/learninghub/cbt" aria-label="Mulai CBT Trensains Muhammadiyah Sragen">Mulai CBT <span aria-hidden="true">→</span></a></div>
+      </article>
+      {% for exam in cbt_exams %}
+      <article class="card">
+        <div class="card-top">
+          <span class="tag">CBT Aktif</span>
+          {% if exam.integrated %}<span class="tag ready">Nilai terintegrasi</span>{% else %}<span class="tag local">Nilai belum terintegrasi</span>{% endif %}
+        </div>
+        <h2>{{ exam.title|replace('_',' ') }}</h2>
+        <p>Simulasi ujian interaktif untuk Hadziq. Kerjakan soal secara bertahap, lalu lihat hasil dan pembahasannya.</p>
+        <div class="card-footer"><a class="btn" href="{{ url_for('cbt_library.view',exam_id=exam.id) }}" aria-label="Mulai CBT {{ exam.title }}">Mulai CBT <span aria-hidden="true">→</span></a></div>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="note">CBT aktif yang diunggah lewat CBT Manager muncul otomatis di sini. Label integrasi menunjukkan apakah nilai telah tersambung ke Parent Dashboard.</p>
+  </section>
+</main>
+</body>
+</html>
