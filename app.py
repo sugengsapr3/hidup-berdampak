@@ -291,6 +291,7 @@ def parent_learning_dashboard():
     }
 
     attempts = []
+    level_analysis = None
     database_message = ""
 
     if not db.db_enabled():
@@ -333,6 +334,44 @@ def parent_learning_dashboard():
                     for row in cur.fetchall()
                 ]
 
+                # Only attempts submitted after server-side level scoring have
+                # a trustworthy difficulty breakdown. Never fabricate older data.
+                from cbt_difficulty import ensure_table, recommendation
+                ensure_table(cur)
+                cur.execute("""
+                    SELECT r.quiz_title, r.submitted_at,
+                           d.difficulty, d.correct_count, d.total_questions
+                    FROM learning_results r
+                    JOIN cbt_difficulty_scores d ON d.result_id = r.id
+                    WHERE r.id = (
+                        SELECT r2.id FROM learning_results r2
+                        WHERE r2.child_slug = %s
+                          AND EXISTS (
+                            SELECT 1 FROM cbt_difficulty_scores s
+                            WHERE s.result_id = r2.id
+                          )
+                        ORDER BY r2.submitted_at DESC, r2.id DESC LIMIT 1
+                    )
+                    ORDER BY CASE d.difficulty
+                        WHEN 'Mudah' THEN 1 WHEN 'Sedang' THEN 2 ELSE 3 END
+                """, ("hadziq",))
+                breakdown = cur.fetchall()
+                if breakdown:
+                    levels = []
+                    for _, _, difficulty, correct_count, total_questions in breakdown:
+                        percent = round(correct_count * 100 / total_questions, 1)
+                        levels.append({
+                            "level": difficulty, "correct": correct_count,
+                            "total": total_questions, "percent": percent,
+                            "remedial": recommendation(difficulty, percent),
+                            "needs_practice": percent < 70,
+                        })
+                    level_analysis = {
+                        "title": breakdown[0][0],
+                        "date": breakdown[0][1],
+                        "levels": levels,
+                    }
+
         except Exception:
             app.logger.exception("Learning Dashboard DB error")
             database_message = (
@@ -345,6 +384,7 @@ def parent_learning_dashboard():
         children=children,
         stats=stats,
         attempts=attempts,
+        level_analysis=level_analysis,
         delete_csrf_token=_learning_delete_csrf_token(),
         database_message=database_message
     ))
