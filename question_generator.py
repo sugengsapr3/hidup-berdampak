@@ -59,7 +59,7 @@ def _valid(q, level):
     opts={k:str(opts[k]).strip() for k in "ABCD"}
     answer=str(q.get("answer","")).strip().upper()
     explanation=str(q.get("explanation","")).strip()
-    if not 12<=len(stem)<=800 or not 12<=len(explanation)<=1600 or answer not in "ABCD":
+    if not 12<=len(stem)<=800 or not 12<=len(explanation)<=1600 or answer not in ("A","B","C","D"):
         raise ValueError("Pertanyaan, jawaban atau pembahasan tidak lengkap.")
     if any(not v or len(v)>250 for v in opts.values()) or len(set(opts.values()))!=4:
         raise ValueError("Keempat opsi harus berbeda dan tidak kosong.")
@@ -172,6 +172,10 @@ DETAIL="""<!doctype html><html lang="id"><meta charset="utf-8"><meta name="viewp
 <input type="hidden" name="csrf" value="{{csrf}}"><p>Generate batch berikutnya: <strong>10 soal {{nextlevel}}</strong>.</p>
 <div class="grid"><button name="method" value="local" type="submit">Generate Lokal (tanpa API)</button><button name="method" value="ai" type="submit">Generate AI (API)</button></div>
 <small>AI dapat membuat kesalahan matematika. Semua soal harus diperiksa sebelum terbit.</small>
+{% if q|length == 0 %}<form method="post" action="{{url_for('question_generator.generate_all',draft_id=draft.id)}}" onsubmit="return confirm('Generate 30 soal lokal (10 mudah, 10 sedang, 10 sulit) sekaligus?')">
+<input type="hidden" name="csrf" value="{{csrf}}">
+<button type="submit" style="margin-top:12px;background:#88ddbe">Generate 30 Soal Lokal Sekaligus</button>
+</form>{% endif %}
 </form>{% endif %}
 {% if not draft.published_exam_id and q|length == 30 %}
 <form method="post" class="panel" action="{{url_for('question_generator.publish',draft_id=draft.id)}}" onsubmit="return confirm('Terbitkan 30 soal yang sudah direview ke Learning Hub?')">
@@ -247,6 +251,31 @@ def generate(draft_id):
                     (json.dumps(existing,ensure_ascii=False),draft_id))
         conn.commit()
     return redirect(url_for("question_generator.detail",draft_id=draft_id))
+
+@bp.post("/<uuid:draft_id>/generate-all")
+def generate_all(draft_id):
+    """Generate exactly 30 deterministic practice questions in one atomic update."""
+    _guard(); _schema()
+    with _conn() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT questions,published_exam_id FROM question_bank_drafts WHERE id=%s FOR UPDATE",
+            (draft_id,),
+        )
+        rec=cur.fetchone()
+        if rec is None:
+            abort(404)
+        if rec[1] is not None or rec[0]:
+            return "Generate sekaligus hanya untuk bank soal kosong berstatus Draft.",409
+        questions=(_local("Mudah",0)+_local("Sedang",10)+_local("Sulit",20))
+        if len(questions)!=30 or any(q["reviewed"] for q in questions):
+            abort(500)
+        cur.execute(
+            "UPDATE question_bank_drafts SET questions=%s WHERE id=%s",
+            (json.dumps(questions,ensure_ascii=False),draft_id),
+        )
+        conn.commit()
+    return redirect(url_for("question_generator.detail",draft_id=draft_id))
+
 
 @bp.post("/<uuid:draft_id>/review/<int:number>")
 def review(draft_id,number):
