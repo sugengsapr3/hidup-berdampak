@@ -32,6 +32,10 @@ app = Flask(__name__)
 # CBT HTML library is isolated in its own Blueprint.
 from cbt_library import bp as cbt_library_bp
 app.register_blueprint(cbt_library_bp)
+
+# Admin-only question bank: generate, review and publish CBT exams.
+from question_generator import bp as question_generator_bp
+app.register_blueprint(question_generator_bp)
 # Secret key dari environment (fallback untuk dev lokal saja).
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-ganti-di-produksi")
 
