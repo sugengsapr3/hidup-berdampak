@@ -24,7 +24,7 @@ KNOWN = {
 NEEDLE = "function results(){show('result');"
 
 # Submitted answers are graded on the server. The iframe never sends a score.
-SUBMISSION = """if(!state.attempt_id){state.attempt_id='hadziq-'+Date.now()+'-'+Math.random().toString(16).slice(2);save();}
+SUBMISSION = """if(!state.attempt_id){state.attempt_id='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.floor(Math.random()*16);return(c==='x'?r:(r&3|8)).toString(16);});save();}
 try{window.parent.postMessage({type:'hb-cbt-submit-v1',attempt_id:state.attempt_id,answers:state.answers},'*');}catch(_e){}"""
 
 def upgrade(html):
