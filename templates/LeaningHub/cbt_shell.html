@@ -5,11 +5,11 @@
 <style>
 body{font-family:system-ui;background:#0d1420;color:#f5f8ff;margin:0}
 header{padding:12px 20px;background:#17243d;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-header small{color:#bfcee6} iframe{display:block;width:100%;height:calc(100vh - 58px);border:0;background:white}
+header small{color:#bfcee6} .back-link{margin-left:auto;display:inline-block;padding:8px 12px;border:1px solid #f4c566;border-radius:8px;color:#17243d;background:#f4c566;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap} .back-link:hover,.back-link:focus-visible{background:#ffe19b;outline:2px solid #fff;outline-offset:2px} iframe{display:block;width:100%;height:calc(100vh - 58px);border:0;background:white}
 #notice{display:none;position:fixed;bottom:15px;left:15px;right:15px;margin:auto;max-width:600px;border-radius:10px;padding:14px 18px;background:#183961;color:white;box-shadow:0 8px 24px #0005}
 </style></head>
 <body>
-<header><strong>{{ title }}</strong><small>{{ child }}{% if not integrated %} · HTML lama: hasil belum terhubung dashboard{% endif %}</small></header>
+<header><strong>{{ title }}</strong><small>{{ child }}{% if not integrated %} · HTML lama: hasil belum terhubung dashboard{% endif %}</small>{% if child == "Hadziq" %}<a class="back-link" href="/generasi-berdampak/hadziq/learninghub" onclick="return confirm('Kembali ke Learning Hub? Jika ujian sedang berlangsung, jawaban yang belum diselesaikan dapat hilang.')">← Kembali ke Learning Hub</a>{% endif %}</header>
 <iframe id="cbt-frame" title="CBT" sandbox="allow-scripts allow-modals" referrerpolicy="no-referrer" src="{{ url_for('cbt_library.content',exam_id=exam_id) }}"></iframe>
 <div id="notice" role="status" aria-live="polite"></div>
 <script>
