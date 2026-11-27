@@ -29,6 +29,9 @@ import emails
 
 app = Flask(__name__)
 
+from english_center import bp as english_center_bp
+app.register_blueprint(english_center_bp)
+
 from habit_checkout import bp as habit_checkout_bp
 app.register_blueprint(habit_checkout_bp)
 
