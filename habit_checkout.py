@@ -1,12 +1,11 @@
 """Checkout dan akses Daily Habit Tracker melalui verifikasi email."""
 import base64
-import csv
 import hmac
-import io
 import re
 import secrets
 from datetime import datetime, timedelta, timezone
 from html import escape
+from pathlib import Path
 
 from flask import Blueprint, abort, current_app, make_response, redirect, render_template, request, session, url_for
 
@@ -14,19 +13,12 @@ import db
 import emails
 
 bp = Blueprint("habit_checkout", __name__, url_prefix="/sumber-daya/daily-habit-tracker")
-FILENAME = "daily-habit-tracker-hidup-berdampak.csv"
+FILENAME = "daily-habit-tracker-hidup-berdampak.xlsx"
 PUBLIC_ORIGIN = "https://hidupberdampak.vercel.app"
 
 
 def tracker_file():
-    result = io.StringIO()
-    writer = csv.writer(result)
-    writer.writerow(["Bulan", "", "Tahun", ""])
-    writer.writerow(["Kebiasaan", "Target (hari)", *range(1, 32), "Total", "Catatan"])
-    for row, habit in enumerate(["Baca 10 menit", "Bergerak 15 menit", "Refleksi malam", "", "", ""], 3):
-        writer.writerow([habit, "", *([""] * 31), f'=COUNTIF(C{row}:AG{row},1)', ""])
-    writer.writerow(["Tulis 1 jika selesai. Kosongkan hari yang belum selesai atau di luar bulan."])
-    return result.getvalue().encode("utf-8-sig")
+    return (Path(current_app.root_path) / "product_files" / FILENAME).read_bytes()
 
 
 def render_step(step, status=200, **context):
@@ -197,7 +189,7 @@ def download(claim_id):
         return redirect(url_for(".product", claim_id=claim_id))
     response = make_response(tracker_file())
     response.headers.update({
-        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": f'attachment; filename="{FILENAME}"',
         "Cache-Control": "no-store",
     })
