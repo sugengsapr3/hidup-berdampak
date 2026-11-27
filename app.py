@@ -29,6 +29,9 @@ import emails
 
 app = Flask(__name__)
 
+from habit_checkout import bp as habit_checkout_bp
+app.register_blueprint(habit_checkout_bp)
+
 # CBT HTML library is isolated in its own Blueprint.
 from cbt_library import bp as cbt_library_bp
 app.register_blueprint(cbt_library_bp)

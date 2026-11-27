@@ -537,3 +537,64 @@ h1, h2, h3, h4 { font-family: var(--font-head); line-height: 1.18; letter-spacin
   .footer-top { grid-template-columns: 1fr; }
   .footer-bottom { flex-direction: column; text-align: center; }
 }
+
+/* Daily Habit Tracker checkout */
+.hb-checkout { padding-inline: 16px; }
+.hb-checkout-panel {
+  position: relative;
+  width: min(100%, 34rem);
+  margin-inline: auto;
+  padding: clamp(20px, 5vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.hb-checkout-panel h1 { font-size: clamp(1.75rem, 5vw, 2.25rem); padding-right: 36px; }
+.hb-checkout-panel > p { margin-top: 12px; }
+.hb-checkout-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink);
+  font-size: 1.5rem;
+}
+.hb-checkout-product {
+  margin-block: 20px;
+  padding: 16px;
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.hb-checkout-product h2 { font-size: 1.35rem; margin-block: 4px; }
+.hb-checkout-price { color: var(--gold); font-weight: 700; }
+.hb-checkout-form, .hb-checkout-actions { display: grid; gap: 14px; margin-block: 20px; }
+.hb-checkout-form label { display: grid; gap: 6px; font-weight: 600; }
+.hb-checkout-form input:not([type="hidden"]) {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+.hb-checkout-panel :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.hb-checkout-error { color: #ffb5ad; }
+.hb-checkout-check {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 12px;
+  border-radius: 50%;
+  background: #15453a;
+  color: #9ee6cd;
+  font-size: 1.4rem;
+}

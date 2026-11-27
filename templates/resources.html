@@ -12,6 +12,12 @@
 
 <section class="section">
   <div class="container">
+    <article class="content-card" style="margin-bottom: 24px">
+      <span class="kicker">Unduhan gratis</span>
+      <h2>Daily Habit Tracker</h2>
+      <p>Catat kebiasaan harian dalam satu lembar yang bisa diedit di Excel atau Google Sheets.</p>
+      <a class="btn btn-gold" href="{{ url_for('habit_checkout.checkout') }}">Ambil Gratis</a>
+    </article>
     <div class="card-grid grid-3">
       {% for r in resources %}
       <div class="content-card">

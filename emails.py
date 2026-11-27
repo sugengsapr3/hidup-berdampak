@@ -34,10 +34,13 @@ def _rupiah(amount):
         return f"Rp {amount}"
 
 
-def _send(to, subject, html):
+def _send(to, subject, html, *, attachment=None):
     """Kirim satu email. Kembalikan (ok, error). Tidak melempar exception."""
     if not RESEND_API_KEY:
         return False, "RESEND_API_KEY belum di-set."
+    payload = {"from": EMAIL_FROM, "to": [to], "subject": subject, "html": html}
+    if attachment:
+        payload["attachments"] = [attachment]
     try:
         resp = requests.post(
             _RESEND_ENDPOINT,
@@ -45,7 +48,7 @@ def _send(to, subject, html):
                 "Authorization": f"Bearer {RESEND_API_KEY}",
                 "Content-Type": "application/json",
             },
-            json={"from": EMAIL_FROM, "to": [to], "subject": subject, "html": html},
+            json=payload,
             timeout=15,
         )
         if resp.status_code in (200, 201):
