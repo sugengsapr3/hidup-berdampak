@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Daily Habit Tracker | HIDUP. BERDAMPAK{% endblock %}
+{% block content %}
+<section class="hb-checkout section">
+  <div class="hb-checkout-panel" aria-labelledby="habit-title">
+    <a class="hb-checkout-close" href="{{ url_for('resources') }}" aria-label="Kembali ke Sumber Daya">×</a>
+    {% if step == "checkout" %}
+      <h1 id="habit-title">Checkout</h1>
+      <div class="hb-checkout-product">
+        <span class="kicker">HIDUP. BERDAMPAK</span>
+        <h2>Daily Habit Tracker</h2>
+        <span class="hb-checkout-price">Gratis · Rp0</span>
+      </div>
+      {% set values = values|default({}) %}
+      <form method="post" class="hb-checkout-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        {% if error %}<p class="hb-checkout-error" role="alert">{{ error }}</p>{% endif %}
+        <label>Nama lengkap <input name="name" autocomplete="name" required minlength="2" maxlength="100" value="{{ values.get('name', '') }}"></label>
+        <label>Nomor HP <input type="tel" name="phone" autocomplete="tel" required maxlength="25" placeholder="08xxxxxxxxxx" value="{{ values.get('phone', '') }}"></label>
+        <label>Email <input type="email" name="email" autocomplete="email" required maxlength="254" value="{{ values.get('email', '') }}"></label>
+        <label>Konfirmasi email <input type="email" name="confirm" required maxlength="254" value="{{ values.get('confirm', '') }}"></label>
+        <p>Konfirmasi klaim dikirim ke emailmu. File tersedia setelah email terverifikasi.</p>
+        <button class="btn btn-gold" type="submit">Ambil Produk</button>
+      </form>
+    {% elif step == "confirmation" %}
+      <span class="hb-checkout-check" aria-hidden="true">✓</span>
+      <h1 id="habit-title">Klaim Berhasil</h1>
+      <p>{% if sent %}Email konfirmasi sudah dikirim. {% else %}Email konfirmasi belum terkirim. {% endif %}Pilih Lihat Produk untuk memverifikasi email dan mengakses tracker.</p>
+      <div class="hb-checkout-product"><span class="kicker">HIDUP. BERDAMPAK</span><h2>Daily Habit Tracker</h2></div>
+      <div class="hb-checkout-actions">
+        <a class="btn btn-gold" href="{{ url_for('.product', claim_id=claim_id) }}">Lihat Produk</a>
+        <a class="btn btn-outline" href="{{ url_for('resources') }}">Jelajahi Sumber Daya</a>
+      </div>
+    {% elif step == "verify" %}
+      <h1 id="habit-title">Verifikasi Email</h1>
+      {% if error %}<p class="hb-checkout-error" role="alert">{{ error }}</p>{% endif %}
+      {% if otp_ready %}
+        <p>Masukkan kode 6 digit yang dikirim ke <strong>{{ masked }}</strong>. Kode berlaku 10 menit.</p>
+        <form method="post" class="hb-checkout-form">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <label>Kode verifikasi <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required></label>
+          <button class="btn btn-gold" name="action" value="verify" type="submit">Verifikasi</button>
+        </form>
+      {% else %}
+        <p>Kirim kode verifikasi ke <strong>{{ masked }}</strong> untuk membuka Daily Habit Tracker.</p>
+      {% endif %}
+      <form method="post" class="hb-checkout-form">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="btn {{ 'btn-outline' if otp_ready else 'btn-gold' }}" name="action" value="send" type="submit">{{ 'Kirim Ulang Kode' if otp_ready else 'Kirim Kode' }}</button>
+      </form>
+      <a href="{{ url_for('.checkout') }}">Gunakan alamat email lain</a>
+    {% else %}
+      <span class="kicker">Email terverifikasi</span>
+      <h1 id="habit-title">Daily Habit Tracker</h1>
+      <p>Catat kebiasaan selama sebulan dan lihat total hari yang berhasil kamu jalani. Buka file CSV di Excel atau impor ke Google Sheets.</p>
+      {% if sent %}<p>Salinan file sudah dikirim ke emailmu.</p>{% else %}<p>Pengiriman file ke email belum berhasil. Kamu bisa mengunduhnya di sini.</p>{% endif %}
+      <div class="hb-checkout-actions">
+        <a class="btn btn-gold" href="{{ url_for('.download', claim_id=claim_id) }}">Unduh Tracker (CSV)</a>
+        <a class="btn btn-outline" href="{{ url_for('resources') }}">Jelajahi Sumber Daya</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
