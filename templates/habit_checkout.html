@@ -52,10 +52,10 @@
     {% else %}
       <span class="kicker">Email terverifikasi</span>
       <h1 id="habit-title">Daily Habit Tracker</h1>
-      <p>Catat kebiasaan selama sebulan dan lihat total hari yang berhasil kamu jalani. Buka file CSV di Excel atau impor ke Google Sheets.</p>
+      <p>Catat kebiasaan selama sebulan dan lihat total hari yang berhasil kamu jalani. Buka file Excel (.xlsx) di Microsoft Excel atau Google Sheets.</p>
       {% if sent %}<p>Salinan file sudah dikirim ke emailmu.</p>{% else %}<p>Pengiriman file ke email belum berhasil. Kamu bisa mengunduhnya di sini.</p>{% endif %}
       <div class="hb-checkout-actions">
-        <a class="btn btn-gold" href="{{ url_for('.download', claim_id=claim_id) }}">Unduh Tracker (CSV)</a>
+        <a class="btn btn-gold" href="{{ url_for('.download', claim_id=claim_id) }}">Unduh Tracker (Excel)</a>
         <a class="btn btn-outline" href="{{ url_for('resources') }}">Jelajahi Sumber Daya</a>
       </div>
     {% endif %}
